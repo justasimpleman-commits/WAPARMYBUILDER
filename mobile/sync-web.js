@@ -11,9 +11,9 @@
  * Layout it produces (mirrors the desktop project so index.html's relative
  * "data/..." <script src> paths resolve unchanged):
  *
- *   www/index.html      (copied from ../index.html, with mobile-init.js injected)
+ *   www/index.html      (copied from ../index.html — already references mobile-init.js)
  *   www/data/*.js       (copied from ../data/*.js)
- *   www/mobile-init.js  (mobile-only; NOT copied from desktop — left in place)
+ *   www/mobile-init.js  (copied from ../mobile-init.js — ONE shared source of truth)
  *
  * main.js / preload.js (Electron-only) are intentionally NOT copied — the page
  * feature-detects window.armyAPI and falls back to IndexedDB in the WebView.
@@ -61,6 +61,10 @@ function copy(from, to) {
 // data files -> www/data/
 for (const f of DATA_FILES) copy(path.join(SRC, "data", f), path.join(DST, "data", f));
 
+// mobile-init.js -> www/mobile-init.js (single shared source; self-gates on
+// viewport, and always activates under Capacitor).
+copy(path.join(SRC, "mobile-init.js"), path.join(DST, "mobile-init.js"));
+
 // index.html -> www/index.html, injecting the mobile-only script once.
 const idxSrc = path.join(SRC, "index.html");
 if (fs.existsSync(idxSrc)) {
@@ -80,4 +84,4 @@ if (fs.existsSync(idxSrc)) {
   process.exitCode = 1;
 }
 
-console.log(`sync-web: wrote ${copied}/${DATA_FILES.length + 1} files into www/ (data/ + index.html, mobile-init.js injected)`);
+console.log(`sync-web: wrote ${copied}/${DATA_FILES.length + 2} files into www/ (data/ + index.html + mobile-init.js)`);
