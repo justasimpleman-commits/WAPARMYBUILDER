@@ -1,0 +1,1106 @@
+/* ============================================================================
+   VAMPIRE COUNTS — army data (Warhammer Armies, Mathias Eliasson v3.0,
+   9th Edition 3.0 ruleset). Encoded for the Army Builder engine.
+
+   Pure DATA file. See SCHEMA.md for the full field reference.
+
+   Cost convention:
+     per: "model"  -> cost is multiplied by the number of models
+     per: "flat"   -> cost is added once, regardless of unit size
+
+   Bloodlines: "von Carstein", "Necrarch", "Lahmian", "Blood Dragon", "Strigoi".
+   Vampire characters carry tags:["Vampire"] + bloodline:"..." which gate the
+   Vampiric Powers picker and bloodline-restricted magic items. The combined
+   "Vampiric Powers and/or Magic Items" total is set as the variant magicBudget;
+   the engine shares it across powers + items automatically.
+   ========================================================================== */
+(window.ARMY_BOOKS = window.ARMY_BOOKS || {})["vampire-counts"] = {
+  id: "vampire-counts",
+  name: "Vampire Counts",
+  author: "Mathias Eliasson v3.0 (unofficial) — 9th Edition 3.0",
+  composition: {
+    charactersMax: 0.35,
+    coreMin: 0.25,
+    specialMax: 0.50,
+    rareMax: 0.25,
+    singleUnitMax: 0.25
+  },
+  duplicateCaps: [
+    { upTo: 999,  special: 1, rare: 1 },
+    { upTo: 1999, special: 2, rare: 1 },
+    { upTo: 2999, special: 3, rare: 1 },
+    { upTo: 3999, special: 4, rare: 2 },
+    { upTo: 4999, special: 5, rare: 3 },
+    { upTo: Infinity, special: 6, rare: 3 }
+  ],
+  requireWizardLore: "Necromancy",
+  requireWizardLoreMsg: "Your army must include at least one character that is a Wizard using the Lore of Necromancy.",
+  listRules: [
+    "Special characters are unique — each may be taken only once.",
+    "Magic items are unique (one of each per army) unless marked * (common).",
+    "Each model may take only one item from each magic-item category.",
+    "Vampires may take Vampiric Powers from their own Bloodline (some powers are open to several Bloodlines). Powers share the model's points total with magic items.",
+    "If your army contains any Undead units, it must include at least one Wizard using the Lore of Necromancy.",
+    "You may not have more units of Skeleton Archers than Skeleton Warriors, nor more Skeleton Horsemen than Skeleton Warriors.",
+    "Sylvanian Levy may only be included if the army includes a von Carstein Vampire Character.",
+    "Strigany may only be included if the army includes a Strigoi Vampire Character.",
+    "A Swain may only be included if the army contains at least one Lahmian Vampire Character.",
+    "A Strigany Mystic may only be included if the army contains at least one Strigoi Vampire Character.",
+    "Neferata / Ushoran must be the Army General if included. Neferata makes Lahmian Handmaidens Special. Walach Harkon makes Blood Knights Special."
+  ],
+
+  // ---- VAMPIRIC POWERS ----------------------------------------------------
+  // blood:[...] = Bloodlines allowed to take it. Omit blood => any Vampire.
+  vampiricPowers: [
+    // General powers (any Vampire, with stated bloodline restrictions encoded)
+    { name: "Red Fury", cost: 30, blood: ["Blood Dragon","Strigoi"], desc: `For each unsaved Wound caused in close combat, make an additional Attack (max +3). Extra Attacks do not benefit from Red Fury.` },
+    { name: "Unholy Regeneration", cost: 30, blood: ["Necrarch","Strigoi"], desc: `The model gains the Regeneration (4+) special rule.` },
+    { name: "Curse of the Revenant", cost: 20, blood: ["Necrarch","Strigoi"], desc: `The model has a 3+ invulnerable save when on a single Wound (multiple Wounds in one turn reduce it to 1 first, then it may attempt the save).` },
+    { name: "Fear Incarnate", cost: 20, desc: `All enemy units in base contact must pass a Leadership test at the start of each combat round or suffer -1 To Hit that round.` },
+    { name: "Flying Horror", cost: 20, desc: `Model on foot only. Gains Fly (10) and may join units of Fell Bats.` },
+    { name: "Supernatural Horror", cost: 15, blood: ["von Carstein","Necrarch","Strigoi"], desc: `The model gains the Terror special rule.` },
+    { name: "Transfix", cost: 15, blood: ["von Carstein","Lahmian"], desc: `At the start of the Close Combat phase, a model in base contact must pass a Leadership test or be reduced to WS1 this round and be hit automatically.` },
+    { name: "Hunter in the Dark", cost: 10, blood: ["Lahmian","Strigoi"], desc: `Model on foot only. The model gains the Scouts special rule.` },
+    { name: "Unbending Willpower", cost: 10, blood: ["von Carstein","Necrarch"], desc: `Undead units within 6" suffer one less Wound from Unstable or following the General's death (not cumulative with the Battle Standard).` },
+    { name: "Honour or Death", cost: 5, blood: ["von Carstein","Blood Dragon"], desc: `After issuing/accepting a challenge, the enemy character must pass a Leadership test or automatically refuse the challenge.` },
+
+    // von Carstein
+    { name: "Aura of Dark Majesty", cost: 30, blood: ["von Carstein"], desc: `Enemy units within 6" suffer -1 Leadership (cumulative with other modifiers).` },
+    { name: "Spectral Attendants", cost: 25, blood: ["von Carstein"], desc: `All enemy Wizards within 18" must re-roll successful channelling results.` },
+    { name: "Walking Death", cost: 20, blood: ["von Carstein"], desc: `Any unit in base contact must re-roll successful Break tests.` },
+    { name: "Call Winds", cost: 10, blood: ["von Carstein"], desc: `Bound Spell (Level 3, cast on 9+). Hex aura, range 24"; until the caster's next Magic phase, all enemy missile attacks fired from within or at a target within range suffer -1 To Hit.` },
+    { name: "Earth Bind", cost: 10, blood: ["von Carstein"], desc: `The model and any unit they join gain Magic Resistance (1).` },
+    { name: "Summon Creatures of the Night", cost: 10, blood: ["von Carstein"], desc: `Can use Invocation of Nehek to heal/increase units of Dire Wolves, Bat Swarms and Fell Bats beyond their starting size.` },
+    { name: "Wolf Form", cost: 10, blood: ["von Carstein"], desc: `Model on foot only. Gains Movement 9 and Swiftstride; may join units of Dire Wolves.` },
+    { name: "Wolf Lord", cost: 10, blood: ["von Carstein"], desc: `Allows all friendly Dire Wolves units within 24" to March.` },
+
+    // Necrarch
+    { name: "Wellspring of Dark Magic", cost: 50, blood: ["Necrarch"], desc: `The model and all friendly Wizards within 12" gain +1 to cast Lore of Necromancy spells.` },
+    { name: "Spectral Form", cost: 40, blood: ["Necrarch"], desc: `Model on foot only. Gains Ethereal, but may not join non-Ethereal units or take magic items.` },
+    { name: "Mastery over Flesh", cost: 25, blood: ["Necrarch"], desc: `When casting Invocation of Nehek, Vanhel's Danse Macabre, Hellish Vigour or Raise Dead, may re-roll all initial casting dice (unless a Miscast was rolled).` },
+    { name: "Unholy Cynosure", cost: 25, blood: ["Necrarch"], desc: `Once per Magic phase, re-roll one casting dice (can negate a Miscast or cause an Ultimate Power result).` },
+    { name: "Forbidden Lore", cost: 20, blood: ["Necrarch"], desc: `The model has the Loremaster special rule.` },
+    { name: "Dark Acolyte", cost: 20, blood: ["Necrarch"], desc: `Adds +1 to Wounds healed (Core Units +D3) whenever it successfully casts Invocation of Nehek.` },
+    { name: "Nehekhara's Noble Blood", cost: 20, blood: ["Necrarch"], desc: `Adds +6" to the range of all the model's spells (excluding auras).` },
+    { name: "Master of the Black Arts", cost: 15, blood: ["Necrarch"], desc: `May re-roll the result when determining the strength of the Winds of Magic in each of your Magic phases.` },
+
+    // Blood Dragon
+    { name: "Doomrider", cost: 20, blood: ["Blood Dragon"], desc: `Cavalry only. The model and any Cavalry unit it is with may re-roll failed charge distances.` },
+    { name: "Dread Knight", cost: 20, blood: ["Blood Dragon"], desc: `While in a challenge, the model gains +1 To Hit and To Wound.` },
+    { name: "Warrior Pride", cost: 20, blood: ["Blood Dragon"], desc: `Infantry or Cavalry only. May re-roll failed armour save results of 1.` },
+    { name: "Heart Piercing", cost: 15, blood: ["Blood Dragon"], desc: `May re-roll To Wound rolls of 1 in close combat.` },
+    { name: "Master Strike", cost: 15, blood: ["Blood Dragon"], desc: `The model has the Killing Blow special rule.` },
+    { name: "Might of Arms", cost: 15, blood: ["Blood Dragon"], desc: `May re-roll To Hit rolls of 1 in close combat.` },
+    { name: "Strength of Steel", cost: 10, blood: ["Blood Dragon"], desc: `The model gains Devastating Charge and Mighty Blow (1).` },
+    { name: "Blademaster", cost: 10, blood: ["Blood Dragon"], desc: `Gains Parry (6+), even while mounted.` },
+    { name: "Furious Charge", cost: 10, blood: ["Blood Dragon"], desc: `In any turn the model makes a successful charge, it has Ignores Armour Saves.` },
+
+    // Strigoi
+    { name: "Massive Monstrosity", cost: 35, blood: ["Strigoi"], desc: `Model on foot only. +2 Wounds and becomes Monstrous Infantry (40x40mm base).` },
+    { name: "Loathsome Stench", cost: 20, blood: ["Strigoi"], desc: `All enemy units in base contact suffer -1 Weapon Skill.` },
+    { name: "Iron Sinews", cost: 15, blood: ["Strigoi"], desc: `May re-roll failed To Wound rolls.` },
+    { name: "Terrible Blows", cost: 15, blood: ["Strigoi"], desc: `The model gains Multiple Wounds (D3).` },
+    { name: "Ghoulkin", cost: 10, blood: ["Strigoi"], desc: `One unit of Crypt Ghouls may be deployed as Scouts.` },
+    { name: "Infinite Hatred", cost: 10, blood: ["Strigoi"], desc: `The model's Hatred applies in every close combat round, not just the first.` },
+    { name: "Monstrous Mass", cost: 10, blood: ["Strigoi"], desc: `Gains Immunity (Killing Blow, Multiple Wounds).` },
+    { name: "Ravenous", cost: 10, blood: ["Strigoi"], desc: `The model gains the Frenzy special rule.` },
+    { name: "Summon Ghouls", cost: 10, blood: ["Strigoi"], desc: `Allows one unit of Crypt Ghouls to deploy as Ambushers.` },
+
+    // Lahmian
+    { name: "Seduction", cost: 25, blood: ["Lahmian"], desc: `At the start of a combat round, a model in base contact takes a Leadership test at -1; if failed it is controlled by the Vampire's player that phase (directs attacks at its own side, cannot be attacked).` },
+    { name: "Lightning Reflexes", cost: 25, blood: ["Lahmian"], desc: `Enemies must re-roll successful To Hit rolls in close combat against this model.` },
+    { name: "Night Creature", cost: 20, blood: ["Lahmian"], desc: `Model on foot only. If a lone character, cannot be targeted by enemy missile attacks or spells unless within 12".` },
+    { name: "Innocence Lost", cost: 20, blood: ["Lahmian"], desc: `The model has the Always Strikes First special rule.` },
+    { name: "Domination", cost: 15, blood: ["Lahmian"], desc: `All enemy units in base contact must re-roll successful Leadership tests (except Break tests).` },
+    { name: "Quickblood", cost: 15, blood: ["Lahmian"], desc: `The model gains the Dodge (5+) special rule.` },
+    { name: "Beguile", cost: 10, blood: ["Lahmian"], desc: `At the start of a combat round, units in base contact test Leadership at -3; if failed, the Vampire can only be Hit on 6's that turn.` },
+    { name: "Swiftness", cost: 10, blood: ["Lahmian"], desc: `Model on foot only. Gains Movement 10 and Swiftstride.` }
+  ],
+
+  // ---- MAGIC ITEMS --------------------------------------------------------
+  magicItems: {
+    "Magic Weapons": [
+      { name: "Frostblade", cost: 60 },
+      { name: "Skabscrath", cost: 40 },
+      { name: "Slaking Blade", cost: 40 },
+      { name: "Dreadlance", cost: 35, requiresAccess: "lance" },
+      { name: "Asp Bow", cost: 25 },
+      { name: "Slitter", cost: 25, requiresAccess: "additional hand weapon" },
+      { name: "Keening Bone", cost: 20, blood: ["Strigoi"] },   // self-grants throwing weapon access — unrestricted
+      { name: "Reaper of Sorrows", cost: 15, only: "Cairn Wraith", requiresAccess: "great weapon" },
+      { name: "Sword of Kings", cost: 15, only: "Wight King" },
+      { name: "The Balefire Spike", cost: 15, requiresAccess: "lance" },
+      { name: "Shadow's Edge", cost: 10 }
+    ],
+    "Magic Armour": [
+      { name: "Armour of Night", cost: 50, blood: ["von Carstein"], requiresAccess: "heavy armour" },
+      { name: "The Flayed Hauberk", cost: 45, requiresAccess: "heavy armour" },
+      { name: "Helm of Commandment", cost: 25 },   // enchanted helm (grants a save) — no mundane armour type
+      { name: "The Scabbing Plate", cost: 35, requiresAccess: "heavy armour" },
+      { name: "The Accursed Armour", cost: 30, requiresAccess: "heavy armour" },
+      { name: "The Armour of Blood", cost: 30, blood: ["Blood Dragon"], requiresAccess: "heavy armour" },
+      { name: "The Red Casket", cost: 30, blood: ["Blood Dragon"], requiresAccess: "heavy armour" },
+      { name: "Wailing Helm", cost: 25 },   // enchanted helm (grants a save) — no mundane armour type
+      { name: "The Cadaverous Cuirass", cost: 25, vampireOnly: true, requiresAccess: "heavy armour" },
+      { name: "Armour of Bone", cost: 15 },   // medium armour but self-grants (may be taken by Necromancers) — unrestricted
+      { name: "The Cursed Shield of Mousillon", cost: 10, requiresAccess: "shield" }
+    ],
+    "Talismans": [
+      { name: "Nightshroud", cost: 50 },
+      { name: "Talisman of the Nadir", cost: 30 },
+      { name: "The Gem of Blood", cost: 25, vampireOnly: true },
+      { name: "Splintervane Broach", cost: 25, blood: ["Strigoi"] },
+      { name: "Wristbands of Black Gold", cost: 25 },
+      { name: "Chiropteran Cloak", cost: 15, blood: ["von Carstein"] },
+      { name: "Cloak of the Waxing Moon", cost: 15, only: "Cairn Wraith" }
+    ],
+    "Arcane Items": [
+      { name: "The Dermal Robe", cost: 70 },
+      { name: "Staff of Raukhamon", cost: 45, blood: ["Necrarch"] },
+      { name: "Sceptre de Noirot", cost: 40 },
+      { name: "Book of Arkhan", cost: 35 },
+      { name: "Carrion Wand", cost: 35, blood: ["Strigoi"] },
+      { name: "The Cursed Book", cost: 35 },
+      { name: "Rod of Flaming Death", cost: 35 },
+      { name: "Staff of Damnation", cost: 35 },
+      { name: "Black Periapt", cost: 30 },
+      { name: "Blasphemous Tome", cost: 30 },
+      { name: "Wychlight Lantern", cost: 30 },
+      { name: "Amulet of Screams", cost: 20, blood: ["Lahmian"] },
+      { name: "Crimson Gem of Lahmia", cost: 20, blood: ["Lahmian"] },
+      { name: "Midnight Tome", cost: 20 },
+      { name: "Morbheg's Claw", cost: 20, blood: ["von Carstein"] },
+      { name: "Stave of Suffering", cost: 15 }
+    ],
+    "Enchanted Items": [
+      { name: "Midnight Amulet", cost: 40 },
+      { name: "The Casket of Ages", cost: 35 },
+      { name: "Talon of Death", cost: 35 },
+      { name: "Dreadbolt Ring", cost: 30 },
+      { name: "Breath of the Void Maw", cost: 25, blood: ["Necrarch"] },
+      { name: "Fragment of the Keep", cost: 25, blood: ["Blood Dragon"] },
+      { name: "The Grim Garland", cost: 25, blood: ["Strigoi"] },
+      { name: "Lightshard of the Harvest Moon", cost: 25 },
+      { name: "Pendant of the Fell Wind", cost: 25 },
+      { name: "The Saccharine Goblet", cost: 25, vampireOnly: true },
+      { name: "Sigil of the Sanguine Throne", cost: 25, blood: ["von Carstein"] },
+      { name: "The Furious Crown", cost: 20 },
+      { name: "Grave-sand Shard", cost: 20, blood: ["Blood Dragon"] },
+      { name: "Medal of Madness", cost: 20, blood: ["Strigoi"] },
+      { name: "Soulfire Ring", cost: 20, only: "Cairn Wraith" },
+      { name: "Blood River Chalice", cost: 15, vampireOnly: true },
+      { name: "Brazier of Nagashizzar", cost: 15, only: "Cairn Wraith" },
+      { name: "Mirror of Echoing Failures", cost: 15 },
+      { name: "Nathmar's Skull", cost: 15, only: ["Master Necromancer","Necromancer"] },
+      { name: "Ruby Vial", cost: 15, vampireOnly: true },
+      { name: "Signet of the First Court", cost: 15, blood: ["Strigoi"] },
+      { name: "The Bilious Decanter", cost: 10, blood: ["Strigoi"] },
+      { name: "Orb of Enchantment", cost: 10, blood: ["Lahmian"] },
+      { name: "Talisman of the Lycni", cost: 10, vampireOnly: true },
+      { name: "Heart of the Giant Feast", cost: 10, vampireOnly: true },
+      { name: "Shard of Night", cost: 5, vampireOnly: true }
+    ],
+    "Magic Standards": [
+      { name: "The Drakenhof Banner", cost: 75 },
+      { name: "The Flag of Blood Keep", cost: 45 },
+      { name: "Banner of the Barrows", cost: 40 },
+      { name: "Hell Banner", cost: 40 },
+      { name: "Cursed Pennant of Mousillon", cost: 35 },
+      { name: "Banner of Doom", cost: 25 },
+      { name: "Banner of the Dead Legion", cost: 25 },
+      { name: "Banner of Hellfire", cost: 25 },
+      { name: "The Flayed Pennant", cost: 25 },
+      { name: "Infernal Standard", cost: 25 },
+      { name: "Royal Standard of Strigos", cost: 25 },
+      { name: "The Screaming Banner", cost: 25 },
+      { name: "Icon of Vengeance", cost: 20 },
+      { name: "Standard of Hellish Vigour", cost: 15 },
+      { name: "Banner of the Endless Nightmare", cost: 10 },
+      { name: "Standard of Everlasting Death", cost: 10 }
+    ]
+  },
+
+  // Common rulebook magic items (identical across armies — copied verbatim).
+  commonMagicItems: {
+    "Magic Weapons": [
+      { name: "Giant Blade", cost: 45 },
+      { name: "Sword of Bloodshed", cost: 45 },
+      { name: "Sword of Power", cost: 30 },
+      { name: "Sword of Strife", cost: 30 },
+      { name: "Sword of Swift Slaying", cost: 25 },
+      { name: "Parrying Blade", cost: 20 },
+      { name: "Blade of Sea Gold", cost: 15 },
+      { name: "Ogre Blade", cost: 15 },
+      { name: "Headsman's Axe", cost: 15 },
+      { name: "Sword of Striking", cost: 15, common: true },
+      { name: "Sword of Might", cost: 15, common: true },
+      { name: "Sword of Battle", cost: 15, common: true },
+      { name: "Shrieking Blade", cost: 15 },
+      { name: "Berserker Sword", cost: 10 },
+      { name: "Blade of Slicing", cost: 10 },
+      { name: "Venom Sword", cost: 10 },
+      { name: "Biting Blade", cost: 5, common: true },
+      { name: "Burning Blade", cost: 5, common: true }
+    ],
+    "Magic Armour": [
+      { name: "Armour of Destiny", cost: 60, requiresAccess: "heavy armour" },
+      { name: "Armour of Resilience", cost: 40, requiresAccess: "heavy armour" },
+      { name: "Armour of Silvered Steel", cost: 40, requiresAccess: "heavy armour" },
+      { name: "Armour of Fortune", cost: 35, requiresAccess: "medium armour" },
+      { name: "Trickster's Helm", cost: 30, restrict: "footCav" },
+      { name: "Glittering Scales", cost: 25, requiresAccess: "light armour" },
+      { name: "Seamless Armour", cost: 25, requiresAccess: "medium armour" },
+      { name: "Alleviating Armour", cost: 20, requiresAccess: "medium armour" },
+      { name: "Gambler's Armour", cost: 20, requiresAccess: "light armour" },
+      { name: "Bedazzling Helm", cost: 20 },
+      { name: "Shield of the Warrior True", cost: 15 },
+      { name: "Dragonhelm", cost: 10 },
+      { name: "Enchanted Shield", cost: 10, common: true, requiresAccess: "shield" },
+      { name: "Charmed Shield", cost: 5, common: true }
+    ],
+    "Talismans": [
+      { name: "Talisman of Preservation", cost: 40 },
+      { name: "Obsidian Lodestone", cost: 30 },
+      { name: "Talisman of Endurance", cost: 25 },
+      { name: "Dawnstone", cost: 15, common: true, restrict: "footCav" },
+      { name: "Obsidian Amulet", cost: 20 },
+      { name: "Opal Amulet", cost: 15, common: true },
+      { name: "Talisman of Protection", cost: 10, common: true },
+      { name: "Obsidian Trinket", cost: 10, common: true },
+      { name: "Seed of Rebirth", cost: 10, common: true },
+      { name: "Lucky Trinket", cost: 5, common: true }
+    ],
+    "Arcane Items": [
+      { name: "Wand of the Winds", cost: 40 },
+      { name: "Destroy Magic Scroll", cost: 35 },
+      { name: "Feedback Scroll", cost: 35 },
+      { name: "Dispel Scroll", cost: 25 },
+      { name: "Scroll of Leaching", cost: 25 },
+      { name: "Power Familiar", cost: 25 },
+      { name: "Wand of Jade", cost: 25 },
+      { name: "Wand of Jet", cost: 25 },
+      { name: "Channelling Staff", cost: 20 },
+      { name: "Forbidden Rod", cost: 20 },
+      { name: "Wand of Onyx", cost: 20 },
+      { name: "Sceptre of Stability", cost: 20 },
+      { name: "Arcane Familiar", cost: 15, common: true, extraSignatures: 1 },
+      { name: "Earthing Rod", cost: 15, common: true },
+      { name: "Power Scroll", cost: 15, common: true },
+      { name: "Luckstone", cost: 10, common: true },
+      { name: "Power Stone", cost: 10, common: true },
+      { name: "Scroll of Shielding", cost: 10, common: true },
+      { name: "Spell Familiar", cost: 10, common: true, extraSpells: 1 }
+    ],
+    "Enchanted Items": [
+      { name: "Ruby Ring of Ruin", cost: 35 },
+      { name: "Boots of Flight", cost: 20, restrict: "infantry" },
+      { name: "Crown of Command", cost: 20 },
+      { name: "Healing Potion", cost: 15, common: true },
+      { name: "Potion of Strength", cost: 10, common: true },
+      { name: "Potion of Toughness", cost: 10, common: true },
+      { name: "Potion of Speed", cost: 10, common: true },
+      { name: "Potion of Foolhardiness", cost: 5, common: true },
+      { name: "Warrior Familiar", cost: 5, common: true }
+    ],
+    "Magic Standards": [
+      { name: "Banner of Defiance", cost: 25 },
+      { name: "Banner of Iron Resolve", cost: 25 },
+      { name: "Rampager's Standard", cost: 25 },
+      { name: "Banner of Swiftness", cost: 25 },
+      { name: "Razor Standard", cost: 25 },
+      { name: "Ranger's Standard", cost: 20 },
+      { name: "Banner of Eternal Flame", cost: 15 },
+      { name: "Standard of Discipline", cost: 15 },
+      { name: "Standard of Shielding", cost: 15 },
+      { name: "War Banner", cost: 15, common: true },
+      { name: "Lichbone Pennant", cost: 10, common: true },
+      { name: "Gleaming Pennant", cost: 5, common: true }
+    ]
+  },
+
+  // ---- UNITS --------------------------------------------------------------
+  units: {
+    characters: [
+      // ===== von Carsteins =====
+      { id: "voncarstein", name: "von Carstein", isCharacter: true, tags: ["Vampire"], bloodline: "von Carstein",
+        access: ["additional hand weapon","lance","halberd","great weapon","light armour","medium armour","heavy armour"],
+        lores: ["Death","Necromancy","Shadow"],
+        variants: [
+          { name: "Count", points: 190, wizardLevel: 0, magicBudget: 100 },
+          { name: "Scion", points: 80, wizardLevel: 0, magicBudget: 50 }
+        ],
+        options: [
+          { id: "wiz", type: "choice", label: "Wizard Level", choices: [
+            { label: "Level 1 Wizard", cost: 35, wizLevel: 1 },
+            { label: "Level 2 Wizard", cost: 70, wizLevel: 2 },
+            { label: "Level 3 Wizard (Count only)", cost: 105, wizLevel: 3, only: "Count" } ] },
+          { id: "wpn", type: "choice", label: "Weapon", choices: [
+            { label: "Additional hand weapon", cost: 5 },
+            { label: "Heavy lance", cost: 10 },
+            { label: "Polearm", cost: 10 },
+            { label: "Great weapon", cost: 10 } ] },
+          { id: "arm", type: "choice", label: "Armour", choices: [
+            { label: "Light armour", cost: 3 },
+            { label: "Medium armour", cost: 9 },
+            { label: "Heavy armour", cost: 18 } ] },
+          { id: "mount", type: "mount", label: "Mount", choices: [
+            { label: "Nightmare", cost: 15 },
+            { label: "Hellsteed", cost: 25 },
+            { label: "Abyssal Terror (Count only)", cost: 125, only: "Count" },
+            { label: "Zombie Dragon (Count only)", cost: 245, only: "Count" } ] },
+          { id: "bsb", type: "toggle", label: "Battle Standard (Scion only)", cost: 25, per: "flat", bsb: true, only: "Scion" } ] },
+
+      // ===== Necrarchs =====
+      { id: "necrarch", name: "Necrarch", isCharacter: true, tags: ["Vampire"], bloodline: "Necrarch",
+        access: [],   // no weapon/armour options — cannot take magic armour or special-weapon items
+        lores: ["Death","Heavens","Metal","Necromancy","Shadow"],
+        variants: [
+          { name: "Master", points: 245, wizardLevel: 3, magicBudget: 100 },
+          { name: "Acolyte", points: 70, wizardLevel: 1, magicBudget: 50 }
+        ],
+        options: [
+          { id: "wlvl", type: "toggle", label: "Additional Wizard Level", cost: 35, per: "flat" },
+          { id: "motd", type: "toggle", label: "Master of the Dead", cost: 20, per: "flat" },
+          { id: "mount", type: "mount", label: "Mount", choices: [
+            { label: "Nightmare", cost: 15 },
+            { label: "Hellsteed", cost: 25 },
+            { label: "Abyssal Terror (Master only)", cost: 125, only: "Master" },
+            { label: "Zombie Dragon (Master only)", cost: 245, only: "Master" } ] },
+          { id: "bsb", type: "toggle", label: "Battle Standard (Acolyte only)", cost: 25, per: "flat", bsb: true, only: "Acolyte" } ] },
+
+      // ===== Lahmians =====
+      { id: "lahmian", name: "Lahmian", isCharacter: true, tags: ["Vampire"], bloodline: "Lahmian",
+        access: ["additional hand weapon","throwing weapon","shortbow","light armour"],
+        lores: ["Death","Necromancy","Shadow"],
+        variants: [
+          { name: "Lady", points: 175, wizardLevel: 0, magicBudget: 100 },
+          { name: "Courtesan", points: 70, wizardLevel: 0, magicBudget: 50 }
+        ],
+        options: [
+          { id: "wiz", type: "choice", label: "Wizard Level", choices: [
+            { label: "Level 1 Wizard", cost: 35, wizLevel: 1 },
+            { label: "Level 2 Wizard", cost: 70, wizLevel: 2 },
+            { label: "Level 3 Wizard (Lady only)", cost: 105, wizLevel: 3, only: "Lady" } ] },
+          { id: "ahw", type: "toggle", label: "Additional hand weapon", cost: 5, per: "flat" },
+          { id: "thrown", type: "toggle", label: "Throwing weapons", cost: 6, per: "flat" },
+          { id: "bow", type: "toggle", label: "Shortbow", cost: 4, per: "flat" },
+          { id: "la", type: "toggle", label: "Light armour", cost: 3, per: "flat" },
+          { id: "poison", type: "toggle", label: "Poisoned Attacks", cost: 10, per: "flat" },
+          { id: "mount", type: "mount", label: "Mount", choices: [
+            { label: "Nightmare", cost: 15 },
+            { label: "Hellsteed", cost: 25 },
+            { label: "Coven Throne (Lady only, replacing one crew)", cost: 200, only: "Lady" } ] },
+          { id: "bsb", type: "toggle", label: "Battle Standard (Courtesan only)", cost: 25, per: "flat", bsb: true, only: "Courtesan" } ] },
+
+      // ===== Blood Dragons =====
+      { id: "blooddragon", name: "Blood Dragon", isCharacter: true, tags: ["Vampire"], bloodline: "Blood Dragon",
+        access: ["heavy armour","shield","additional hand weapon","lance","great weapon"],   // heavy armour is BASE equipment
+        lores: ["Death","Necromancy","Shadow"],
+        variants: [
+          { name: "Lord", points: 215, wizardLevel: 0, magicBudget: 100 },
+          { name: "Kastellan", points: 100, wizardLevel: 0, magicBudget: 50 }
+        ],
+        options: [
+          { id: "wiz", type: "choice", label: "Wizard Level", choices: [
+            { label: "Level 1 Wizard", cost: 35, wizLevel: 1 },
+            { label: "Level 2 Wizard (Lord only)", cost: 70, wizLevel: 2, only: "Lord" } ] },
+          { id: "wpn", type: "choice", label: "Weapon", choices: [
+            { label: "Additional hand weapon", cost: 5 },
+            { label: "Heavy lance", cost: 10 },
+            { label: "Great weapon", cost: 10 } ] },
+          { id: "shield", type: "toggle", label: "Shield", cost: 5, per: "flat" },
+          { id: "mount", type: "mount", label: "Mount", choices: [
+            { label: "Nightmare", cost: 20 },
+            { label: "Hellsteed", cost: 25 },
+            { label: "Abyssal Terror", cost: 125 },
+            { label: "Zombie Dragon", cost: 245 } ] },
+          { id: "bsb", type: "toggle", label: "Battle Standard (Kastellan only)", cost: 25, per: "flat", bsb: true, only: "Kastellan" } ],
+        notes: "Martial Honour: the Vampire must always issue and accept challenges when possible." },
+
+      // ===== Strigoi =====
+      { id: "strigoi", name: "Strigoi", isCharacter: true, tags: ["Vampire"], bloodline: "Strigoi",
+        access: [],   // no weapon/armour options
+        lores: ["Beasts","Necromancy"],
+        variants: [
+          { name: "Ghoul King", points: 220, wizardLevel: 0, magicBudget: 100 },
+          { name: "Ghoul Prince", points: 120, wizardLevel: 0, magicBudget: 50 }
+        ],
+        options: [
+          { id: "wiz", type: "choice", label: "Wizard Level", choices: [
+            { label: "Level 1 Wizard", cost: 35, wizLevel: 1 },
+            { label: "Level 2 Wizard (Ghoul King only)", cost: 70, wizLevel: 2, only: "Ghoul King" } ] },
+          { id: "mount", type: "mount", label: "Mount", choices: [
+            { label: "Terrorgheist (Ghoul King only)", cost: 225, only: "Ghoul King" } ] },
+          { id: "bsb", type: "toggle", label: "Battle Standard (Ghoul Prince only)", cost: 25, per: "flat", bsb: true, only: "Ghoul Prince" } ] },
+
+      // ===== Necromancers (NOT vampires — magic items only) =====
+      { id: "necromancer", name: "Necromancer", isCharacter: true,
+        access: [],   // no armour/weapon access (Armour of Bone self-grants and stays available)
+        lores: ["Death","Necromancy"],
+        variants: [
+          { name: "Master Necromancer", points: 160, wizardLevel: 3, magicBudget: 100 },
+          { name: "Necromancer", points: 65, wizardLevel: 1, magicBudget: 50 }
+        ],
+        options: [
+          { id: "wlvl", type: "toggle", label: "Additional Wizard Level", cost: 35, per: "flat" },
+          { id: "motd", type: "toggle", label: "Master of the Dead", cost: 20, per: "flat" },
+          { id: "mount", type: "mount", label: "Mount", choices: [
+            { label: "Nightmare", cost: 20 },
+            { label: "Hellsteed", cost: 25 },
+            { label: "Corpse Cart (replacing the Corpsemaster)", cost: 100 },
+            { label: "Abyssal Terror (Master Necromancer only)", cost: 125, only: "Master Necromancer" } ] } ] },
+
+      // ===== Liche Lord (NOT a vampire) =====
+      { id: "lichelord", name: "Liche Lord", isCharacter: true,
+        access: ["light armour","medium armour"],
+        lores: ["Death","Necromancy"],
+        variants: [
+          { name: "Liche Lord", points: 290, wizardLevel: 4, magicBudget: 100 }
+        ],
+        options: [
+          { id: "arm", type: "choice", label: "Armour", choices: [
+            { label: "Light armour", cost: 3 },
+            { label: "Medium armour", cost: 9 } ] },
+          { id: "mount", type: "mount", label: "Mount", choices: [
+            { label: "Mortis Engine (replacing the Corpsemaster)", cost: 200 } ] } ],
+        },
+
+      // ===== Wight Lords (NOT vampires) =====
+      { id: "wightlord", name: "Wight Lord", isCharacter: true,
+        access: ["additional hand weapon","lance","great weapon","medium armour","heavy armour","shield"],
+        variants: [
+          { name: "Wight King", points: 140, wizardLevel: 0, magicBudget: 100 },
+          { name: "Wight Lord", points: 100, wizardLevel: 0, magicBudget: 50 }
+        ],
+        options: [
+          { id: "wpn", type: "choice", label: "Weapon", choices: [
+            { label: "Additional hand weapon", cost: 5 },
+            { label: "Heavy lance", cost: 10 },
+            { label: "Great weapon", cost: 10 } ] },
+          { id: "arm", type: "choice", label: "Armour", choices: [
+            { label: "Medium armour", cost: 9 },
+            { label: "Heavy armour", cost: 18 } ] },
+          { id: "shield", type: "toggle", label: "Shield", cost: 5, per: "flat" },
+          { id: "mount", type: "mount", label: "Mount", choices: [
+            { label: "Skeletal Steed", cost: 12 },
+            { label: "Barrow Chariot", cost: 50 } ] },
+          { id: "bsb", type: "toggle", label: "Battle Standard (Wight Lord only)", cost: 25, per: "flat", bsb: true, only: "Wight Lord" } ],
+        },
+
+      // ===== Cairn Wraith (NOT a vampire) =====
+      { id: "cairnwraith", name: "Cairn Wraith", isCharacter: true,
+        access: ["additional hand weapon","great weapon"],
+        variants: [ { name: "Cairn Wraith", points: 60, wizardLevel: 0, magicBudget: 50 } ],
+        options: [
+          { id: "wpn", type: "choice", label: "Weapon", choices: [
+            { label: "Additional hand weapon", cost: 2 },
+            { label: "Great weapon", cost: 4 } ] },
+          { id: "mount", type: "mount", label: "Mount", choices: [
+            { label: "Skeletal Steed", cost: 12 } ] } ],
+        },
+
+      // ===== Tomb Banshee (NOT a vampire) =====
+      { id: "tombbanshee", name: "Tomb Banshee", isCharacter: true,
+        variants: [ { name: "Tomb Banshee", points: 80, wizardLevel: 0, magicBudget: 0 } ],
+        options: [],
+        notes: "No magic-item allowance." },
+
+      // ===== Swain (conditional — Lahmian char required) =====
+      { id: "swain", name: "Swain", isCharacter: true, cannotBeGeneral: true,
+        access: ["additional hand weapon","halberd","great weapon","light armour","medium armour","heavy armour","shield"],
+        variants: [ { name: "Swain", points: 50, wizardLevel: 0, magicBudget: 50 } ],
+        options: [
+          { id: "wpn", type: "choice", label: "Weapon", choices: [
+            { label: "Additional hand weapon", cost: 5 },
+            { label: "Polearm", cost: 10 },
+            { label: "Great weapon", cost: 15 } ] },
+          { id: "pistol", type: "toggle", label: "Pistol", cost: 5, per: "flat" },
+          { id: "arm", type: "choice", label: "Armour", choices: [
+            { label: "Light armour", cost: 3 },
+            { label: "Medium armour", cost: 9 },
+            { label: "Heavy armour", cost: 18 } ] },
+          { id: "shield", type: "toggle", label: "Shield", cost: 2, per: "flat" } ],
+        notes: "May only be included if the army contains at least one Lahmian Vampire Character." },
+
+      // ===== Crypt Ghast (NOT a vampire) =====
+      { id: "cryptghast", name: "Crypt Ghast", isCharacter: true, cannotBeGeneral: true,
+        access: ["additional hand weapon","halberd","great weapon"],
+        variants: [ { name: "Crypt Ghast", points: 60, wizardLevel: 0, magicBudget: 50 } ],
+        options: [
+          { id: "wpn", type: "choice", label: "Weapon", choices: [
+            { label: "Additional hand weapon", cost: 5 },
+            { label: "Polearm", cost: 10 },
+            { label: "Great weapon", cost: 15 } ] },
+          { id: "bsb", type: "toggle", label: "Battle Standard", cost: 25, per: "flat", bsb: true } ],
+        notes: "A BSB carrying a magic standard may carry other magic items up to 25 points only." },
+
+      // ===== Strigany Mystic (conditional — Strigoi char required) =====
+      { id: "striganymystic", name: "Strigany Mystic", isCharacter: true, cannotBeGeneral: true,
+        access: [],
+        lores: ["Heavens","Necromancy"],
+        variants: [ { name: "Strigany Mystic", points: 65, wizardLevel: 1, magicBudget: 50 } ],
+        options: [
+          { id: "wlvl", type: "toggle", label: "Additional Wizard Level", cost: 35, per: "flat" } ],
+        notes: "May only be included if the army contains at least one Strigoi Vampire Character. May only join units of Strigany or Ghouls." },
+
+      // ===== SPECIAL CHARACTERS =====
+      { id: "vlad", name: "Vlad von Carstein", isCharacter: true, isSpecialChar: true, tags: ["Vampire"], bloodline: "von Carstein",
+        lores: ["Necromancy"],
+        variants: [ { name: "Vlad von Carstein", points: 450, wizardLevel: 3, magicBudget: 0 } ],
+        options: [],
+        notes: "Carries Blood Drinker, The Carstein Ring; Powers: Aura of Dark Majesty, Supernatural Horror, Transfix." },
+
+      { id: "isabella", name: "Isabella von Carstein", isCharacter: true, isSpecialChar: true, tags: ["Vampire"], bloodline: "von Carstein",
+        variants: [ { name: "Isabella von Carstein", points: 110, wizardLevel: 0, magicBudget: 0 } ],
+        options: [],
+        notes: "Carries Blood Chalice of Bathori; Power: Beguile." },
+
+      { id: "konrad", name: "Konrad von Carstein", isCharacter: true, isSpecialChar: true, tags: ["Vampire"], bloodline: "von Carstein",
+        variants: [ { name: "Konrad von Carstein", points: 215, wizardLevel: 0, magicBudget: 0 } ],
+        options: [],
+        notes: "Carries Sword of Waldenhof, Ring of the Night; Power: Red Fury." },
+
+      { id: "mannfred", name: "Mannfred von Carstein", isCharacter: true, isSpecialChar: true, tags: ["Vampire"], bloodline: "von Carstein",
+        lores: ["Death","Necromancy"],
+        variants: [ { name: "Mannfred von Carstein", points: 565, wizardLevel: 4, magicBudget: 0 } ],
+        options: [
+          { id: "mount", type: "mount", label: "Mount", choices: [
+            { label: "Nightmare", cost: 20 },
+            { label: "Hellsteed", cost: 25 },
+            { label: "Abyssal Terror", cost: 125 },
+            { label: "Zombie Dragon", cost: 245 } ] } ],
+        notes: "Loremaster (Death, Necromancy). Carries Timor Noctis, Armour of Templehof, Cloak of Darkness, Ebony Staff; Powers: Dark Acolyte, Master of the Black Arts, Summon Creatures of the Night. Drakenhof Guard upgrade." },
+
+      { id: "zacharias", name: "Zacharias the Everliving", isCharacter: true, isSpecialChar: true, tags: ["Vampire"], bloodline: "Necrarch",
+        lores: ["Beasts","Fire","Death","Heavens","Light","Metal","Necromancy","Shadow"],
+        variants: [ { name: "Zacharias the Everliving", points: 720, wizardLevel: 4, magicBudget: 0 } ],
+        options: [],
+        notes: "Mounted on a Zombie Dragon. Carries Circlet of Rathek, Scrolls of Semhtep, Book of Nagash, Staff of Kaphamon; Powers: Dark Acolyte, Forbidden Lore, Master of the Black Arts." },
+
+      { id: "melkhior", name: "Melkhior the Ancient", isCharacter: true, isSpecialChar: true, tags: ["Vampire"], bloodline: "Necrarch",
+        lores: ["Necromancy"],
+        variants: [ { name: "Melkhior", points: 455, wizardLevel: 4, magicBudget: 0 } ],
+        options: [],
+        notes: "Mounted on an Abyssal Terror. Carries Painbringer, Black Cloak of Lahmia, Grimoire Necronium; Powers: Dark Acolyte, Forbidden Lore, Nehekhara's Noble Blood." },
+
+      { id: "neferata", name: "Neferata", isCharacter: true, isSpecialChar: true, mustBeGeneral: true, tags: ["Vampire"], bloodline: "Lahmian",
+        lores: ["Death","Necromancy","Shadow"],
+        variants: [ { name: "Neferata", points: 510, wizardLevel: 3, magicBudget: 0 } ],
+        options: [
+          { id: "ma", type: "toggle", label: "Medium armour", cost: 9, per: "flat" },
+          { id: "mount", type: "mount", label: "Mount", choices: [
+            { label: "Nightmare", cost: 21 },
+            { label: "Hellsteed", cost: 30 },
+            { label: "Abyssal Terror", cost: 125 },
+            { label: "Coven Throne (replacing one crew)", cost: 200 } ] } ],
+        notes: "Must be the Army General. Knows Shadowblood. Carries Dagger of Jet, Ruby of Lahmia, The Staff of Pain, Bastet; Powers: Lightning Reflexes, Quickblood, Seduction." },
+
+      { id: "sekhar", name: "Sekhar", isCharacter: true, isSpecialChar: true, tags: ["Vampire"], bloodline: "Lahmian",
+        lores: ["Death","Necromancy","Shadow"],
+        variants: [ { name: "Sekhar", points: 190, wizardLevel: 2, magicBudget: 0 } ],
+        options: [],
+        notes: "Equipment: Polearm, medium armour; mounted on Ouboroth (Unit Strength 2). Powers: Seduction, Lightning Reflexes." },
+
+      { id: "walach", name: "Walach Harkon", isCharacter: true, isSpecialChar: true, tags: ["Vampire"], bloodline: "Blood Dragon",
+        lores: ["Necromancy"],
+        variants: [ { name: "Walach Harkon", points: 490, wizardLevel: 2, magicBudget: 0 } ],
+        options: [],
+        notes: "Mounted on a Nightmare. Carries Crimson Blade, Walach's Bloody Hauberk, Blood Chalice, Blood Dragon Standard (army Battle Standard); Powers: Dread Knight, Doomrider, Warrior Pride." },
+
+      { id: "vhordrai", name: "Prince Vhordrai", isCharacter: true, isSpecialChar: true, tags: ["Vampire"], bloodline: "Blood Dragon",
+        lores: ["Necromancy"],
+        variants: [ { name: "Prince Vhordrai", points: 615, wizardLevel: 1, magicBudget: 0 } ],
+        options: [],
+        notes: "Mounted on Shordemaire (Zombie Dragon). Carries Bloodlance; Powers: Heart Piercing, Honour or Death, Red Fury. Breath of Shyish; Fist of Abhorash." },
+
+      { id: "ushoran", name: "Ushoran", isCharacter: true, isSpecialChar: true, mustBeGeneral: true, tags: ["Vampire"], bloodline: "Strigoi",
+        lores: ["Beasts","Death","Necromancy"],
+        variants: [ { name: "Ushoran", points: 590, wizardLevel: 2, magicBudget: 0 } ],
+        options: [],
+        notes: "Must be the Army General. Carries Sceptre of the Carrion King, The King's Chalice, Shroudcage Fragment; Powers: Monstrous Mass, Summon Ghouls." },
+
+      { id: "gormayne", name: "Gormayne", isCharacter: true, isSpecialChar: true, tags: ["Vampire"], bloodline: "Strigoi",
+        variants: [ { name: "Gormayne", points: 170, wizardLevel: 0, magicBudget: 0 } ],
+        options: [],
+        notes: "Power: Unholy Regeneration." },
+
+      { id: "kemmler", name: "Heinrich Kemmler", isCharacter: true, isSpecialChar: true,
+        lores: ["Necromancy"],
+        variants: [ { name: "Heinrich Kemmler", points: 325, wizardLevel: 4, magicBudget: 0 } ],
+        options: [],
+        notes: "Carries Chaos Tomb Blade, Skull Staff, Cloak of Mists and Shadows." },
+
+      { id: "helmanghorst", name: "Helman Ghorst", isCharacter: true, isSpecialChar: true,
+        lores: ["Necromancy"],
+        variants: [ { name: "Helman Ghorst", points: 165, wizardLevel: 2, magicBudget: 0 } ],
+        options: [
+          { id: "mount", type: "mount", label: "Mount", choices: [
+            { label: "Corpse Cart (replacing the Corpsemaster)", cost: 100 } ] } ],
+        notes: "Carries The Liber Noctis. Awaken from the Grave; The Brothers Ghorst; The Konigstein Stalkers upgrade." },
+
+      { id: "krell", name: "Krell", isCharacter: true, isSpecialChar: true,
+        variants: [ { name: "Krell", points: 235, wizardLevel: 0, magicBudget: 0 } ],
+        options: [],
+        notes: "Carries The Black Axe of Krell, Armour of the Barrows, Crown of the Damned." }
+    ],
+
+    core: [
+      { id: "skeletonwarriors", name: "Skeleton Warriors", perModel: true, basePoints: 3, unitSize: [20, 60],
+        options: [
+          { id: "wpn", type: "choice", label: "Weapon", choices: [
+            { label: "Spears", cost: 0.5, per: "model" },
+            { label: "Polearms", cost: 2, per: "model" },
+            { label: "Great weapons", cost: 3, per: "model" } ] },
+          { id: "arm", type: "choice", label: "Armour", choices: [
+            { label: "Light armour", cost: 0.5, per: "model" },
+            { label: "Medium armour", cost: 1.5, per: "model" } ] },
+          { id: "shield", type: "toggle", label: "Shields (unless armed with great weapons)", cost: 1, per: "model" },
+          { id: "cmd", type: "command", label: "Command", magicStandard: 25 } ] },
+
+      { id: "skeletonarchers", name: "Skeleton Archers", perModel: true, basePoints: 4, unitSize: [10, 30],
+        options: [
+          { id: "bow", type: "choice", label: "Replace shortbows", choices: [
+            { label: "Longbows", cost: 1, per: "model" },
+            { label: "Crossbows", cost: 2, per: "model" } ] },
+          { id: "arm", type: "choice", label: "Armour", choices: [
+            { label: "Light armour", cost: 0.5, per: "model" },
+            { label: "Medium armour", cost: 1.5, per: "model" } ] },
+          { id: "cmd", type: "command", label: "Command", magicStandard: 25 } ],
+        notes: "You may not have more units of Skeleton Archers than Skeleton Warriors." },
+
+      { id: "skeletonhorsemen", name: "Skeleton Horsemen", perModel: true, basePoints: 9, unitSize: [5, 15],
+        options: [
+          { id: "wpn", type: "choice", label: "Weapon", choices: [
+            { label: "Replace shields with bows", cost: 0, per: "model" },
+            { label: "Light lances", cost: 1, per: "model" } ] },
+          { id: "la", type: "toggle", label: "Light armour", cost: 1, per: "model" },
+          { id: "cmd", type: "command", label: "Command", magicStandard: 25 } ],
+        notes: "You may not have more units of Skeleton Horsemen than Skeleton Warriors." },
+
+      { id: "zombies", name: "Zombies", perModel: true, basePoints: 2.5, unitSize: [20, 60],
+        options: [
+          { id: "cmd", type: "command", label: "Command", roles: ["musician","standard"], magicStandard: 0 } ],
+        notes: "Command: Musician (+5) and Standard Bearer (+10) only — no Leader, no magic standard." },
+
+      { id: "cryptghouls", name: "Crypt Ghouls", perModel: true, basePoints: 7, unitSize: [10, 30],
+        options: [
+          { id: "skirm", type: "toggle", label: "Skirmishers", cost: 1, per: "model" },
+          { id: "leader", type: "toggle", label: "Leader", cost: 5, per: "flat" } ],
+        notes: "May only upgrade a Leader (no Musician/Standard)" },
+
+      { id: "sylvanianlevy", name: "Sylvanian Levy", perModel: true, basePoints: 2, unitSize: [20, 60], expendable: true,
+        options: [
+          { id: "wpn", type: "choice", label: "Weapon", choices: [
+            { label: "Spears", cost: 0.5, per: "model" },
+            { label: "Longbows", cost: 4, per: "model" },
+            { label: "Crossbows", cost: 5, per: "model" } ] },
+          { id: "cmd", type: "command", label: "Command", magicStandard: 0 } ],
+        notes: "May only be included if the army includes a von Carstein Vampire Character." },
+
+      { id: "strigany", name: "Strigany", perModel: true, basePoints: 4, unitSize: [10, 30], expendable: true,
+        options: [
+          { id: "thrown", type: "toggle", label: "Throwing weapons", cost: 1, per: "model" },
+          { id: "skirm", type: "toggle", label: "Skirmishers", cost: 1, per: "model" },
+          { id: "cmd", type: "command", label: "Command", magicStandard: 0 } ],
+        notes: "May only be included if the army includes a Strigoi Vampire Character. Equipment: two hand weapons." },
+
+      { id: "direwolves", name: "Dire Wolves", perModel: true, basePoints: 5, unitSize: [10, 30],
+        options: [
+          { id: "leader", type: "toggle", label: "Leader", cost: 5, per: "flat" } ],
+        notes: "May only upgrade a Leader." },
+
+      { id: "fellbats", name: "Fell Bats", perModel: true, basePoints: 12, unitSize: [3, 9],
+        options: [],
+        },
+
+      { id: "batswarms", name: "Bat Swarms", perModel: true, basePoints: 30, unitSize: [3, 9],
+        options: [],
+        notes: "Line of Sight value 1." },
+
+      { id: "spirithosts", name: "Spirit Hosts", perModel: true, basePoints: 40, unitSize: [3, 9],
+        options: [],
+        notes: "Line of Sight value 1." }
+    ],
+
+    special: [
+      { id: "graveguard", name: "Grave Guard", perModel: true, basePoints: 10, unitSize: [10, 30],
+        options: [
+          { id: "wpn", type: "choice", label: "Weapon", choices: [
+            { label: "Polearms", cost: 2, per: "model" },
+            { label: "Great weapons", cost: 3, per: "model" } ] },
+          { id: "ha", type: "toggle", label: "Heavy armour", cost: 1.5, per: "model" },
+          { id: "shield", type: "toggle", label: "Shields (unless armed with great weapons)", cost: 1, per: "model" },
+          { id: "cmd", type: "command", label: "Command", magicStandard: 50 } ] },
+
+      { id: "blackknights", name: "Black Knights", perModel: true, basePoints: 22, unitSize: [5, 15],
+        options: [
+          { id: "ha", type: "toggle", label: "Heavy armour", cost: 2, per: "model" },
+          { id: "barding", type: "toggle", label: "Barding", cost: 2, per: "model" },
+          { id: "cmd", type: "command", label: "Command", magicStandard: 50 } ] },
+
+      { id: "cryptguard", name: "Crypt Guard", perModel: true, basePoints: 9, unitSize: [10, 30],
+        options: [
+          { id: "polearm", type: "toggle", label: "Polearms", cost: 2, per: "model" },
+          { id: "cmd", type: "command", label: "Command", magicStandard: 50 } ],
+        },
+
+      { id: "crypthorrors", name: "Crypt Horrors", perModel: true, basePoints: 35, unitSize: [3, 9],
+        options: [
+          { id: "leader", type: "toggle", label: "Leader", cost: 5, per: "flat" } ],
+        notes: "May only upgrade a Leader." },
+
+      { id: "vargheists", name: "Vargheists", perModel: true, basePoints: 50, unitSize: [3, 9],
+        options: [
+          { id: "leader", type: "toggle", label: "Leader", cost: 5, per: "flat" } ],
+        notes: "May only upgrade a Leader." },
+
+      { id: "fleshgolems", name: "Flesh Golems", perModel: true, basePoints: 20, unitSize: [3, 9],
+        options: [] },
+
+      { id: "skeletonchariot", name: "Skeleton Chariot", basePoints: 45, unitSize: null,
+        options: [
+          { id: "lances", type: "toggle", label: "Light lances", cost: 2, per: "flat" },
+          { id: "bows", type: "toggle", label: "Bows", cost: 2, per: "flat" },
+          { id: "shields", type: "toggle", label: "Shields", cost: 8, per: "flat" },
+          { id: "barding", type: "toggle", label: "Barding", cost: 4, per: "flat" },
+          { id: "scythes", type: "toggle", label: "Scythes", cost: 5, per: "flat" } ],
+        notes: "Chariot (Armour save 6+). Crew: 2; drawn by 2 Skeletal Steeds." },
+
+      { id: "corpsecart", name: "Corpse Cart", basePoints: 100, unitSize: null,
+        options: [
+          { id: "upg", type: "choice", label: "Upgrade", choices: [
+            { label: "Balefire", cost: 20 },
+            { label: "Unholy Lodestone", cost: 20 } ] } ],
+        notes: "Shrine (Armour save 6+, Undead)" },
+
+      { id: "wraithwisps", name: "Wraithwisps", perModel: true, basePoints: 13, unitSize: [5, 15],
+        options: [
+          { id: "wpn", type: "choice", label: "Weapon", choices: [
+            { label: "Additional hand weapons", cost: 1, per: "model" },
+            { label: "Polearms", cost: 2, per: "model" },
+            { label: "Crossbows", cost: 3, per: "model" },
+            { label: "Great weapons", cost: 3, per: "model" } ] },
+          { id: "cmd", type: "command", label: "Command", magicStandard: 50 } ],
+        },
+
+      { id: "hexwraiths", name: "Hexwraiths", perModel: true, basePoints: 27, unitSize: [5, 15],
+        options: [
+          { id: "leader", type: "toggle", label: "Leader", cost: 5, per: "flat" } ],
+        notes: "May only upgrade a Leader." },
+
+      { id: "varghulf", name: "Varghulf", basePoints: 135, unitSize: null,
+        options: [],
+        notes: "Monstrous Creature." },
+
+      { id: "mourngul", name: "Mourngul", basePoints: 130, unitSize: null,
+        options: [],
+        notes: "Monstrous Creature." }
+    ],
+
+    rare: [
+      { id: "bloodknights", name: "Blood Knights", perModel: true, basePoints: 36, unitSize: [5, 15],
+        options: [
+          { id: "cmd", type: "command", label: "Command", magicStandard: 75 } ],
+        notes: "Become Special if Walach Harkon is in the army." },
+
+      { id: "lahmianhandmaidens", name: "Lahmian Handmaidens", perModel: true, basePoints: 18, unitSize: [5, 15],
+        options: [
+          { id: "thrown", type: "toggle", label: "Throwing weapons", cost: 3, per: "model" },
+          { id: "poison", type: "toggle", label: "Poisoned Attacks", cost: 2, per: "model" },
+          { id: "leader", type: "toggle", label: "Leader", cost: 5, per: "flat" } ],
+        notes: "Become Special if Neferata is in the army. May only upgrade a Leader." },
+
+      { id: "morbhegknights", name: "Morbheg Knights", perModel: true, basePoints: 35, unitSize: [3, 6],
+        options: [
+          { id: "cmd", type: "command", label: "Command", magicStandard: 50 } ] },
+
+      { id: "terrorgheist", name: "Terrorgheist", basePoints: 225, unitSize: null,
+        options: [
+          { id: "infested", type: "toggle", label: "Infested", cost: 10, per: "flat" },
+          { id: "rancid", type: "toggle", label: "Rancid Maw", cost: 10, per: "flat" } ],
+        notes: "Monster." },
+
+      { id: "zombiedragon", name: "Zombie Dragon", basePoints: 245, unitSize: null,
+        options: [],
+        notes: "Monster." },
+
+      { id: "necrofexcolossus", name: "Necrofex Colossus", basePoints: 240, unitSize: null,
+        options: [
+          { id: "scythes", type: "toggle", label: "Scythes and Barbs", cost: 10, per: "flat" },
+          { id: "vampblood", type: "toggle", label: "Vampire Blood", cost: 10, per: "flat" },
+          { id: "corpsekillers", type: "toggle", label: "Corpse Killers", cost: 20, per: "flat" },
+          { id: "darksoul", type: "toggle", label: "Dark Soul (Level 1 Wizard)", cost: 45, per: "flat" } ],
+        notes: "Monster." },
+
+      { id: "skeletoncatapult", name: "Skeleton Catapult", basePoints: 80, unitSize: null,
+        options: [
+          { id: "la", type: "toggle", label: "Light armour", cost: 3, per: "flat" } ],
+        notes: "War Machine. Equipment: hand weapon, stone thrower. Crew: 3." },
+
+      { id: "blackcoach", name: "Black Coach", basePoints: 140, unitSize: null,
+        options: [
+          { id: "nightmares", type: "toggle", label: "Two additional Nightmares", cost: 6, per: "flat" },
+          { id: "spectres", type: "toggle", label: "Spectres", cost: 5, per: "flat" } ],
+        notes: "Chariot (Armour save 5+)" },
+
+      { id: "coventhrone", name: "Coven Throne", basePoints: 200, unitSize: null,
+        options: [],
+        notes: "Chariot (Armour save 5+). Crew: 3 Pallid Handmaidens (Lahmian). Line of Sight value 5." },
+
+      { id: "mortisengine", name: "Mortis Engine", basePoints: 220, unitSize: null,
+        options: [],
+        notes: "Chariot (Armour save 5+). Line of Sight value 5." }
+    ]
+  },
+
+  // ---- SPELL LORES --------------------------------------------------------
+  spellLores: {
+    "Necromancy": {
+      attribute: { name: "The Curse of Undeath", text: `When a Lore of Necromancy spell is successfully cast, all Undead units (excluding mounts) within 6" of the caster regain 1 Wound (Core Units regain D3 Wounds), following the rules for Invocation of Nehek.` },
+      spells: [
+        { name: "Invocation of Nehek", lvl: 0, cast: 6, type: "Summoning", range: `18"`, effect: `Targets Undead (excluding mounts). Core Units gain 2D6 Wounds; Special Units (except Cavalry) gain D6 Wounds; Characters, Cavalry Special Units and Rare Units regain D3 Wounds. Characters in a unit only heal if targeted separately.` },
+        { name: "Hand of Dust", lvl: 1, cast: 5, type: "Augment", range: "Self", effect: `Remains in play. The caster gains an extra close combat attack (no magic-item/special-rule benefit); if it Hits, the target suffers an automatic Wound with Ignores Armour Saves and Multiple Wounds (D6).` },
+        { name: "Vanhel's Danse Macabre", lvl: 1, cast: 5, type: "Conveyance", range: `24"`, effect: `Targets Undead (including mounts). The target immediately makes a normal move as if in the Remaining Moves sub-phase (including any Characters in the unit).` },
+        { name: "Hellish Vigour", lvl: 1, cast: 7, type: "Augment", range: `18"`, effect: `All Undead models (including mounts) in the unit gain Always Strikes First and may re-roll failed To Hit rolls in close combat until the caster's next Magic phase.` },
+        { name: "Fountains of Blood", lvl: 2, cast: 7, type: "Hex", range: `24"`, effect: `Until the caster's next Magic phase, all failed To Wound rolls against this unit may be re-rolled; in addition, Vampires gain +1 to The Red Thirst rolls for Wounds caused against this unit.` },
+        { name: "Deathly Cabal", lvl: 2, cast: 8, type: "Augment", range: `18"`, effect: `Until the caster's next Magic phase, the target gains Fear and Magical Ward (6+).` },
+        { name: "Gaze of Nagash", lvl: 2, cast: 9, type: "Magic missile", range: `24"`, effect: `2D6 Strength 4 hits.` },
+        { name: "Raise Dead", lvl: 3, cast: 9, type: "Summoning", range: `18"`, effect: `Brings a unit of Zombies into play. Roll 2D6+3 for the unit's size. May instead summon 2D6+3 Skeleton Warriors with shields, raising the casting value to 12+.` },
+        { name: "Unquiet Spirits", lvl: 3, cast: 10, type: "Direct damage", range: `24"`, effect: `The target suffers 3D6 Strength 2 hits with Ignores Armour Saves.` },
+        { name: "Malediction of Nagash", lvl: 3, cast: 11, type: "Hex", range: `24"`, effect: `The target halves their Strength (rounding down) until the caster's next Magic phase.` },
+        { name: "Spiritual Vortex", lvl: 4, cast: 11, type: "Summoning", range: `24"`, effect: `Remains in play. Summons the 5" template; it counts as Dangerous Terrain and enemy units within 6" suffer -1 Leadership.` },
+        { name: "Curse of Years", lvl: 4, cast: 12, type: "Hex", range: `18"`, effect: `Remains in play. Roll a D6 per model in the target unit; on a 6 the model suffers a Wound with Ignores Armour Saves. Each subsequent Magic phase the threshold lowers (5+, then so on) to a maximum of 2+.` },
+        { name: "Wind of Undeath", lvl: 4, cast: 13, type: "Direct damage (aura)", range: `12"`, effect: `Each unit within range suffers 2D6 Strength 3 hits with Ignores Armour Saves.` }
+      ]
+    }
+  },
+
+  // ---- UNIT INFO (detail popup profiles) ----------------------------------
+  unitInfo: {
+    voncarstein: { profile: [["Count",6,7,5,6,5,3,7,4,10],["Scion",6,6,5,5,4,2,6,3,9]], eq: "Hand weapon", rules:"The Red Thirst, Vampiric" },
+    necrarch: { profile: [["Master",6,5,3,5,5,3,6,3,9],["Acolyte",6,4,3,4,4,2,5,2,8]], eq: "Hand weapon", rules:"The Red Thirst, Vampiric" },
+    lahmian: { profile: [["Lady",6,6,5,5,5,3,8,4,10],["Courtesan",6,5,5,4,4,2,7,3,9]], eq: "Hand weapon", rules:"Dodge (6+), The Red Thirst, Vampiric" },
+    blooddragon: { profile: [["Lord",6,8,3,6,5,3,7,5,10],["Kastellan",6,7,3,5,4,2,6,4,9]], eq: "Hand weapon, heavy armour", rules:"Martial Honour, The Red Thirst, Vampiric" },
+    strigoi: { profile: [["Ghoul King",6,6,3,6,6,3,7,5,9],["Ghoul Prince",6,5,3,5,5,2,6,4,8]], eq: "Hand weapon", rules:"Hatred, Natural Armour (6+), The Red Thirst, Vampiric" },
+    necromancer: { profile: [["Master Necromancer",4,4,3,3,3,3,4,2,8],["Necromancer",4,3,3,3,3,2,3,1,7]], eq: "Hand weapon", rules:"Wizard" },
+    lichelord: { profile: [["Liche Lord",4,4,3,5,5,4,2,2,9]], eq: "Hand weapon", rules:"Master of the Dead, Terror, Undead" },
+    wightlord: { profile: [["Wight King",4,6,3,5,5,4,4,4,9],["Wight Lord",4,5,3,5,5,3,4,3,8]], eq: "Hand weapon", rules:"Killing Blow, Magical Attacks, Spectral Steeds, Undead" },
+    cairnwraith: { profile: [["Cairn Wraith",6,4,0,3,3,2,3,3,7]], eq: "Hand weapon", rules:"Ethereal, Ignores Armour Saves, Terror, Undead, Chill Grasp, Soulstriders" },
+    tombbanshee: { profile: [["Tomb Banshee",6,3,0,3,3,2,3,1,5]], eq: "Hand weapon", rules:"Death Shriek, Ethereal, Fly (6), Terror, Undead" },
+    swain: { profile: [["Swain",4,5,5,4,4,2,5,3,8]], eq: "Hand weapon", rules:"Immunity (Psychology), Til Death Do Us Part" },
+    cryptghast: { profile: [["Crypt Ghast",4,4,3,4,5,2,5,3,7]], eq: "Hand weapon", rules:"Fear, Poisoned Attacks" },
+    striganymystic: { profile: [["Strigany Mystic",4,3,3,3,3,2,3,1,7]], eq: "Hand weapon", rules:"Expendable, Wizard" },
+    vlad: { profile: [["Vlad von Carstein",6,7,5,6,5,3,7,5,10]], eq: "Heavy armour, Blood Drinker", rules:"The Red Thirst, Vampiric, Beloved in Death" },
+    isabella: { profile: [["Isabella von Carstein",6,6,4,5,4,2,6,3,8]], eq: "Hand weapon, medium armour", rules:"The Red Thirst, Vampiric, Beloved in Death" },
+    konrad: { profile: [["Konrad von Carstein",6,7,4,5,4,2,6,3,6]], eq: "Heavy armour, Sword of Waldenhof", rules:"The Red Thirst, Vampiric, One Bat Short of a Belfry" },
+    mannfred: { profile: [["Mannfred von Carstein",6,7,5,6,5,3,7,4,10]], eq: "Heavy armour, Timor Noctis", rules:"Loremaster (Death & Necromancy), The Red Thirst, Vampiric, Drakenhof Guard" },
+    zacharias: { profile: [["Zacharias the Everliving",6,6,3,5,5,3,6,3,9],["Zombie Dragon",6,4,0,6,6,6,2,5,4]], eq: "Hand weapon", rules:"Fly (7), Natural Armour (5+), The Red Thirst, Vampiric, Pestilential Breath, Swarm of Flies" },
+    melkhior: { profile: [["Melkhior",6,6,3,5,5,3,6,3,9],["Abyssal Terror",6,4,0,5,5,4,2,3,4]], eq: "Hand weapon", rules:"Fly (8), Frenzy, Stupidity, The Red Thirst, Vampiric" },
+    neferata: { profile: [["Neferata",6,7,5,5,5,3,9,5,10]], eq: "Hand weapon", rules:"Dodge (6+), The Red Thirst, Vampiric, Heavenly Creature, Queen of Lahmia" },
+    sekhar: { profile: [["Sekhar",6,6,5,5,4,2,7,3,9],["Ouboroth","-",4,0,4,"-","-",4,2,"-"]], eq: "Polearm, medium armour", rules:"Dodge (6+), Poisoned Attacks (Ouboroth), The Red Thirst, Vampiric, The Time-Swallower's Maw" },
+    walach: { profile: [["Walach Harkon",6,9,3,6,5,3,7,5,10],["Nightmare",8,3,0,4,4,1,2,1,3]], eq: "Barding, Crimson Blade", rules:"Hatred (The Empire), Martial Honour, The Red Thirst, Vampiric, Grand Master of the Blood Knights" },
+    vhordrai: { profile: [["Prince Vhordrai",6,8,3,6,5,3,7,5,10],["Shordemaire (Zombie Dragon)",6,4,0,6,6,6,2,5,4]], eq: "Heavy armour, shield, Bloodlance", rules:"Fly (7), Martial Honour, Natural Armour (5+), The Red Thirst, Swarm of Flies, Vampiric" },
+    ushoran: { profile: [["Ushoran",6,7,3,7,7,4,7,5,10]], eq: "Sceptre of the Carrion King", rules:"Hatred, Natural Armour (6+), The Red Thirst, Vampiric, The Carrion King" },
+    gormayne: { profile: [["Gormayne",6,6,3,5,5,2,6,4,8]], eq: "Hand weapon", rules:"Hatred, Natural Armour (6+), The Red Thirst, Vampiric, Pronounce Judgement" },
+    kemmler: { profile: [["Heinrich Kemmler",4,4,3,3,3,3,4,2,8]], eq: "Chaos Tomb Blade", rules:"Loremaster (Lore of Necromancy), Master of the Dead" },
+    helmanghorst: { profile: [["Helman Ghorst",4,3,3,3,3,2,3,1,7]], eq: "Hand weapon", rules:"Loremaster (Lore of Necromancy), Master of the Dead, Awaken from the Grave" },
+    krell: { profile: [["Krell",4,6,3,5,5,4,5,4,9]], eq: "The Black Axe of Krell, Armour of the Barrows", rules:"Killing Blow, Terror, Undead, Champion of the Dead" },
+
+    skeletonwarriors: { profile: [["Skeleton Warrior",4,2,2,3,3,1,2,1,5]], eq: "Hand weapon", rules:"Undead" },
+    skeletonarchers: { profile: [["Skeleton Archer",4,2,2,3,3,1,2,1,5]], eq: "Hand weapon, shortbow", rules:"Undead" },
+    skeletonhorsemen: { profile: [["Skeleton Horseman",4,2,2,3,3,1,2,1,5],["Skeletal Steed",8,2,0,3,3,1,2,1,3]], eq: "Hand weapon, shield", rules:"Fast Cavalry, Undead" },
+    zombies: { profile: [["Zombie",4,1,0,3,3,1,1,1,2]], eq: "Hand weapon", rules:"Undead, The Newly Dead" },
+    cryptghouls: { profile: [["Crypt Ghoul",4,3,0,3,4,1,3,2,6]], eq: "Hand weapon", rules:"Fear, Poisoned Attacks" },
+    sylvanianlevy: { profile: [["Peasant",4,2,3,3,3,1,3,1,5]], eq: "Hand weapon", rules:"Expendable" },
+    strigany: { profile: [["Strigany",4,3,3,3,3,1,3,1,7]], eq: "Two hand weapons", rules:"Expendable" },
+    direwolves: { profile: [["Dire Wolf",9,2,0,3,3,1,2,1,3]], eq: "—", rules:"Undead" },
+    fellbats: { profile: [["Fell Bat",1,3,0,3,3,2,3,2,5]], eq: "—", rules:"Fly (9)" },
+    batswarms: { profile: [["Bat Swarm",1,3,0,2,2,6,4,6,3]], eq: "—", rules:"Fly (6), Cloud of Horror" },
+    spirithosts: { profile: [["Spirit Host",6,3,0,3,3,4,1,4,4]], eq: "—", rules:"Ethereal, Undead" },
+
+    graveguard: { profile: [["Grave Guard",4,3,3,4,4,1,3,1,6]], eq: "Hand weapon, medium armour", rules:"Killing Blow, Magical Attacks, Undead" },
+    blackknights: { profile: [["Black Knight",4,3,3,4,4,1,3,1,6],["Skeletal Steed",8,2,0,3,3,1,2,1,3]], eq: "Heavy lance, medium armour, shield", rules:"Killing Blow, Magical Attacks, Spectral Steeds, Undead" },
+    cryptguard: { profile: [["Crypt Guard",4,4,0,3,4,1,3,2,7]], eq: "Hand weapon", rules:"Fear, Poisoned Attacks, Royal Bodyguard" },
+    crypthorrors: { profile: [["Crypt Horror",6,3,0,4,5,3,2,3,7]], eq: "—", rules:"Poisoned Attacks, Regeneration (5+)" },
+    vargheists: { profile: [["Vargheist",6,4,0,5,4,3,4,3,7]], eq: "—", rules:"Fly (8), Frenzy, The Red Thirst, Vampiric" },
+    fleshgolems: { profile: [["Flesh Golem","*",2,0,4,4,3,1,"*",2]], eq: "Hand weapon", rules:"Random Attacks (D3+1), Random Movement (2D6), Undead" },
+    skeletonchariot: { profile: [["Skeleton Chariot",7,"-","-",4,4,4,"-","-","-"],["Crew","-",2,2,3,"-","-",2,1,5],["Skeletal Steed","-",2,0,3,"-","-",1,1,"-"]], eq: "Hand weapon", rules:"Undead" },
+    corpsecart: { profile: [["Corpse Cart",4,"-","-",4,5,4,"-","-","-"],["Corpsemaster","-",3,3,3,"-","-",2,1,5],["The Restless Dead","-",1,0,3,"-","-",1,"*","-"]], eq: "Hand weapon", rules:"Random Attacks (2D6), Regeneration (4+), Undead, Vigour Mortis" },
+    wraithwisps: { profile: [["Wraithwisp",6,3,3,3,3,1,2,1,5]], eq: "Hand weapon", rules:"Ethereal, Terror, Skirmishers, Undead" },
+    hexwraiths: { profile: [["Hexwraith",6,3,0,3,3,1,2,1,5],["Skeletal Steed",8,2,0,3,3,1,2,1,3]], eq: "Great weapon", rules:"Ethereal, Fast Cavalry, Flaming Attacks, Ignores Armour Saves, Terror, Undead, Soulstriders" },
+    varghulf: { profile: [["Varghulf",8,5,0,5,5,4,4,5,7]], eq: "—", rules:"Hatred, The Red Thirst, Regeneration (4+), Vampiric, Bestial Fury" },
+    mourngul: { profile: [["Mourngul",6,5,0,5,5,4,2,4,5]], eq: "—", rules:"Ice Attacks, Killing Blow, Magical Ward (4+), Undead, Carnophage" },
+
+    bloodknights: { profile: [["Blood Knight",6,6,3,5,4,1,5,2,8],["Nightmare",8,3,0,4,4,1,2,1,3]], eq: "Heavy lance, heavy armour, shield, barding", rules:"Vampiric" },
+    lahmianhandmaidens: { profile: [["Handmaiden",6,5,4,4,4,1,6,2,8]], eq: "Two hand weapons, light armour", rules:"Dodge (6+), Scouts, Skirmishers, Vampiric" },
+    morbhegknights: { profile: [["Morbheg Knight",6,4,0,3,4,1,3,2,7],["Nightshrieker",8,4,0,4,4,3,4,3,3]], eq: "Light lance, shield", rules:"Fly (5), Poisoned Attacks, Shrieking Charge" },
+    terrorgheist: { profile: [["Terrorgheist",6,3,0,5,6,6,3,4,4]], eq: "—", rules:"Death Shriek, Fly (7), Regeneration (6+), Undead" },
+    zombiedragon: { profile: [["Zombie Dragon",6,4,0,6,6,6,2,5,4]], eq: "—", rules:"Fly (7), Natural Armour (5+), Undead, Pestilential Breath, Swarm of Flies" },
+    necrofexcolossus: { profile: [["Necrofex Colossus",6,3,0,6,6,6,1,"*",8]], eq: "—", rules:"Regeneration (4+), Undead, Vortex of Death, Necrofex Colossus Special Attacks" },
+    skeletoncatapult: { profile: [["Skeleton Catapult","-","-","-","-",7,3,"-","-","-"],["Crew",4,2,2,3,3,1,2,1,3]], eq: "Hand weapon, stone thrower", rules:"Undead" },
+    blackcoach: { profile: [["Black Coach",7,"-","-",5,5,4,"-","-","-"],["Wraith","-",3,0,3,"-","-",2,2,5],["Spectres","-",3,0,3,"-","-",1,3,"-"],["Nightmare","-",3,0,4,"-","-",2,1,"-"]], eq: "Great weapon (Wraith)", rules:"Magical Attacks, Magical Ward (4+), Terror, Undead, Evocation of Death" },
+    coventhrone: { profile: [["Coven Throne",7,"-","-",5,5,5,"-","-","-"],["Pallid Handmaiden","-",5,3,5,"-","-",6,2,8],["Spirit Horde","-",3,0,3,"-","-",1,"*","-"]], eq: "Hand weapon", rules:"Fly (7), Magical Ward (4+), Spectral Steeds, Terror, Vampiric, Battle of Wills, Scrying Pool" },
+    mortisengine: { profile: [["Mortis Engine",7,"-","-",5,5,5,"-","-","-"],["Corpsemaster","-",3,3,3,"-","-",2,1,5],["Banshee","-",3,0,3,"-","-",2,1,"-"],["Spirit Horde","-",3,0,3,"-","-",2,"*","-"]], eq: "Hand weapon", rules:"Death Shriek, Fly (7), Regeneration (4+), Spectral Steeds, Terror, Undead, The Reliquary" },
+
+    // mount profiles (prefixed mount_ for those not also units)
+    mount_nightmare: { profile: [["Nightmare",8,3,0,4,4,1,2,1,3]], eq: "—", rules:"Undead" },
+    mount_hellsteed: { profile: [["Hellsteed",8,3,0,4,4,2,2,2,3]], eq: "—", rules:"Fly (9), Undead" },
+    mount_skeletalsteed: { profile: [["Skeletal Steed",8,2,0,3,3,1,2,1,3]], eq: "—", rules:"Undead" },
+    mount_abyssalterror: { profile: [["Abyssal Terror",6,4,0,5,5,4,2,3,4]], eq: "—", rules:"Fly (8), Undead" },
+    mount_barrowchariot: { profile: [["Barrow Chariot",7,"-","-",5,5,4,"-","-","-"],["Crew","-",2,2,3,"-","-",2,1,"-"],["Skeletal Steed","-",2,0,3,"-","-",2,1,"-"]], eq: "Hand weapon", rules:"Chariot (Armour save 5+), Undead" }
+  },
+
+  // ---- ITEM DESCRIPTIONS --------------------------------------------------
+  itemDesc: {
+    // Magic Weapons
+    "Frostblade": `The wielder gains the Ice Attacks and Multiple Wounds (D6) special rules.`,
+    "Skabscrath": `The bearer has Devastating Charge and Frenzy, all close combat attacks gain Flaming Attacks, and the bearer gains the Death Shriek special rule.`,
+    "Slaking Blade": `+1 Strength and Attacks at the end of each close combat phase in which it inflicts at least 1 unsaved Wound (max +3); the bonus lasts the rest of the game.`,
+    "Dreadlance": `Heavy lance. All attacks with this weapon automatically Hit.`,
+    "Asp Bow": `Bow. All shots resolved at Strength 4 with Poisoned Attacks and Sniper.`,
+    "Slitter": `Additional hand weapon. Adds one special attack after the normal attacks: roll a D3; if higher than the target's remaining Wounds, the target is slain with no saves allowed.`,
+    "Keening Bone": `Throwing weapon. All shots automatically Hit. Characters may take this despite not normally being allowed throwing weapons.`,
+    "Reaper of Sorrows": `Great weapon. All attacks with this weapon automatically Wound with no saves allowed.`,
+    "Sword of Kings": `Makes the model's Killing Blow take effect on a 5+.`,
+    "The Balefire Spike": `Heavy lance. Gives the wielder Devastating Charge and Flaming Attacks.`,
+    "Shadow's Edge": `For every natural 6 rolled To Hit, that attack gains Ignores Armour Saves and Multiple Wounds (D3).`,
+    // Magic Armour
+    "Armour of Night": `Heavy armour. Missile attacks targeting the wearer or their unit suffer -1 To Hit.`,
+    "The Flayed Hauberk": `Heavy armour. Gives the wearer a 2+ armour save that cannot be improved by any means.`,
+    "Helm of Commandment": `Gives a 6+ armour save. If the wearer is not engaged at the start of the Close Combat phase, one friendly Undead unit (including mounts) within 12" may use the wearer's unmodified Weapon Skill that round.`,
+    "The Scabbing Plate": `Heavy armour. The wearer restores 1 Wound at the end of each close combat round in which it inflicted one or more unsaved Wounds.`,
+    "The Accursed Armour": `Heavy armour. +1 Toughness, but -1 Weapon Skill and Initiative.`,
+    "The Armour of Blood": `Heavy armour. Allows the wielder to automatically regain Wounds through the Red Thirst.`,
+    "The Red Casket": `Heavy armour. The wearer gains the Frenzy special rule.`,
+    "Wailing Helm": `Gives a 6+ armour save and the Terror special rule.`,
+    "The Cadaverous Cuirass": `Heavy armour. Gives the wearer Immunity (Killing Blow).`,
+    "Armour of Bone": `Medium armour. When the wearer fails their first armour save (or is wounded by an attack ignoring armour saves), the armour crumbles and is destroyed, but the Wound is ignored. May be taken by Necromancers.`,
+    "The Cursed Shield of Mousillon": `Shield. One enemy model in base contact of your choice loses 1 Attack. The bearer gains Hatred (Bretonnia), and all Bretonnia models gain Hatred against the bearer.`,
+    // Talismans
+    "Nightshroud": `Enemy models in base contact lose all Strength bonuses from normal and magical weapons, and are subject to Always Strikes Last.`,
+    "Talisman of the Nadir": `All friendly units within 12" gain Magic Resistance (1).`,
+    "The Gem of Blood": `One use only. Activates on the bearer's first close combat Wound (before saves). Roll a D6: on a 1 the wearer suffers the Wound plus an extra Wound with no saves; on 2+ the Wound is saved and rebounded onto the attacker with no saves.`,
+    "Splintervane Broach": `All enemy Wizards within 18" suffer a -1 casting penalty.`,
+    "Wristbands of Black Gold": `Gives the wearer a Magical Ward (3+) against all missile attacks.`,
+    "Chiropteran Cloak": `If a model attacking the wearer rolls a natural 1 To Hit in close combat, it suffers a Strength 4 Hit.`,
+    "Cloak of the Waxing Moon": `The wearer can only be Hit on To Hit rolls of natural 6's.`,
+    // Arcane Items
+    "The Dermal Robe": `Relic. +1 to cast and dispel; +1 to channelling rolls.`,
+    "Staff of Raukhamon": `Staff. Bound Spell containing Hellish Vigour. Roll a D6 each use; on a 1 it is exhausted for the battle. All enemy units within 6" of the bearer suffer -1 To Hit in close combat.`,
+    "Sceptre de Noirot": `Staff. May re-roll one dice when determining Zombies or Skeletons raised with Invocation of Nehek and Raise Dead.`,
+    "Book of Arkhan": `Relic. Bound Spell containing Vanhel's Danse Macabre.`,
+    "Carrion Wand": `Staff. The wielder counts their Wizard level as 1 higher than normal.`,
+    "The Cursed Book": `Relic. At the start of the bearer's Magic phase, sacrifice one power dice to roll a D6 and automatically cast (at minimum value) a spell from a table (Shadow/Heavens/Death). A dispel attempt may be made.`,
+    "Rod of Flaming Death": `Staff. Bound Spell containing the Fulminating Flame Cage spell from the Lore of Fire.`,
+    "Staff of Damnation": `Staff. Bound Spell (Level 2, cast on 8+) augment: all Undead models (including mounts) in friendly units within 6" gain +1 Attack until the bearer's next Magic phase.`,
+    "Black Periapt": `Relic. Save up to two unused power or dispel dice at the end of a Magic phase and add them to the pool at the start of the next.`,
+    "Blasphemous Tome": `Relic. +2 to cast Lore of Necromancy spells. However, on a Miscast, roll an additional D6 on the Miscast table and discard the lowest.`,
+    "Wychlight Lantern": `Charm. One use only. Cast one of your spells automatically without power dice at its minimum casting value.`,
+    "Amulet of Screams": `Relic. Roll a D6 each time an enemy Wizard within 18" casts a spell; on a 1 that Wizard suffers 1 Wound which Ignores Armour Saves.`,
+    "Crimson Gem of Lahmia": `Relic. Once per Magic phase while casting, take a Toughness test; if passed, re-roll one power dice; if failed, suffer a Wound with no saves.`,
+    "Midnight Tome": `Charm. One use only. Used when the wearer casts a spell of casting value 10 or less; the opponent cannot attempt to dispel it.`,
+    "Morbheg's Claw": `Relic. +2 to cast spells if the wearer has not moved that turn or is not engaged in close combat.`,
+    "Stave of Suffering": `Staff. +1 casting bonus for each spell that successfully inflicted one or more unsaved Wounds the same Magic phase (cumulative).`,
+    // Enchanted Items
+    "Midnight Amulet": `One use only. Used in any of your Magic phases: pick one enemy unit within 12"; it suffers D6 Strength 4 Hits multiplied by the current game turn.`,
+    "The Casket of Ages": `Bound Spell (Level 1, cast on 6+): direct damage on one enemy model in base contact; suffers a Wound (Ignores Armour Saves), and if unsaved must pass a Toughness test or suffer an additional Wound with no saves.`,
+    "Talon of Death": `All enemy models in base contact must pass a Toughness test at the start of each combat round or suffer a Wound which Ignores Armour Saves.`,
+    "Dreadbolt Ring": `For each unsaved Wound the bearer inflicts in close combat, one enemy unit in base contact suffers D3 Strength 3 Attacks with Flaming Attacks after the bearer's normal attacks.`,
+    "Breath of the Void Maw": `One use only. Used at the start of any Magic phase: pick one enemy unit within 6" not in combat; roll a D6, on a 2+ it suffers that many Strength 5 Hits.`,
+    "Fragment of the Keep": `The bearer gains the Always Strikes First special rule.`,
+    "The Grim Garland": `Enemy units in base contact with the bearer must roll 3D6 for Leadership tests and discard the lowest.`,
+    "Lightshard of the Harvest Moon": `One use only. Used at the start of any close combat phase: the bearer and their unit may re-roll failed To Hit rolls for the turn.`,
+    "Pendant of the Fell Wind": `The character and any unit they are with gain +1 Movement.`,
+    "The Saccharine Goblet": `Used at the start of any combat round: the bearer gains +1 To Hit and To Wound; for each Attack that fails to wound, pass a Toughness test or suffer a Wound with no saves at the end of combat.`,
+    "Sigil of the Sanguine Throne": `The bearer and any friendly Vampire unit within 12" may re-roll one of their charge distance dice.`,
+    "The Furious Crown": `In any turn the bearer makes a successful charge, gains +1 Attack per enemy model in base contact (max +3).`,
+    "Grave-sand Shard": `One use only. Used in any of your Magic phases: automatically restores Wounds to any unit they are with following the rules for Invocation of Nehek.`,
+    "Medal of Madness": `The bearer gains the Inspiring Presence (6) special rule.`,
+    "Soulfire Ring": `For every unsaved Wound caused in close combat by the bearer, they and/or their unit regain 1 Wound, like a summoning spell.`,
+    "Blood River Chalice": `One use only. Used at the start of your turn: the model immediately recovers all lost Wounds (ignoring mount Wounds) up to its starting value.`,
+    "Brazier of Nagashizzar": `The bearer and any unit they join may re-roll failed charge and pursuit distances.`,
+    "Mirror of Echoing Failures": `Any Wizard within 18" of the bearer that fails a spellcasting attempt (not dispels) suffers one Wound which Ignores Armour Saves.`,
+    "Nathmar's Skull": `All friendly Skeleton and Zombie units within 12" of the bearer may March despite being Undead.`,
+    "Ruby Vial": `One use only. Used at the start of any of your turns: until your next turn, all enemy units within 18" suffer -1 Movement.`,
+    "Signet of the First Court": `The bearer gains the Killing Blow special rule.`,
+    "The Bilious Decanter": `One use only. Used at the start of any close combat phase: the bearer gains Frenzy and +1 Attack for the rest of the game, but automatically fails Berserk Rage tests and must always Pursue.`,
+    "Orb of Enchantment": `One enemy model in base contact (chosen by the bearer) must take a Leadership test at the start of each combat round; if failed, it may not attack that turn.`,
+    "Talisman of the Lycni": `Model on foot only. +4 Movement and Swiftstride; may join units of Dire Wolves.`,
+    "Heart of the Giant Feast": `One use only. Used at the start of any close combat phase: the bearer may re-roll failed To Wound rolls for the turn.`,
+    "Shard of Night": `One use only. Used at the start of any combat round: the bearer suffers 1 Wound with no saves; in exchange, +2 Strength for that round.`,
+    // Magic Standards
+    "The Drakenhof Banner": `von Carstein or Wight only. Requires a von Carstein Vampire Character. All Undead models (excluding mounts) in the unit gain Regeneration (4+).`,
+    "The Flag of Blood Keep": `Blood Knights only. Requires a Blood Dragon Vampire Character. The unit gains a Magical Ward (4+) against missile attacks.`,
+    "Banner of the Barrows": `All Wights in the unit receive +1 To Hit in close combat (not mounts).`,
+    "Hell Banner": `All enemy units with Line of Sight to this standard suffer -1 Leadership (no effect on Immunity (Psychology)).`,
+    "Cursed Pennant of Mousillon": `Blood Dragon, Skeletons, Wights or Blood Knights only. Requires a Blood Dragon Vampire Character. Any enemy unit in base contact must re-roll 6's when rolling To Hit, To Wound and taking armour saves.`,
+    "Banner of Doom": `All Undead models (excluding mounts) in the unit gain Regeneration (5+) against missile attacks.`,
+    "Banner of the Dead Legion": `All Undead models (including mounts) in the unit count as having twice their actual Unit Strength in close combat.`,
+    "Banner of Hellfire": `Bound Spell containing the Flaming Sword of Rhuin spell from the Lore of Fire. Only castable on the unit carrying this standard.`,
+    "The Flayed Pennant": `Strigoi or Ghoul only. The unit gains the Frenzy special rule.`,
+    "Infernal Standard": `Wight King with Battle Standard only. The model gains the Hold Your Ground (6) special rule.`,
+    "Royal Standard of Strigos": `Requires a Strigoi Vampire Character. Strigoi or Ghoul only. The unit gains the Hatred special rule.`,
+    "The Screaming Banner": `Enemy units in base contact must pass a Leadership test at the start of each combat phase; if failed, they require 6's To Hit for the phase.`,
+    "Icon of Vengeance": `Any Undead model (including mounts) in the unit slain in close combat may immediately make an additional Attack, even if it already attacked this turn.`,
+    "Standard of Hellish Vigour": `Undead only. Requires a Necrarch Vampire Character. The unit may March despite being Animated Constructs.`,
+    "Banner of the Endless Nightmare": `The unit counts as having one more rank than normal for combat resolution.`,
+    "Standard of Everlasting Death": `The unit suffers one fewer Wound than normal due to the Unstable special rule.`
+  },
+
+  // ---- GLOSSARY -----------------------------------------------------------
+  glossary: {
+    /* ---- audited & added from the source PDF (unique upgrades / special rules) ---- */
+    "Balefire": `Enemy Wizards suffer a -1 casting penalty if there is one or more Corpse Carts with a Balefire within 18".`,
+    "Unholy Lodestone": `When a friendly Wizard within 12" of an Unholy Lodestone successfully casts Invocation of Nehek, they may re-roll a single dice to determine how many Wounds are restored.`,
+    "Pestilential Breath": `A Zombie Dragon has a Breath Weapon. Any model hit suffers a Strength 2 Hit with the Ignores Armour saves special rule.`,
+    "Swarm of Flies": `Enemy units in base contact with a Zombie Dragon suffer -1 to their Weapon Skill.`,
+    "Infested": `When a Terrorgheist with this upgrade is removed as a casualty, all units that were in base contact (friend or foe) take 3D6 Strength 2 hits.`,
+    "Rancid Maw": `Attacks made by a Terrorgheist with this upgrade have the Poisoned Attacks special rule.`,
+    "Corpse Killers": `After resolving its regular attacks, all enemy units in base contact with the Necrofex Colossus suffer D6 Strength 2 hits.`,
+    "Dark Soul": `The Necrofex Colossus becomes a Level 1 Wizard who uses spells from the Lore of Death or Lore of Necromancy. However, should the Necrofex Colossus suffer a miscast, in addition to any other effect, the Necrofex Colossus permanently has its Toughness value reduced by 1.`,
+    "Scythes and Barbs": `The Necrofex Colossus' number of Random Attacks and Stomp hits may be re-rolled.`,
+    "Vampire Blood": `The Necrofex Colossus gains the Regeneration (3+) special rule, but is also subject to the Berserk Rage part of Frenzy.`,
+    "Vortex of Death": `Any Wizard attempting to cast spells from the Lore of Death or Lore of Necromancy within 12" of the Necrofex Colossus gains +1 to their Casting roll.`,
+    "Necrofex Colossus Special Attacks": `When it is the Necrofex Colossus' turn to strike in close combat, roll a D6:\n1-2 Batter and Slash: it fights using the Random Attacks (D6+1) special rule.\n3-4 Impale: select one model in base contact; that model and all models in the same file must pass an Initiative test or suffer a Strength 7 Hit with Multiple Wounds (D6).\n5-6 Screams of the Damned: make a Death Shriek into close combat — roll 2D6+3; for each point exceeding the target unit's Leadership it suffers 1 Wound which Ignores Armour Saves. This is a non-physical Magical Attack, distributed as if from shooting.`,
+    "Battle of Wills": `Immediately before the first model in an enemy unit rolls To Hit against the Coven Throne (in close combat or shooting), the opponent rolls a D6 and adds it to their unit's Leadership; then roll a D6 and add it to the Coven Throne's Leadership. Subtract the enemy's total from the Coven Throne's total and apply the result (lasts until end of turn):\n0 or less — No effect.\n1-2 Must... Resist...: enemy at -1 Weapon Skill and -1 Ballistic Skill; artillery that does not roll To Hit may be forced to re-roll the scatter dice.\n3-5 Bewitched: enemy must re-roll successful To Hit rolls; artillery that does not roll To Hit must roll 4+ to fire.\n6+ Completely Enthralled: every model in the enemy unit makes a single close combat attack against its own unit.`,
+    "Scrying Pool": `Enchanted Item. Bound Spell (Level 1, cast on 5+). An augment spell targeting the Coven Throne — all crew (including any characters mounted on it) may re-roll all failed To Hit and To Wound rolls for the remainder of the turn.`,
+    "Evocation of Death": `When rolling for the Winds of Magic each turn, each natural 6 rolled increases the Black Coach's abilities for the rest of the game (cumulative):\n1 +1 to Impact Hits when it charges.\n2 The Wraith, Spectres and Nightmares gain +1 Strength.\n3 The Black Coach's Impact Hits, Nightmares', Wraith's and Spectres' Attacks gain Killing Blow and Flaming Attacks.\n4 The Black Coach gains Magic Resistance (2) and Strider.\n5 The Black Coach gains Fly (8).\n6 The Black Coach gains Ethereal.`,
+    "Two additional Nightmares": `The Black Coach may be drawn by two additional Nightmares.`,
+    "Spectres": `The Black Coach may add Spectres to its crew.`,
+    "The Reliquary": `At the start of each of your turns, roll 2D6 and add the current turn number — this is the range of the reliquary's dark aura this turn in inches. All enemy units within range immediately take D6 hits at a Strength equal to the current turn number, distributed as shooting. Friendly Undead units within range improve their Regeneration save by one point (max 4+) until the start of their next turn (no save ⇒ Regeneration (6+)). If the 2D6 was a double, the Mortis Engine takes 1 Wound with no saves. When the Mortis Engine suffers its last unsaved Wound, every unit within (12 + turn number)" takes 2D6 hits at a Strength equal to the current turn number, distributed as shooting.`,
+    "Awaken from the Grave": `When Helman Ghorst successfully casts the Invocation of Nehek or Raise Dead spells, he can add +D3 to the total number of Skeletons or Zombies created.`,
+    "The Brothers Ghorst": `If Helman Ghorst is mounted on a Corpse Cart, all attacks from the Restless Dead pulling it are resolved at Strength 4.`,
+    "The Konigstein Stalkers": `If Helman Ghorst is included in your army, you may upgrade one unit of Skeleton Warriors to the Konigstein Stalkers for +1 point per model. This unit has the Poisoned Attacks special rule.`,
+    "Beloved in Death": `If Vlad and Isabella von Carstein are in the same unit, they gain +1 Combat Resolution. Furthermore, Vlad becomes subject to Frenzy and Hatred should Isabella be slain, and vice versa.`,
+    "One Bat Short of a Belfry": `At the start of each of Konrad's turns, roll a D6. On a 1-3, Konrad is subject to the rules for Stupidity until the start of his next turn. On a 4-6, Konrad is subject to Frenzy until the start of his next turn.`,
+    "Drakenhof Guard": `If Mannfred von Carstein is included in your army, you may upgrade one unit of Grave Guard to the Drakenhof Guard for +1 point per model. This unit ignores casualties caused by being Unstable.`,
+    "Heavenly Creature": `Enemy units in base contact with Neferata suffer a -2 penalty to their Leadership.`,
+    "Queen of Lahmia": `Neferata must be the Army General. In addition, units of Lahmian Handmaidens may be included as Special Units rather than Rare Units.`,
+    "The Time-Swallower's Maw": `Once per game, at the start of any close combat phase, all enemy models in base contact with Sekhar must pass an Initiative test or suffer 1 Wound for every point they failed the Initiative test by.`,
+    "Grand Master of the Blood Knights": `If Walach is included in your army, units of Blood Knights are taken as Special Units instead of Rare Units.`,
+    "The Carrion King": `Ushoran must be the Army General. In addition, all friendly Ghouls within 12" of Ushoran are subject to the Frenzy special rule.`,
+    "Pronounce Judgement": `At the start of each of your turns, choose one enemy unit within Line of Sight and roll a D6:\n1-2 Petty Transgression: friendly Ghouls may re-roll 1's on charge and pursuit distance against that unit.\n3-4 Dishonourable Conduct in Battle: friendly Ghouls may re-roll failed To Wound rolls of 1 against that unit.\n5 Grievous Insult to the Court: friendly Ghouls may re-roll failed To Hit rolls of 1 against that unit.\n6 Regicide: friendly Ghouls gain the Killing Blow special rule against that unit.\n(All effects last until the start of your next turn.)`,
+    "Champion of the Dead": `Krell must always issue and accept challenges whenever possible. If Krell is fighting a challenge whilst in the same unit as Heinrich Kemmler, he has the Heroic Killing Blow special rule.`,
+    "Til Death Do Us Part": `Pick one Lahmian Vampire Character in your army to be this model's mistress. If both models are in base contact, the Lahmian gains a 3+ 'Look Out, Sir!' save in close combat with any Hits being allocated against the Swain instead. If the Lahmian is slain, the Swain will be subject to the Hatred and Frenzy special rules for the remainder of the game.`,
+
+    "Undead": `All models with the Undead special rule have the Animated Construct, Fear and Unstable special rules. They may make march moves if within the Army General's Inspiring Presence range or joined by a character with the Lore of Necromancy.`,
+    "Vampiric": `Models with the Vampiric special rule have Fear and Immunity (Psychology). In addition, they suffer -1 To Wound rolls against them unless the attacker uses Magical or Flaming Attacks. Vampiric models treat all rivers as Deadly Terrain unless mounted.`,
+    "The Red Thirst": `Roll a D6 at the end of each Close Combat phase in which a Vampire with this rule slew one or more models. On a 5+, the Vampire recovers a single Wound (up to its starting value, excluding mount Wounds). Does not work against Animated Constructs, Daemons, Forest Spirits or Vampires.`,
+    "Animated Construct": `Animated Constructs cannot march (unless an effect allows it) and are not affected by Psychology. (See rulebook.)`,
+    "Unstable": `If an Undead unit loses combat, it suffers a number of additional Wounds equal to the combat resolution difference, with no saves of any kind. A unit destroyed by Unstable does not flee.`,
+    "Master of the Dead": `A model with this rule can use the Invocation of Nehek spell to increase units of Skeleton Warriors and Skeleton Archers beyond their starting size.`,
+    "Spectral Steeds": `Mounted models with this rule gain Ethereal for movement only and ignore the barding movement penalty. If joined by a character without Spectral Steeds or Ethereal, the unit loses this rule.`,
+    "Bloodlines": `Most Vampires belong to a Bloodline (von Carstein, Necrarch, Lahmian, Blood Dragon or Strigoi). Characters of one Bloodline may not join units of another, nor may two characters of different Bloodlines join the same unit.`,
+    "Death Shriek": `A special attack used against a single unit in the Shooting phase (range 8", needs line of sight). Roll 2D6+3; for each point exceeding the target's Leadership it suffers 1 Wound that Ignores Armour Saves. Non-physical Magical Attack, distributed as shooting.`,
+    "Martial Honour": `The Vampire must always issue and accept challenges when possible.`,
+    "The Newly Dead": `Zombie units can be increased beyond their starting size by spells/effects that add models. When targeted by Invocation of Nehek they regain an extra D6 Wounds, but suffer D3 more casualties than normal from being Unstable.`,
+    "Chill Grasp": `A Cairn Wraith may substitute all its Attacks for a single Chill Grasp: one Attack that, if it Hits, automatically Wounds with Ignores Armour Saves and Multiple Wounds (D3).`,
+    "Soulstriders": `Cavalry models with this rule can move through any unengaged units during the Remaining Moves sub-phase, but cannot end their movement within 1" of another unit.`,
+    "Bestial Fury": `For the purposes of calculating combat result bonuses, a Varghulf counts as having no flanks or rear.`,
+    "Carnophage": `For every unsaved Wound the Mourngul inflicts in close combat, it regains one Wound previously lost during the battle.`,
+    "Royal Bodyguard": `If a unit of Crypt Guard is joined by a Strigoi Vampire Character, the unit becomes Stubborn.`,
+    "Cloud of Horror": `An enemy unit attacked in the flank or rear by one or more Bat Swarms is automatically Disrupted.`,
+    "Shrieking Charge": `When Morbheg Knights successfully charge, roll 2D6 +1 per Nightshrieker; for each point exceeding the target's Leadership it suffers 1 Wound that Ignores Armour Saves (distributed as shooting; no effect on Animated Constructs).`,
+    "Vigour Mortis": `All friendly Skeleton and Zombie units (not characters) within 6" of the Corpse Cart may re-roll failed To Wound rolls in close combat and gain Regeneration (6+).`
+  }
+};

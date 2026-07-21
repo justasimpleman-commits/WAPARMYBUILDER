@@ -1,0 +1,49 @@
+{
+  "name": "warhammer-army-builder",
+  "productName": "Warhammer Army Builder",
+  "version": "1.5.0",
+  "description": "Desktop army builder for Warhammer 9th Edition 3.0 — Chaos Dwarfs, Grand Cathay, Daemons of Chaos, Beastmen, Ogre Kingdoms, Orcs & Goblins, Skaven, High Elves, Dark Elves, Tomb Kings, Vampire Counts, Bretonnia",
+  "author": "András",
+  "license": "MIT",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac",
+    "dist:dir": "electron-builder --dir"
+  },
+  "devDependencies": {
+    "docx": "^9.7.1",
+    "electron": "^42.4.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.andras.warhammer.armybuilder",
+    "productName": "Warhammer Army Builder",
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "data/**/*.js"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.games"
+    }
+  }
+}

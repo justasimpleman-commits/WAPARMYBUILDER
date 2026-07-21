@@ -1,0 +1,2184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Warhammer Army Builder — Chaos Dwarfs</title>
+<style>
+  :root{
+    --bg:#120f0c; --panel:#1a1511; --panel2:#221b16; --line:#332a21;
+    --ink:#d8cebf; --muted:#897b6c; --fire:#a35f2c; --fire2:#bd8b50;
+    --ok:#5a8f52; --warn:#b89a3c; --err:#b54d3a; --accent:#a8853f;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+  header{background:linear-gradient(180deg,#2c1a10,#1a120c);border-bottom:2px solid var(--fire);
+    padding:12px 18px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;position:sticky;top:0;z-index:20}
+  header h1{font-size:18px;margin:0;letter-spacing:.5px}
+  header h1 small{color:var(--fire2);font-weight:400;display:block;font-size:11px;letter-spacing:1px}
+  .limit{display:flex;align-items:center;gap:8px}
+  .limit input{width:90px;background:#0f0b08;border:1px solid var(--line);color:var(--ink);padding:6px 8px;border-radius:6px;font-size:14px}
+  .total{margin-left:auto;text-align:right}
+  .total .big{font-size:24px;font-weight:700;color:var(--fire2)}
+  .total .big.over{color:var(--err)}
+  .bars{display:flex;gap:10px;flex-wrap:wrap;padding:8px 18px;background:#1b130d;border-bottom:1px solid var(--line)}
+  .bar{flex:1;min-width:150px}
+  .bar .lab{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:3px}
+  .bar .lab b{color:var(--ink)}
+  .track{height:8px;background:#0f0b08;border-radius:5px;overflow:hidden;border:1px solid var(--line)}
+  .fill{height:100%;background:var(--fire);transition:width .2s,background .2s}
+  .fill.bad{background:var(--err)} .fill.good{background:var(--ok)}
+  .wrap{display:grid;grid-template-columns:320px 1fr 300px;gap:0;min-height:calc(100vh - 120px)}
+  .col{padding:14px;overflow-y:auto;max-height:calc(100vh - 120px)}
+  .catalog{border-right:1px solid var(--line)}
+  .validation{border-left:1px solid var(--line);background:#1a120c}
+  h2.sec{font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:var(--fire2);
+    border-bottom:1px solid var(--line);padding-bottom:5px;margin:14px 0 8px}
+  .catgroup{margin-bottom:6px}
+  .catitem{display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border-radius:6px;cursor:pointer}
+  .catitem:hover{background:var(--panel2)}
+  .catitem .pts{color:var(--muted);font-size:12px}
+  .catitem .add{background:var(--fire);color:#1a120c;border:none;border-radius:5px;width:24px;height:24px;font-size:16px;
+    font-weight:700;cursor:pointer;line-height:1}
+  .entry{background:var(--panel);border:1px solid var(--line);border-radius:8px;margin-bottom:12px}
+  .entry.invalid{border-color:var(--err)}
+  .ehead{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--panel2);border-radius:8px 8px 0 0}
+  .ehead .nm{font-weight:600;font-size:15px}
+  .ehead .cat{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);
+    border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+  .ehead .ept{margin-left:auto;font-weight:700;color:var(--fire2);font-size:16px}
+  .ehead .del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px}
+  .ehead .del:hover{color:var(--err)}
+  .ebody{padding:10px 12px;display:flex;flex-direction:column;gap:9px}
+  .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .row>label.t{min-width:120px;color:var(--muted);font-size:12px}
+  select,.stepper input{background:#0f0b08;border:1px solid var(--line);color:var(--ink);padding:5px 7px;border-radius:5px;font-size:13px}
+  select{max-width:230px}
+  .stepper{display:flex;align-items:center;gap:4px}
+  .stepper button{width:26px;height:26px;background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:5px;cursor:pointer;font-size:15px}
+  .stepper input{width:56px;text-align:center}
+  .chk{display:inline-flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;
+    background:var(--panel2);border:1px solid var(--line);padding:4px 9px;border-radius:6px}
+  .chk input{accent-color:var(--fire)}
+  .opt-cost{color:var(--muted);font-size:11px}
+  .magic{border-top:1px dashed var(--line);padding-top:8px;margin-top:4px}
+  .magic .mt{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--accent);margin-bottom:6px}
+  .budget{font-size:12px;color:var(--muted)} .budget b{color:var(--ink)} .budget.over b{color:var(--err)}
+  .vmsg{padding:8px 10px;border-radius:6px;margin-bottom:8px;font-size:12.5px;line-height:1.4;border-left:3px solid}
+  .vmsg.err{background:#2a1410;border-color:var(--err)}
+  .vmsg.warn{background:#262012;border-color:var(--warn)}
+  .vmsg.ok{background:#16210f;border-color:var(--ok)}
+  .empty{color:var(--muted);text-align:center;padding:40px 10px;font-style:italic}
+  .actions{display:flex;gap:8px;margin-top:6px}
+  .btn{background:var(--panel2);border:1px solid var(--line);color:var(--ink);padding:7px 12px;border-radius:6px;cursor:pointer;font-size:13px}
+  .btn:hover{border-color:var(--fire)}
+  .btn.primary{background:var(--fire);color:#1a120c;border:none;font-weight:600}
+  .size-warn{color:var(--warn);font-size:11px}
+  .note{font-size:11px;color:var(--muted);font-style:italic}
+  textarea{width:100%;height:200px;background:#0f0b08;border:1px solid var(--line);color:var(--ink);border-radius:6px;padding:8px;font-family:monospace;font-size:12px}
+  @media(max-width:980px){.wrap{grid-template-columns:1fr}.catalog,.validation{border:none;border-bottom:1px solid var(--line)}}
+  /* info button */
+  .info{background:none;border:1px solid var(--line);color:var(--fire2);border-radius:50%;width:20px;height:20px;
+    font-size:12px;line-height:1;cursor:pointer;flex:none;font-style:italic;font-weight:700}
+  .info:hover{border-color:var(--fire);background:var(--panel2)}
+  /* "all options" info button: a list glyph in accent gold + rounded square, so
+     it reads differently from the round italic "i" (which shows one/chosen entry) */
+  .info.list{border-radius:5px;color:var(--accent);border-color:var(--accent);font-style:normal;font-weight:400;font-size:13px}
+  .info.list:hover{border-color:var(--accent);background:var(--panel2)}
+  .ehead .info{margin-left:0}
+  .catitem .info{margin-left:auto;margin-right:6px}
+  /* army summary */
+  .summary .scat{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--fire2);margin:10px 0 3px;display:flex;justify-content:space-between}
+  .summary .scat b{color:var(--ink)}
+  .summary .srow{display:flex;justify-content:space-between;padding:2px 4px;border-radius:4px;cursor:pointer;font-size:12.5px}
+  .summary .srow:hover{background:var(--panel2)}
+  .summary .srow .ct{color:var(--fire2);font-weight:700}
+  .summary .grand{margin-top:10px;padding-top:8px;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-weight:700}
+  .summary .empty{font-size:12px}
+  /* modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+  .modal-bg.open{display:flex}
+  #modal2Bg{z-index:110}
+  .modal{background:var(--panel);border:1px solid var(--fire);border-radius:10px;max-width:680px;width:100%;
+    max-height:85vh;overflow-y:auto;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+  .modal .mhead{display:flex;align-items:center;gap:10px;padding:14px 18px;background:var(--panel2);
+    border-radius:10px 10px 0 0;position:sticky;top:0;border-bottom:1px solid var(--line)}
+  .modal .mhead h3{margin:0;font-size:18px;color:var(--fire2)}
+  .modal .mhead .x{margin-left:auto;background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer}
+  .modal .mhead .x:hover{color:var(--err)}
+  .modal .mbody{padding:16px 18px}
+  .modal table.prof{border-collapse:collapse;width:100%;margin:6px 0 12px;font-size:13px}
+  .modal table.prof th,.modal table.prof td{border:1px solid var(--line);padding:4px 6px;text-align:center}
+  .modal table.prof th{background:var(--head,#2c1a10);color:#fff;font-size:11px}
+  .modal table.prof td.nm{text-align:left;font-weight:600}
+  .modal .lbl{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--accent);margin:12px 0 4px}
+  .modal .rule{margin-bottom:8px;font-size:13px;line-height:1.45}
+  .modal .rule b{color:var(--fire2)}
+  .modal .rule .ruleword{color:var(--fire2);cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px}
+  .modal .rule .ruleword:hover{text-decoration-style:solid}
+  .modal .mirow{padding:7px 0;border-bottom:1px dashed var(--line)}
+  .modal .mirow.sel{background:var(--panel2);border-radius:6px;padding:7px 8px}
+  .modal .mirow .nm{font-weight:600} .modal .mirow .cost{color:var(--fire2);font-weight:700}
+  .modal .mirow .d{font-size:12.5px;color:var(--ink);line-height:1.4;margin-top:2px}
+  /* item picker modal */
+  .modal .mirow.pick{cursor:pointer;display:flex;gap:9px;align-items:flex-start;border-radius:6px;padding:7px 6px}
+  .modal .mirow.pick:hover:not(.disabled){background:var(--panel2)}
+  .modal .mirow.pick.sel{background:var(--panel2)}
+  .modal .mirow.pick.disabled{opacity:.38;cursor:not-allowed}
+  .modal .mirow.pick .pkmark{flex:none;width:18px;height:18px;border:1px solid var(--line);border-radius:4px;
+    display:flex;align-items:center;justify-content:center;color:#1a120c;font-size:12px;font-weight:700;margin-top:1px}
+  .modal .mirow.pick.sel .pkmark{background:var(--fire);border-color:var(--fire)}
+  .modal .pkfoot{display:flex;gap:10px;justify-content:space-between;align-items:center;position:sticky;bottom:0;
+    background:var(--panel);padding:12px 0 2px;margin-top:10px;border-top:1px solid var(--line)}
+  .modal .pkfoot .rem{font-size:12px;color:var(--muted)} .modal .pkfoot .rem b{color:var(--ink)} .modal .pkfoot .rem.over b{color:var(--err)}
+  .pickbtn{background:#0f0b08;border:1px solid var(--line);color:var(--ink);padding:5px 9px;border-radius:5px;
+    font-size:13px;cursor:pointer;text-align:left;max-width:230px}
+  .pickbtn:hover{border-color:var(--fire)}
+  .pickbtn.empty{color:var(--muted)}
+  .pickchip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer;
+    background:var(--panel2);border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+  .pickchip:hover{border-color:var(--fire)}
+  /* collapse carets & category header */
+  .cvbtn{background:none;border:none;color:var(--fire2);font-size:13px;cursor:pointer;flex:none;padding:0 2px}
+  .ehead .htitle{flex:1}
+  .ehead .cnt{color:var(--fire2);font-weight:700;font-size:13px}
+  .del.dup{font-size:15px}
+  h2.sec.cathead{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+  h2.sec.cathead .cv{color:var(--fire2)}
+  h2.sec.cathead .cpts{margin-left:auto;color:var(--muted);font-size:11px;letter-spacing:0}
+  h2.sec.cathead:hover{color:var(--fire2)}
+  /* spell rows */
+  .spellrow{justify-content:flex-start;width:100%;gap:7px}
+  .spellrow.on{border-color:var(--fire)}
+  .spellrow .slvl{display:inline-block;min-width:24px;text-align:center;background:var(--head,#2c1a10);color:var(--fire2);
+    border-radius:4px;font-size:10px;padding:1px 4px;font-weight:700}
+  .spellrow .scast{color:var(--fire2);font-weight:700}
+  .saveStatus{font-size:12px;opacity:.65;margin:6px 2px 0}
+  .liblist{display:flex;flex-direction:column;gap:8px}
+  .librow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:rgba(255,255,255,.03)}
+  .librow .libname{font-weight:700}
+  .librow .libsub{font-size:12px;opacity:.6;margin-top:2px}
+  .librow .libacts{display:flex;gap:6px;flex-shrink:0}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:#2a1f17;color:#fff;border:1px solid var(--fire2);padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:1000}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  /* ---- prevent sideways scroll on narrow screens (belt-and-suspenders;
+         the Capacitor build's mobile init script owns the drawer layout) ---- */
+  html,body{max-width:100%;overflow-x:hidden}
+  .wrap,.col{min-width:0}
+  .col select{max-width:100%}
+  /* restore-unsaved-work notice (autosave draft) */
+  .restore-note{position:fixed;bottom:0;left:0;right:0;z-index:120;background:#2a1f17;
+    border-top:1px solid var(--fire2);color:var(--ink);padding:10px 14px;display:flex;align-items:center;gap:10px;
+    font-size:13px;transform:translateY(110%);transition:transform .25s}
+  .restore-note.show{transform:translateY(0)}
+  .restore-note span{flex:1}
+  .restore-note .btn{padding:5px 10px}
+</style>
+</head>
+<body>
+<header>
+  <h1>⚒ Army Builder<small id="titleSub">WARHAMMER — CHAOS DWARFS</small></h1>
+  <div class="limit"><label>Army</label><select id="armySel"></select></div>
+  <div class="limit"><label>Points limit</label><input id="limit" type="number" value="2000" min="0" step="50"></div>
+  <div class="total"><div class="big" id="totalPts">0</div><div class="note" id="totalNote">of 2000</div></div>
+  <span id="appVersion" title="App version" style="align-self:flex-start;margin-left:6px;font-size:11px;color:var(--muted);opacity:.7;white-space:nowrap"></span>
+</header>
+<div class="bars" id="bars"></div>
+<div class="wrap">
+  <div class="col catalog" id="catalog"></div>
+  <div class="col roster">
+    <div class="actions">
+      <button class="btn primary" onclick="saveArmy()">Save</button>
+      <button class="btn" onclick="openLibrary()">Library…</button>
+      <button class="btn" onclick="saveArmyToFile()">Save to file…</button>
+      <button class="btn" onclick="openArmyFromFile()">Open file…</button>
+      <button class="btn" onclick="exportList()">Export list</button>
+      <button class="btn" onclick="if(confirm('Clear the whole army?')){state=[];generalUid=null;currentSaveName=null;currentSaveFile=null;render();updateSaveStatus()}">Clear army</button>
+    </div>
+    <div id="saveStatus" class="saveStatus"></div>
+    <div id="roster"></div>
+  </div>
+  <div class="col validation">
+    <h2 class="sec">Army summary</h2><div class="summary" id="summary"></div>
+    <h2 class="sec">Validation</h2><div id="validation"></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalBg"><div class="modal">
+  <div class="mhead"><h3 id="modalTitle"></h3><button class="x" onclick="closeModal()">✕</button></div>
+  <div class="mbody" id="modalBody"></div>
+</div></div>
+
+<!-- second, stacked window for a single rule's definition, so the unit-detail
+     (stats) window stays open underneath -->
+<div class="modal-bg" id="modal2Bg"><div class="modal">
+  <div class="mhead"><h3 id="modal2Title"></h3><button class="x" onclick="closeModal2()">✕</button></div>
+  <div class="mbody" id="modal2Body"></div>
+</div></div>
+
+<script src="data/lores-common.js"></script>
+<script src="data/rules-common.js"></script>
+<script src="data/special-rules-common.js"></script>
+<script src="data/common-items.js"></script>
+<script src="data/chaos-dwarfs.js"></script>
+<script src="data/grand-cathay.js"></script>
+<script src="data/daemons-of-chaos.js"></script>
+<script src="data/beastmen.js"></script>
+<script src="data/ogre-kingdoms.js"></script>
+<script src="data/orcs-and-goblins.js"></script>
+<script src="data/skaven.js"></script>
+<script src="data/high-elves.js"></script>
+<script src="data/dark-elves.js"></script>
+<script src="data/tomb-kings.js"></script>
+<script src="data/vampire-counts.js"></script>
+<script src="data/bretonnia.js"></script>
+<script src="data/wood-elves.js"></script>
+<script>
+const APP_VERSION = "1.5.0";   // kept in sync with package.json by scripts/set-version.js
+const ARMY_BOOKS = window.ARMY_BOOKS || {};
+const BOOK_IDS = Object.keys(ARMY_BOOKS);
+if(!BOOK_IDS.length){ document.body.innerHTML='<p style="color:#fff;padding:20px">Could not load army data files — keep the *.js data files in the same folder as index.html.</p>'; throw new Error("no data"); }
+let CURRENT_ARMY = BOOK_IDS.includes("chaos-dwarfs") ? "chaos-dwarfs" : BOOK_IDS[0];
+let D = ARMY_BOOKS[CURRENT_ARMY];
+const CMD_COST = {leader:5, musician:10/* set below */, standard:10};
+CMD_COST.musician = 5; // Leader +5, Musician +5, Standard +10
+let state = [];           // roster entries
+let uidc = 1;
+let generalUid = null;    // uid of the character nominated as Army General
+let collapsedCats = {};   // category collapse state (roster)
+let collapsedCatalog = {};// category collapse state (left catalog)
+const CATS = [["characters","Characters"],["core","Core"],["special","Special"],["rare","Rare"]];
+
+/* ---------- find a unit definition ---------- */
+function findUnit(cat, id){ return D.units[cat].find(u=>u.id===id); }
+
+/* ---------- create a roster entry with defaults ---------- */
+function addUnit(cat, id){
+  const u = findUnit(cat,id);
+  const e = { uid: uidc++, cat, id, variant:0, count: defaultCount(u), opts:{}, magic:{}, magicStd:"", gifts:[], powers:[], virtue:"", spells:[], sigSpells:[], collapsed:false };
+  (u.options||[]).forEach(o=>{
+    if(o.type==="choice") e.opts[o.id]=null;
+    else if(o.type==="mustChoose") e.opts[o.id]=0;          // default first
+    else if(o.type==="toggle") e.opts[o.id]=false;
+    else if(o.type==="multi") e.opts[o.id]= o.repeatable?0:[];
+    else if(o.type==="perN") e.opts[o.id]=0;                 // unit-size-based upgrade counter
+    else if(o.type==="command") e.opts.cmd={leader:false,musician:false,standard:false};
+    else if(o.type==="mount") e.opts.mount=null;
+  });
+  state.push(e); render();
+}
+function defaultCount(u){ if(u.isCharacter) return 1; if(!u.perModel) return 1; return u.unitSize? u.unitSize[0]:1; }
+function duplicateEntry(uid){
+  const i=state.findIndex(x=>x.uid===uid); if(i<0) return;
+  const copy=JSON.parse(JSON.stringify(state[i])); copy.uid=uidc++; copy.collapsed=false;
+  state.splice(i+1,0,copy); render();
+}
+function wizardLevel(e,u){
+  let lvl = u.isCharacter ? (u.variants[e.variant].wizardLevel||0) : (u.wizardLevel||0);
+  // a choice option may grant an absolute wizard level (e.g. Daemon Prince "Wizard")
+  (u.options||[]).forEach(o=>{
+    if(optGodBlocked(e,u,o)) return;            // Khornate Daemons can't become Wizards
+    if(o.type==="choice"||o.type==="mustChoose"){ const i=e.opts[o.id];
+      if(i!=null && o.choices[i] && o.choices[i].wizLevel!=null) lvl=Math.max(lvl, o.choices[i].wizLevel); }
+  });
+  if(lvl===0 && u.wizardIfUpgraded && e.opts.wiz) lvl=1;   // Daemonsmith upgraded to Wizard
+  if(lvl>0 && e.opts.wlvl) lvl+=1;                          // "Additional Wizard Level"
+  return lvl;
+}
+/* extra CHOSEN-spell slots granted by magic items (e.g. Spell Familiar):
+   any item def flagged `extraSpells:N` that the model actually carries adds N
+   more spell picks from its normally-allowed spells. Data-driven — see SCHEMA. */
+function bonusSpells(e){
+  let n=0;
+  const add=nm=>{ if(!nm) return; const it=findItem(nm); if(it && it.extraSpells) n+=it.extraSpells; };
+  if(e.magic) Object.values(e.magic).forEach(add);
+  (e.gifts||[]).forEach(add);
+  add(e.magicStd);
+  return n;
+}
+/* extra SIGNATURE-spell slots granted by items (e.g. the Arcane Familiar): each
+   `extraSignatures:N` item lets the wizard also know N signature spells picked
+   from ANY of the eight Winds of Magic — a separate pool from its own lore.
+   Picks live in `entry.sigSpells`; see renderSpells / knownSpells. */
+function bonusSignatures(e){
+  let n=0;
+  const add=nm=>{ if(!nm) return; const it=findItem(nm); if(it && it.extraSignatures) n+=it.extraSignatures; };
+  if(e.magic) Object.values(e.magic).forEach(add);
+  (e.gifts||[]).forEach(add);
+  add(e.magicStd);
+  return n;
+}
+/* the signature (lvl-0) spells of the eight standard Winds of Magic, flattened
+   to {lore, name, sp} — the pool an Arcane Familiar draws from. */
+function windSignatures(){
+  const out=[]; const W=window.COMMON_LORES||{};
+  Object.keys(W).forEach(ln=>{ (W[ln].spells||[]).filter(sp=>sp.lvl===0).forEach(sp=>out.push({lore:ln,name:sp.name,sp})); });
+  return out;
+}
+
+/* ---------- points for one entry ---------- */
+function entryPoints(e){
+  const u = findUnit(e.cat,e.id);
+  let pts;
+  if(u.isCharacter){ pts = u.variants[e.variant].points; }
+  else { pts = u.perModel ? u.basePoints*e.count : u.basePoints; }
+  // attached models required at a fixed ratio (e.g. Squig Herd: one Herder per five
+  // Cave Squigs) — auto-costed on top of the base per-model points.
+  if(u.attachedPerN) pts += attachedCount(e,u) * u.attachedPerN.cost;
+  (u.options||[]).forEach(o=>{
+    if(o.requires && !optionAvailable(o)) return;   // conditional option not unlocked
+    if(optGodBlocked(e,u,o)) return;                // option barred for this model's god — no cost
+    if(optMountBlocked(e,u,o)) return;              // mount-upgrade not unlocked by the chosen mount — no cost
+    if(optChoiceBlocked(e,u,o)) return;             // barred by a sibling choice (e.g. sub-species) — no cost
+    if(o.type==="choice"){ const i=e.opts[o.id]; if(i!=null){ const c=o.choices[i]; pts+=optCost(c,e.count); } }
+    else if(o.type==="mustChoose"){ const c=o.choices[e.opts[o.id]]; if(c) pts+=optCost(c,e.count); }
+    else if(o.type==="toggle"){ if(e.opts[o.id]) pts+=optCost(o,e.count); }
+    else if(o.type==="perN"){ pts += perNCount(e,o)*o.cost; }   // one upgrade per o.n models
+    else if(o.type==="multi"){
+      if(o.repeatable){ pts += (e.opts[o.id]||0)*o.choices[0].cost; }
+      else { (e.opts[o.id]||[]).forEach(i=>pts+=optCost(o.choices[i],e.count)); }
+    }
+    else if(o.type==="command"){ const c=e.opts.cmd;
+      if(c.leader)pts+=CMD_COST.leader; if(c.musician)pts+=CMD_COST.musician; if(c.standard)pts+=CMD_COST.standard; }
+    else if(o.type==="mount"){ const i=e.opts.mount; if(i!=null && !mountChoiceBlocked(e,u,o.choices[i])) pts+=o.choices[i].cost; }
+  });
+  // magic items
+  Object.values(e.magic).forEach(nm=>{ if(nm) pts+=itemCost(nm); });
+  if(e.magicStd) pts+=itemCost(e.magicStd);
+  // multi-pick items (e.g. Daemonic Gifts) — share the magic-item budget
+  (e.gifts||[]).forEach(nm=>{ if(nm) pts+=itemCost(nm); });
+  // Vampiric Powers (VC) — share the magic-item budget, separate catalog
+  pts += powersCost(e);
+  // Virtues (Bretonnia) — one per model; duplicate copies across the army cost ×rank
+  pts += virtueCost(e);
+  return pts;
+}
+function optCost(c,count){ return (c.per==="model") ? c.cost*count : c.cost; }
+/* ---- perN upgrades: "one <thing> for every N models in the unit" ----
+   max allowed = floor(current model count / o.n); the stored counter is clamped to
+   that (and to 0 when the option is blocked by a sibling choice/god/mount). */
+// required attached models at a fixed ratio (`u.attachedPerN={every,cost,name}`):
+// how many are auto-included for the current model count (one per `every` models).
+function attachedCount(e,u){ const ap=u&&u.attachedPerN; if(!ap||!ap.every) return 0; return Math.floor((e.count||0)/ap.every); }
+function perNMax(e,o){ if(!o||!o.n) return 0; return Math.floor((e.count||0)/o.n); }
+function perNCount(e,o){ const v=Math.floor(e.opts[o.id]||0); return Math.max(0, Math.min(perNMax(e,o), v)); }
+/* ---- gate an option on a sibling choice's value (`requiresChoice`) ----
+   {id:"subspecies", is:"Night Goblin"} → only when that choice is Night Goblin;
+   is:null means "none selected" (e.g. Common Goblin); is may be an array. Used to
+   hard-restrict the Goblin Gitz Fanatic/Netter/Nasty-Skulker upgrades by sub-species. */
+function selectedChoiceLabel(e,u,id){
+  const o=(u.options||[]).find(x=>x.id===id && (x.type==="choice"||x.type==="mustChoose"));
+  if(!o) return undefined; const i=e.opts[id];
+  return (i!=null && o.choices[i]) ? o.choices[i].label : null;
+}
+/* Does the model's sibling choice `rc.id` currently sit on one of `rc.is`?
+   `is` may be a single label, null ("none selected"), or an array of either.
+   Shared by option gating (requiresChoice) and conditional lores. */
+function choiceMatches(e,u,rc){
+  if(!rc) return true;
+  const cur=selectedChoiceLabel(e,u,rc.id);
+  let want=Array.isArray(rc.is)?rc.is:[rc.is];
+  return want.some(w => w===cur);   // w may be null ("none selected"); cur is null when unset
+}
+function optChoiceBlocked(e,u,o){
+  if(!o || !o.requiresChoice) return false;
+  return !choiceMatches(e,u,o.requiresChoice);
+}
+function allPools(){ return D.commonMagicItems ? [D.magicItems, D.commonMagicItems] : [D.magicItems]; }
+function itemsIn(cat){ return allPools().reduce((a,p)=>a.concat(p[cat]||[]), []); }
+function findItem(name){ for(const p of allPools()){ for(const cat in p){ const it=p[cat].find(x=>x.name===name); if(it) return it; } } return null; }
+function itemCost(name){ const it=findItem(name); return it?it.cost:0; }
+function itemCommon(name){ const it=findItem(name); return it?!!it.common:false; }
+
+/* ---------- Vampiric Powers (VC) & Virtues (Bretonnia) ----------
+   Both are bought from the SAME points pool as a character's magic items.
+   Powers: a separate catalog (D.vampiricPowers), multi-pick, no duplicates per
+   model, not army-wide unique, filtered by the model's Bloodline.
+   Virtues: one per model (D.virtues); the Nth model in the army carrying the
+   same Virtue pays cost×N (duplicate-cost escalation). */
+function powerDef(nm){ return (D.vampiricPowers||[]).find(p=>p.name===nm)||null; }
+function powerCost(nm){ const p=powerDef(nm); return p?p.cost:0; }
+function powersCost(e){ return (e.powers||[]).reduce((s,nm)=>s+powerCost(nm),0); }
+function virtueDef(nm){ return (D.virtues||[]).find(v=>v.name===nm)||null; }
+function virtueBase(e){ const v=e.virtue&&virtueDef(e.virtue); return v?v.cost:0; }
+function virtueRank(e){ if(!e.virtue) return 0; let r=0; for(const x of state){ if(x.virtue===e.virtue){ r++; if(x.uid===e.uid) return r; } } return r; }
+function virtueCost(e){ return virtueBase(e)*virtueRank(e); }
+/* points a model has committed from its magic-item budget: items + standard-in-budget
+   + gifts + powers + the Virtue's *base* cost (the duplicate surcharge is added to the
+   army total via virtueCost, but does not eat the model's own item budget). */
+function spentMagic(e){ return Object.values(e.magic).reduce((s,nm)=>s+(nm?itemCost(nm):0),0)+giftsCost(e)+powersCost(e)+virtueBase(e); }
+
+/* ---------- Arcane Item sub-types (Relic / Charm / Staff) ----------
+   In the source books every arcane item's description opens with its type
+   (e.g. "Staff. …", "Charm, one use. …"). A character may carry one of each
+   type, so up to three arcane items total. The type is derived from the item
+   description's first word; the rulebook "common" arcane items (not always
+   described in every book file) fall back to this fixed map. Untyped arcane
+   items default to "Relic". */
+const ARCANE_SUBCATS=["Relic","Charm","Staff"];
+const ARCANE_TYPE_FALLBACK={
+  "Wand of the Winds":"Staff","Destroy Magic Scroll":"Charm","Feedback Scroll":"Charm",
+  "Dispel Scroll":"Charm","Scroll of Leaching":"Charm","Power Familiar":"Relic",
+  "Wand of Jade":"Staff","Wand of Jet":"Staff","Channelling Staff":"Staff",
+  "Forbidden Rod":"Staff","Wand of Onyx":"Staff","Sceptre of Stability":"Staff",
+  "Arcane Familiar":"Relic","Earthing Rod":"Staff","Power Scroll":"Charm",
+  "Luckstone":"Charm","Power Stone":"Charm","Scroll of Shielding":"Charm","Spell Familiar":"Relic"
+};
+/* an item's effect text: the active book's own itemDesc wins, then the shared
+   common-rulebook descriptions (common-items.js) */
+function itemDescOf(name){
+  return (D.itemDesc && D.itemDesc[name]) || (window.COMMON_ITEM_DESC && window.COMMON_ITEM_DESC[name]) || "";
+}
+function arcaneType(name){
+  const d=itemDescOf(name);
+  const m=d.match(/^(Relic|Charm|Staff)\b/);
+  if(m) return m[1];
+  if(ARCANE_TYPE_FALLBACK[name]) return ARCANE_TYPE_FALLBACK[name];
+  return "Relic";
+}
+
+/* ---------- category totals ---------- */
+function catTotal(cat){ return state.filter(e=>e.cat===cat).reduce((s,e)=>s+entryPoints(e),0); }
+function grandTotal(){ return state.reduce((s,e)=>s+entryPoints(e),0); }
+
+/* =========================== RENDER =========================== */
+function render(){ state.forEach(reconcileEntry); renderCatalog(); renderRoster(); renderBars(); renderSummary(); renderValidation(); scheduleDraft(); }
+
+/* ---------- modal helpers ---------- */
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function openModal(title, html){ document.getElementById("modalTitle").textContent=title;
+  document.getElementById("modalBody").innerHTML=html; document.getElementById("modalBg").classList.add("open"); }
+function closeModal(){ document.getElementById("modalBg").classList.remove("open"); if(_promptCb) finishPrompt(false); }
+/* second, stacked window — used for a single rule's definition so it opens on
+   top of the unit-detail window rather than replacing it */
+function openModal2(title, html){ document.getElementById("modal2Title").textContent=title;
+  document.getElementById("modal2Body").innerHTML=html; document.getElementById("modal2Bg").classList.add("open"); }
+function closeModal2(){ document.getElementById("modal2Bg").classList.remove("open"); }
+
+/* In-app text prompt (Electron does NOT support window.prompt(); it throws).
+   Reuses the shared modal; resolves to the trimmed value, or null if cancelled. */
+let _promptCb=null;
+function finishPrompt(ok){
+  if(!_promptCb) return;
+  const cb=_promptCb; _promptCb=null;
+  const inp=document.getElementById("promptInput");
+  const val=inp?inp.value.trim():"";
+  document.getElementById("modalBg").classList.remove("open");
+  cb(ok ? (val||null) : null);
+}
+function modalPrompt(title, def, okLabel){
+  return new Promise(res=>{
+    _promptCb=res;
+    document.getElementById("modalTitle").textContent=title;
+    document.getElementById("modalBody").innerHTML=
+      '<div style="display:flex;flex-direction:column;gap:12px">'+
+      '<input id="promptInput" type="text" value="'+esc(def||"").replace(/"/g,"&quot;")+'" '+
+      'style="padding:8px 10px;font-size:15px;background:#241a14;color:#f3e9dd;border:1px solid #5a463a;border-radius:6px">'+
+      '<div style="display:flex;gap:8px;justify-content:flex-end">'+
+      '<button class="btn" onclick="finishPrompt(false)">Cancel</button>'+
+      '<button class="btn primary" onclick="finishPrompt(true)">'+esc(okLabel||"OK")+'</button>'+
+      '</div></div>';
+    document.getElementById("modalBg").classList.add("open");
+    const inp=document.getElementById("promptInput");
+    if(inp){ inp.focus(); inp.select(); inp.onkeydown=e=>{ if(e.key==="Enter"){ e.preventDefault(); finishPrompt(true); } }; }
+  });
+}
+
+/* ---------- generic item picker modal ----------
+   Replaces the magic-item dropdowns. Opens the full list for ONE category
+   (already filtered to legal items by the caller), the user selects, then
+   confirms with OK.
+   opts: { title, multi, groups:[{label,items:[{name,cost,common,only,desc?}]}],
+           selected:[names], remaining(sel)->pts|Infinity, onConfirm(sel) }
+   Single-pick: once one item is selected the rest lock until it is deselected.
+   Multi-pick: items costing more than the remaining budget lock until you free
+   up points by deselecting. */
+let _pk=null;
+function openItemPicker(opts){
+  _pk={ multi:!!opts.multi, groups:opts.groups||[], remaining:opts.remaining,
+        maxPicks:opts.maxPicks||0, radio:!!opts.radio, requireOne:!!opts.requireOne,
+        onConfirm:opts.onConfirm, title:opts.title||"Choose", sel:(opts.selected||[]).slice() };
+  document.getElementById("modalTitle").textContent=_pk.title;
+  _pkRender();
+  document.getElementById("modalBg").classList.add("open");
+}
+function _pkRemaining(){ return _pk.remaining ? _pk.remaining(_pk.sel) : Infinity; }
+function _pkRender(){
+  const body=document.getElementById("modalBody"); body.innerHTML="";
+  const rem=_pkRemaining(); const lim=isFinite(rem);
+  const note=document.createElement("div"); note.className="rule"; note.style.color="var(--muted)";
+  const capNote = _pk.maxPicks ? ` Choose up to ${_pk.maxPicks}.` : "";
+  note.innerHTML = _pk.multi
+    ? `Tap items to add or remove them.${capNote}${lim?` Items costing more than the points left are disabled.`:(_pk.maxPicks?"":" No points limit.")}`
+    : _pk.radio
+      ? `Tap an option to choose it.${_pk.requireOne?"":" Tap the chosen one again to clear it."}`
+      : (_pk.sel.length ? `Tap the selected item to deselect it, then choose another.`
+                        : `Tap an item to select it.${lim?` Items over budget are disabled.`:""}`);
+  body.appendChild(note);
+  let shown=0;
+  (_pk.groups||[]).forEach(g=>{
+    const its=g.items||[]; if(!its.length) return;
+    if(g.label){ const h=document.createElement("div"); h.className="lbl"; h.textContent=g.label; body.appendChild(h); }
+    its.forEach(it=>{
+      shown++;
+      // `it.locked` → display-only row: shown as already-chosen (✓, full opacity)
+      // but non-interactive and NOT part of _pk.sel, so it never affects the pick
+      // count or budget. Used for always-known spells (lore attribute + signatures).
+      if(it.locked){
+        const row=document.createElement("div");
+        row.className="mirow pick sel"; row.style.cursor="default";
+        const mark=document.createElement("span"); mark.className="pkmark"; mark.textContent="✓";
+        const txt=document.createElement("div"); txt.style.flex="1";
+        const descHTML=(it.html!=null)?it.html:`<div class="d">${esc((it.desc!=null&&it.desc!=="")?it.desc:(itemDescOf(it.name)||"(no description)"))}</div>`;
+        txt.innerHTML=`<div><span class="nm">${esc(it.name)}</span>${it.reason?` <span style="color:var(--muted)">· ${esc(it.reason)}</span>`:""}</div>${descHTML}`;
+        row.appendChild(mark); row.appendChild(txt);
+        body.appendChild(row);
+        return;
+      }
+      const isSel=_pk.sel.includes(it.name);
+      let disabled=false;
+      if(it.disabled && !isSel){ disabled=true; }              // forced (e.g. honour blocked by mount)
+      else if(!isSel){
+        if(_pk.multi){ if(lim && it.cost>rem) disabled=true; if(_pk.maxPicks && _pk.sel.length>=_pk.maxPicks) disabled=true; }
+        else if(_pk.radio){ if(lim && it.cost>rem) disabled=true; }   // radio: never lock the alternatives — tapping one swaps the pick
+        else { if(_pk.sel.length>=1) disabled=true; else if(lim && it.cost>rem) disabled=true; }
+      }
+      const row=document.createElement("div");
+      row.className="mirow pick"+(isSel?" sel":"")+(disabled?" disabled":"");
+      const mark=document.createElement("span"); mark.className="pkmark"; mark.textContent=isSel?"✓":"";
+      const txt=document.createElement("div"); txt.style.flex="1";
+      // `it.html` (raw) renders rich descriptions (e.g. a mount's profile +
+      // clickable rules); otherwise the plain text desc is escaped.
+      const descHTML = (it.html!=null) ? it.html
+        : `<div class="d">${esc((it.desc!=null && it.desc!=="") ? it.desc : (itemDescOf(it.name)||"(no description)"))}</div>`;
+      const costHTML = (it.cost!=null) ? ` — <span class="cost">${it.cost} pts</span>` : "";
+      txt.innerHTML=`<div><span class="nm">${esc(it.name)}${it.common?" *":""}</span>${costHTML}${it.only?` <span style="color:var(--muted)">(${esc(it.only)} only)</span>`:""}${(it.disabled&&it.reason&&!isSel)?` <span style="color:var(--fire2)">· ${esc(it.reason)}</span>`:""}</div>${descHTML}`;
+      row.appendChild(mark); row.appendChild(txt);
+      if(!disabled) row.onclick=()=>{
+        if(_pk.multi){ _pk.sel = isSel ? _pk.sel.filter(n=>n!==it.name) : [..._pk.sel,it.name]; }
+        else if(_pk.radio){ _pk.sel = (isSel && !_pk.requireOne) ? [] : [it.name]; }   // swap, or clear if optional
+        else { _pk.sel = isSel ? [] : [it.name]; }
+        _pkRender();
+      };
+      body.appendChild(row);
+    });
+  });
+  if(!shown){ const n=document.createElement("div"); n.className="rule"; n.style.color="var(--muted)"; n.textContent="No items available for this character."; body.appendChild(n); }
+  const foot=document.createElement("div"); foot.className="pkfoot";
+  const remEl=document.createElement("div"); remEl.className="rem"+(lim&&rem<0?" over":"");
+  remEl.innerHTML = lim ? `<b>${Math.max(0,rem)}</b> pts left`
+    : (_pk.maxPicks ? `<b>${_pk.sel.length}</b> / ${_pk.maxPicks} selected`
+       : _pk.radio ? (_pk.sel.length?`Chosen: ${esc(_pk.sel[0])}`:"Nothing chosen")
+       : `${_pk.sel.length} selected`);
+  const btns=document.createElement("div"); btns.style.display="flex"; btns.style.gap="8px";
+  const cancel=document.createElement("button"); cancel.className="btn"; cancel.textContent="Cancel";
+  cancel.onclick=()=>{ _pk=null; closeModal(); };
+  const okb=document.createElement("button"); okb.className="btn primary"; okb.textContent="OK";
+  okb.onclick=()=>{ const cb=_pk.onConfirm, sel=_pk.sel.slice(); _pk=null;
+    document.getElementById("modalBg").classList.remove("open"); if(cb)cb(sel); };
+  btns.appendChild(cancel); btns.appendChild(okb);
+  foot.appendChild(remEl); foot.appendChild(btns);
+  body.appendChild(foot);
+}
+/* Build the picker's grouped, legal item list for a magic-item category.
+   Mirrors the old dropdown grouping (by God for godSections books, else one
+   army group), and the Common (rulebook) group. `extra` is an extra filter. */
+function pickerGroups(sourceCat, e, u, extra){
+  const groups=[];
+  const ok=(it)=>(!extra||extra(it)) && itemAllowed(it,e,u);
+  const army=(D.magicItems[sourceCat]||[]).filter(ok);
+  if(D.godSections){
+    ["Undivided","Khorne","Nurgle","Slaanesh","Tzeentch"].forEach(sec=>{
+      const its=army.filter(it=>(it.god||"Undivided")===sec); if(its.length) groups.push({label:sec, items:its}); });
+  } else if(army.length){ groups.push({label:D.name, items:army}); }
+  if(D.commonMagicItems && D.commonMagicItems[sourceCat]){
+    const c=D.commonMagicItems[sourceCat].filter(ok); if(c.length) groups.push({label:"Common (rulebook)", items:c}); }
+  return groups;
+}
+/* info popup that shows ONLY the chosen item(s): rows of {name,cost,desc} */
+function openChosenInfoRows(title, rows){
+  rows=(rows||[]).filter(Boolean);
+  if(!rows.length){ openModal(title, `<div class="rule" style="color:var(--muted)">Nothing selected yet — tap “Choose…” to pick from the list.</div>`); return; }
+  let html="";
+  rows.forEach(r=>{ html+=`<div class="mirow"><div><span class="nm">${esc(r.name)}</span> — <span class="cost">${r.cost} pts</span></div><div class="d">${esc(r.desc||"(no description)")}</div></div>`; });
+  openModal(title, html);
+}
+/* entry-side "open the picker" button (shows the current pick, or "Choose…") */
+function pickBtn(text, empty, onClick){
+  const b=document.createElement("button"); b.className="pickbtn"+(empty?" empty":""); b.textContent=text; b.onclick=onClick; return b;
+}
+function pickInfoBtn(title, onClick){
+  const b=document.createElement("button"); b.className="info"; b.textContent="i"; b.title=title; b.onclick=onClick; return b;
+}
+
+/* ---------- army summary ("bracket") ---------- */
+function isLone(u){ return u.isCharacter || !u.perModel; }   // characters & single-model entries have no troop count
+function renderSummary(){
+  const el=document.getElementById("summary");
+  if(!state.length){ el.innerHTML='<div class="empty note">Empty — add units to see your roster outline here.</div>'; return; }
+  let html="";
+  CATS.forEach(([cat,label])=>{
+    const items=state.filter(e=>e.cat===cat); if(!items.length) return;
+    html+=`<div class="scat"><span>${label}</span><b>${Math.round(catTotal(cat))}</b></div>`;
+    items.forEach(e=>{ const u=findUnit(cat,e.id);
+      const nm = u.isCharacter ? u.variants[e.variant].name : u.name;
+      const ct = isLone(u) ? "" : `<span class="ct">${e.count}</span>`;
+      const genTag = (cat==="characters" && e.uid===generalUid) ? ' <span style="color:var(--fire2)" title="Army General">★</span>' : '';
+      html+=`<div class="srow" onclick="scrollToEntry(${e.uid})"><span>${esc(nm)}${genTag}</span>${ct}</div>`;
+    });
+  });
+  html+=`<div class="grand"><span>Total</span><span>${Math.round(grandTotal()*10)/10}</span></div>`;
+  el.innerHTML=html;
+}
+function scrollToEntry(uid){ const n=document.getElementById("entry-"+uid);
+  if(n){ n.scrollIntoView({behavior:"smooth",block:"center"}); n.style.outline="2px solid var(--fire)";
+    setTimeout(()=>n.style.outline="",1200); } }
+
+/* ---------- unit detail (stats + special rules) ---------- */
+const STAT_HEAD=["M","WS","BS","S","T","W","I","A","Ld"];
+function openUnitDetail(cat,id,variant){
+  const u=findUnit(cat,id); const inf=D.unitInfo[id];
+  let html="";
+  if(inf && inf.profile){
+    const showPts = u.isCharacter;
+    html+=`<table class="prof"><tr><th>Profile</th>${STAT_HEAD.map(s=>`<th>${s}</th>`).join("")}${showPts?"<th>Pts</th>":""}</tr>`;
+    inf.profile.forEach((row,i)=>{
+      let pts=""; if(showPts && u.variants[i]) pts=u.variants[i].points;
+      html+=`<tr><td class="nm">${esc(row[0])}</td>${row.slice(1).map(v=>`<td>${esc(v)}</td>`).join("")}${showPts?`<td><b>${pts}</b></td>`:""}</tr>`;
+    });
+    html+=`</table>`;
+  }
+  const meta=[];
+  if(u.unitSize) meta.push(`Unit size: ${u.unitSize[0]}${u.unitSize[1]==null?"+":"–"+u.unitSize[1]}`);
+  if(!u.isCharacter && u.perModel) meta.push(`${u.basePoints} pts/model`);
+  if(u.isSpecialChar) meta.push("Unique special character");
+  const v=u.isCharacter?u:null;
+  if(v && v.variants.some(x=>x.magicBudget)) meta.push("Magic items: "+v.variants.map(x=>`${x.name} ${x.magicBudget}`).join(" / ")+" pts");
+  if(meta.length) html+=`<div class="rule" style="color:var(--muted)">${esc(meta.join("  •  "))}</div>`;
+  if(inf && (inf.eq || inf.rules)) window.__rw=[];
+  if(inf && inf.eq) html+=`<div class="lbl">Equipment <span style="color:var(--muted);font-weight:400">— click an item to open it</span></div><div class="rule">${eqToHTML(inf.eq)}</div>`;
+  if(inf && inf.rules){
+    html+=`<div class="lbl">Special rules <span style="color:var(--muted);font-weight:400">— click a rule to open it</span></div><div class="rule">${rulesToHTML(inf.rules)}</div>`;
+  }
+  if(u.notes) html+=`<div class="lbl">Note</div><div class="rule" style="color:var(--muted)">${esc(u.notes)}</div>`;
+  const title = u.isCharacter && u.variants.length>1 ? u.name : (inf&&inf.profile?inf.profile[0][0]:u.name);
+  openModal(title, html);
+}
+
+/* ---------- mount profile lookup ----------
+   A mount's characteristics come from the book's unitInfo: many mounts are also
+   units (Lammasu, Great Eagle, chariots…), so we match the mount's name (the
+   label, or its parenthetical creature) exactly against any unitInfo profile
+   row. Mounts that aren't units carry their own `prof`/`rules` on the choice.
+   Rendering of all mounts lives in openMountChoices(). */
+function mountNorm(s){ return String(s).toLowerCase().replace(/\s*\([^)]*\)\s*/g," ").replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim(); }
+function mountProfile(label){
+  const wanted=[mountNorm(label)]; const m=String(label).match(/\(([^)]+)\)/); if(m) wanted.push(mountNorm(m[1]));
+  // Pass 1: prefer an entry whose FIRST row is the wanted entity — i.e. the standalone
+  // mount / unit (its `rules` describe the mount itself), not a rider-combined profile
+  // (e.g. Walach, Melkhior, Zacharias) where the mount is only a later sub-row and the
+  // entry's `rules` belong to the rider.
+  for(const k in (D.unitInfo||{})){ const inf=D.unitInfo[k]; const first=(inf.profile||[])[0];
+    if(first && wanted.includes(mountNorm(first[0]))) return {row:first, rules:inf.rules, eq:inf.eq};
+  }
+  // Pass 2: fall back to any-row match (mount only exists inside a combined profile).
+  for(const k in (D.unitInfo||{})){ const inf=D.unitInfo[k];
+    for(const row of (inf.profile||[])){ if(wanted.includes(mountNorm(row[0]))) return {row, rules:inf.rules, eq:inf.eq}; }
+  }
+  return null;
+}
+
+/* ---------- spell selection (per wizard level) ---------- */
+/* Spell selection uses the SAME modal multi-pick picker as magic items / gifts:
+   a "Choose…" button opens openItemPicker listing every choosable spell with its
+   full effect inline; signature spell(s) and the lore attribute are always known
+   and shown read-only above the button (not in the picker, not counted). */
+function renderSpells(e,u){
+  const box=document.createElement("div"); box.className="magic";
+  const lvl=wizardLevel(e,u);
+  const bonus=bonusSpells(e);               // +1 per carried Spell-Familiar-type item
+  const cap=lvl+bonus;                       // signature & lore attribute are free; choose wizard-level spells (+ item bonuses)
+  const head=document.createElement("div"); head.className="mt";
+  head.innerHTML=`Spells <span style="color:var(--muted)">— signature &amp; lore attribute known automatically; choose ${cap} more (wizard level ${lvl}${bonus?` + ${bonus} from items`:``}), max spell level ${lvl}</span>`;
+  box.appendChild(head);
+  if(!e.lore){ const n=document.createElement("div"); n.className="note"; n.textContent="Choose a Lore of Magic above to pick spells."; box.appendChild(n); return box; }
+  const lore=loreData(e.lore);
+  if(!lore){ const n=document.createElement("div"); n.className="note"; n.textContent="No spell data for this lore."; box.appendChild(n); return box; }
+  // e.spells holds only the chosen NON-signature spells; signatures are implicit & always known.
+  // A spell's level may not exceed the wizard's level, so drop any now-too-high picks too.
+  e.spells=(e.spells||[]).filter(nm=>lore.spells.some(sp=>sp.name===nm && sp.lvl!==0 && sp.lvl<=lvl)).slice(0,cap);
+  // always-known: lore attribute + signature spell(s), shown read-only
+  const free=[];
+  if(lore.attribute) free.push(lore.attribute.name+" (lore attribute)");
+  lore.spells.filter(sp=>sp.lvl===0).forEach(sp=>free.push(sp.name+" (signature)"));
+  if(free.length){ const f=document.createElement("div"); f.className="note"; f.innerHTML="Always known: "+esc(free.join(", ")); box.appendChild(f); }
+  const cnt=document.createElement("div"); cnt.className="budget"+(e.spells.length>cap?" over":"");
+  cnt.innerHTML=`Chosen <b>${e.spells.length}</b> / ${cap}`;
+  box.appendChild(cnt);
+  // Always-known group: lore attribute + signature spell(s), shown in the picker
+  // as already-chosen (locked) rows with their full effect — informational only.
+  const freeItems=[];
+  if(lore.attribute) freeItems.push({ name:lore.attribute.name, locked:true, reason:"lore attribute",
+    html:`<div class="d">${esc(lore.attribute.text)}</div>` });
+  lore.spells.filter(sp=>sp.lvl===0).forEach(sp=>freeItems.push({ name:sp.name, locked:true, reason:"signature",
+    html:`<div class="d"><span class="slvl">L${sp.lvl}</span> <span class="scast">${esc(String(sp.cast))}+</span> <span class="note">${esc(sp.type)} · ${esc(sp.range)}</span><br>${esc(sp.effect)}</div>` }));
+  const open=()=>openItemPicker({
+    title:`Spells — Lore of ${e.lore}`,
+    multi:true, maxPicks:cap, selected:e.spells.slice(),
+    groups:[
+     ...(freeItems.length?[{ label:"Always known (free)", items:freeItems }]:[]),
+     { label:`Lore of ${e.lore}`, items: lore.spells.filter(sp=>sp.lvl!==0).map(sp=>{
+      const tooHigh = sp.lvl>lvl;                                  // beyond the wizard's level
+      return { name:sp.name,                                       // cost omitted → no "pts" shown
+        disabled:tooHigh, reason: tooHigh?`requires a level ${sp.lvl} wizard`:"",
+        html:`<div class="d"><span class="slvl">L${sp.lvl}</span> <span class="scast">${esc(String(sp.cast))}+</span> <span class="note">${esc(sp.type)} · ${esc(sp.range)}</span><br>${esc(sp.effect)}</div>` };
+    }) }],
+    onConfirm:(sel)=>{ e.spells=sel.filter(nm=>lore.spells.some(sp=>sp.name===nm && sp.lvl!==0 && sp.lvl<=lvl)).slice(0,cap); render(); }
+  });
+  box.appendChild(pickBtn(e.spells.length?e.spells.join(", "):"Choose…", !e.spells.length, open));
+
+  // Arcane Familiar &c.: additional signature spell(s) from any of the 8 Winds —
+  // a SEPARATE pool/picker, not counted against the wizard-level cap above.
+  const sigCap=bonusSignatures(e);
+  const winds=windSignatures();
+  const ownSigs=new Set(lore.spells.filter(sp=>sp.lvl===0).map(sp=>sp.name));   // already known free
+  e.sigSpells=(e.sigSpells||[]).filter(nm=>winds.some(w=>w.name===nm)).slice(0,sigCap);
+  if(sigCap>0){
+    const sh=document.createElement("div"); sh.className="mt";
+    sh.innerHTML=`Additional signature spell${sigCap>1?"s":""} <span style="color:var(--muted)">— from any of the eight Winds of Magic (granted by an item); choose ${sigCap}</span>`;
+    box.appendChild(sh);
+    const sc=document.createElement("div"); sc.className="budget"+(e.sigSpells.length>sigCap?" over":"");
+    sc.innerHTML=`Chosen <b>${e.sigSpells.length}</b> / ${sigCap}`; box.appendChild(sc);
+    const sigItems=winds.map(w=>{
+      const dup=ownSigs.has(w.name);   // already a signature of the wizard's own lore
+      return { name:w.name, disabled:dup, reason:dup?"already known":"",
+        html:`<div class="d"><span class="note">Lore of ${esc(w.lore)}</span> · <span class="slvl">Signature</span> <span class="scast">${esc(String(w.sp.cast))}+</span> <span class="note">${esc(w.sp.type)} · ${esc(w.sp.range)}</span><br>${esc(w.sp.effect)}</div>` };
+    });
+    const openSig=()=>openItemPicker({
+      title:`Additional signature spell — the eight Winds of Magic`,
+      multi:true, maxPicks:sigCap, selected:e.sigSpells.slice(),
+      groups:[{ label:"Signature spells (8 Winds)", items:sigItems }],
+      onConfirm:(sel)=>{ e.sigSpells=sel.filter(nm=>winds.some(w=>w.name===nm)).slice(0,sigCap); render(); }
+    });
+    box.appendChild(pickBtn(e.sigSpells.length?e.sigSpells.join(", "):"Choose…", !e.sigSpells.length, openSig));
+  }
+  return box;
+}
+/* all spells a wizard knows = signature(s) of its lore + chosen spells
+   (+ any extra signatures from an Arcane Familiar, trimmed to the item bonus) */
+function knownSpells(e){
+  const extraSig=(e.sigSpells||[]).slice(0,bonusSignatures(e));
+  const lore=e.lore?loreData(e.lore):null; if(!lore) return [...(e.spells||[]), ...extraSig];
+  const sigs=lore.spells.filter(sp=>sp.lvl===0).map(sp=>sp.name);
+  return [...sigs, ...(e.spells||[]), ...extraSig];
+}
+/* resolve a lore's spell data: book-specific lores win, then the shared 8 rulebook lores */
+function loreData(name){ return (D.spellLores && D.spellLores[name]) || (window.COMMON_LORES && window.COMMON_LORES[name]) || null; }
+/* ---- conditional lores ----
+   A unit's `lores` entries may be a plain string (always offered) or an object
+   { name, requiresChoice:{id,is} } / { name, requiresVariant:"A"|[…] } that is
+   only offered when the gating condition holds (e.g. Goblin Shaman: "Bad Moon"
+   only once the Night-Goblin sub-species is chosen). `availableLores` returns the
+   names currently selectable; the lore picker & the Undead requireWizardLore
+   validator both use it. */
+function loreEntries(u){ return (u.lores||[]).map(l=> (typeof l==="string") ? {name:l} : l); }
+function loreNames(u){ return loreEntries(u).map(l=>l.name); }
+function loreEntryAvailable(e,u,le){
+  if(le.requiresChoice && !choiceMatches(e,u,le.requiresChoice)) return false;
+  if(le.requiresToggle){ const ids=Array.isArray(le.requiresToggle)?le.requiresToggle:[le.requiresToggle];
+    if(!ids.every(id=>!!(e.opts&&e.opts[id]))) return false; }   // e.g. Orc Shaman: Savage Waaagh! needs the Savage Orc upgrade
+  if(le.requiresVariant){ const names=Array.isArray(le.requiresVariant)?le.requiresVariant:[le.requiresVariant];
+    return u.isCharacter && u.variants[e.variant] && names.includes(u.variants[e.variant].name); }
+  return true;
+}
+function availableLores(e,u){ return loreEntries(u).filter(le=>loreEntryAvailable(e,u,le)).map(le=>le.name); }
+function openSpellInfo(loreName){
+  const lore=loreData(loreName); if(!lore){ openModal(loreName,"No data."); return; }
+  let html=`<div class="lbl">Lore Attribute — ${esc(lore.attribute.name)}</div><div class="rule">${esc(lore.attribute.text)}</div>`;
+  lore.spells.forEach(sp=>{
+    const tag=sp.lvl===0?"Signature":"Level "+sp.lvl;
+    html+=`<div class="mirow"><div><span class="nm">${esc(sp.name)}</span> <span class="cost">${sp.cast}+</span> <span style="color:var(--muted)">${esc(tag)} · ${esc(sp.type)} · ${esc(sp.range)}</span></div><div class="d">${esc(sp.effect)}</div></div>`;
+  });
+  openModal("Lore of "+loreName, html);
+}
+
+/* ---------- magic item info popup ---------- */
+function openItemInfo(category, selected){
+  const list=itemsIn(category);
+  let html=`<div class="rule" style="color:var(--muted)">* = common item (may be taken in multiples).</div>`;
+  list.forEach(it=>{
+    const d = itemDescOf(it.name) || "(no description)";
+    const sel = it.name===selected ? " sel":"";
+    html+=`<div class="mirow${sel}"><div><span class="nm">${esc(it.name)}${it.common?" *":""}</span> — <span class="cost">${it.cost} pts</span>${it.only?` <span style="color:var(--muted)">(${esc(it.only)} only)</span>`:""}</div><div class="d">${esc(d)}</div></div>`;
+  });
+  openModal(category, html);
+}
+
+/* ---------- single-rule info popup (one weapon / armour / command option) ----------
+   Resolve an option label to one rule. EQUIP_REGEX normalises free-form labels
+   (e.g. "Additional hand weapon", "Light armour", "shortbow") onto the canonical
+   COMMON_RULES / COMMON_SPECIAL_RULES keys. */
+const EQUIP_REGEX=[
+  [/additional hand weapon|extra hand weapon|two\/?additional|two hand weapons|paired weapon|brace of hand weapons/, "Additional Hand Weapons"],
+  [/great\s?weapon/, "Great Weapon"],
+  [/halberd|polearm/, "Polearm (Halberd)"],
+  [/\bpikes?\b/, "Pike"],
+  [/light lance/, "Light Lance"],
+  [/heavy lance/, "Heavy Lance"],
+  [/\bflails?\b/, "Flail"],
+  [/cavalry spear|\bspears?\b/, "Spear"],
+  [/\bhand weapons?\b/, "Hand Weapon"],
+  [/light armour/, "Light Armour"],
+  [/medium armour/, "Medium Armour"],
+  [/heavy armour|full plate/, "Heavy Armour"],
+  [/buckler/, "Buckler"],
+  [/\bshields?\b/, "Shield"],
+  [/barding/, "Barding"],
+  [/throwing axe/, "Throwing Axes"],
+  [/throwing (weapon|knive|knife|spear|star)/, "Throwing Weapons"],
+  [/javelin/, "Javelins"],
+  [/crossbow/, "Crossbow"],
+  [/great\s?bow/, "Greatbow"],
+  [/short\s?bow/, "Shortbow"],
+  [/long\s?bow/, "Longbow"],
+  [/handgun/, "Handgun"],
+  [/blunderbuss/, "Blunderbuss"],
+  [/blow\s?pipe/, "Blowpipe"],
+  [/\bpistol/, "Pistol"],
+  [/\bslings?\b/, "Sling"],
+  [/\bbows?\b/, "Longbow"],
+  [/poisoned attack/, "Poisoned Attacks"],
+  [/armour piercing/, "Armour Piercing"],
+  [/nat(ural|\.) ?armour/, "Natural Armour"],
+  [/regenerat/, "Regeneration"],
+  [/killing blow/, "Killing Blow"]
+];
+function equipRegexHit(l){
+  const R=window.COMMON_RULES||{}, SR=window.COMMON_SPECIAL_RULES||{};
+  for(const [re,key] of EQUIP_REGEX){ if(re.test(l)){ const t=R[key]||SR[key]; if(t) return {name:key, text:t}; } }
+  return null;
+}
+function ruleDef(label){
+  if(!label) return null;
+  const ex=ruleExact(label); if(ex) return ex;             // glossary, then SR, then R (exact)
+  const hit=equipRegexHit(label.toLowerCase()); if(hit) return hit;
+  if(D.glossary){ for(const k in D.glossary){ if(label.toLowerCase().includes(k.toLowerCase())) return {name:k, text:D.glossary[k]}; } }
+  return null;
+}
+/* Equipment-line resolver. The `eq` string mixes base equipment with NAMED magic
+   items (e.g. "Bow of Avelorn", "The Lion's Shield", "Star Lance"), so a loose
+   substring match would mis-link those to a generic weapon/armour rule. Instead a
+   token is only clickable if its whole (paren-stripped, lower-cased) form is an
+   exact known equipment phrase. Book `glossary`/COMMON_SPECIAL_RULES exact hits
+   still win first. */
+const EQUIP_ALIASES={
+  "hand weapon":"Hand Weapon","hand weapons":"Hand Weapon",
+  "additional hand weapon":"Additional Hand Weapons","additional hand weapons":"Additional Hand Weapons",
+  "two hand weapons":"Additional Hand Weapons","two additional hand weapons":"Additional Hand Weapons",
+  "pair of hand weapons":"Additional Hand Weapons","brace of hand weapons":"Additional Hand Weapons",
+  "great weapon":"Great Weapon","great weapons":"Great Weapon",
+  "halberd":"Polearm (Halberd)","halberds":"Polearm (Halberd)","polearm":"Polearm (Halberd)","polearms":"Polearm (Halberd)",
+  "pike":"Pike","pikes":"Pike",
+  "spear":"Spear","spears":"Spear","cavalry spear":"Spear","cavalry spears":"Spear",
+  "flail":"Flail","flails":"Flail",
+  "light lance":"Light Lance","light lances":"Light Lance",
+  "heavy lance":"Heavy Lance","heavy lances":"Heavy Lance",
+  "light armour":"Light Armour","medium armour":"Medium Armour","heavy armour":"Heavy Armour",
+  "shield":"Shield","shields":"Shield","buckler":"Buckler","bucklers":"Buckler",
+  "barding":"Barding",
+  "shortbow":"Shortbow","shortbows":"Shortbow","longbow":"Longbow","longbows":"Longbow",
+  "greatbow":"Greatbow","greatbows":"Greatbow","bow":"Longbow","bows":"Longbow",
+  "crossbow":"Crossbow","crossbows":"Crossbow","handgun":"Handgun","handguns":"Handgun",
+  "sling":"Sling","slings":"Sling","javelin":"Javelins","javelins":"Javelins",
+  "blowpipe":"Blowpipe","blowpipes":"Blowpipe","pistol":"Pistol","pistols":"Pistol",
+  "brace of pistols":"Pistol","blunderbuss":"Blunderbuss","blunderbusses":"Blunderbuss",
+  "throwing weapon":"Throwing Weapons","throwing weapons":"Throwing Weapons",
+  "throwing axe":"Throwing Axes","throwing axes":"Throwing Axes",
+  "grenade":"Grenades","grenades":"Grenades",
+  // generic rulebook war machines (specific army-book variants live in each
+  // book's glossary and override these via the case-insensitive match above)
+  "bolt thrower":"Bolt Thrower","bolt throwers":"Bolt Thrower",
+  "repeater bolt thrower":"Repeater Bolt Thrower","repeater bolt throwers":"Repeater Bolt Thrower",
+  "cannon":"Cannon","cannons":"Cannon",
+  "stone thrower":"Stone Thrower","stone throwers":"Stone Thrower",
+  "mortar":"Mortar","mortars":"Mortar",
+  "rocket launcher":"Rocket Launcher","rocket launchers":"Rocket Launcher",
+  "fire thrower":"Fire Thrower","fire throwers":"Fire Thrower",
+  "organ gun":"Organ Gun","organ guns":"Organ Gun"
+};
+function equipDef(label){
+  if(!label) return null;
+  const ex=ruleExact(label); if(ex) return ex;
+  const base=label.replace(/\s*\([^)]*\)\s*$/,"").trim();
+  // Case-insensitive EXACT glossary match FIRST, so a book's own war-machine
+  // profile wins over the generic rulebook one. Artillery / war-machine weapon
+  // tokens are written in the equipment line in lower case ("magma cannon",
+  // "warpfire thrower") but live under a capitalised glossary key ("Magma
+  // Cannon"); ruleExact is case-sensitive, so match the whole token here. Exact
+  // (not substring), so named magic items in an eq line are never mis-linked.
+  if(D.glossary){ const lc=base.toLowerCase();
+    for(const k in D.glossary){ if(k.toLowerCase()===lc) return {name:k, text:D.glossary[k]}; } }
+  // then the shared rulebook weapon/armour rules via alias (generic profiles)
+  const key=EQUIP_ALIASES[base.toLowerCase()];
+  if(key){ const R=window.COMMON_RULES||{}; if(R[key]) return {name:key, text:R[key]}; }
+  return null;
+}
+function hasRuleDef(label){ return !!ruleDef(label); }
+/* strict, exact-name lookup (no equipment regex/substring fallback) — used to
+   decide which words in a unit's Special-rules line are clickable. */
+function ruleExact(name){
+  if(!name) return null;
+  if(D.glossary && D.glossary[name]) return {name, text:D.glossary[name]};
+  const SR=window.COMMON_SPECIAL_RULES||{}; if(SR[name]) return {name, text:SR[name]};
+  const R=window.COMMON_RULES||{}; if(R[name]) return {name, text:R[name]};
+  return null;
+}
+/* render a comma/semicolon/period-separated string (a unit's `rules` or `eq`
+   line) with each recognised token clickable — opens its definition in the
+   stacked window. `resolver` decides what is a known rule; a trailing
+   parenthetical like "Fly (8)" or "light armour (Handlers)" is stripped for the
+   lookup but kept in the displayed text. Unknown tokens stay plain. */
+function tokensToHTML(str, resolver){
+  if(!str) return "";
+  window.__rw = window.__rw || [];
+  const parts = String(str).split(/([,;.])/);
+  let out = "";
+  for(const part of parts){
+    if(part===","||part===";"||part==="."){ out+=esc(part); continue; }
+    const m = part.match(/^(\s*)([\s\S]*?)(\s*)$/);
+    const lead=m[1], core=m[2], trail=m[3];
+    if(!core){ out+=esc(part); continue; }
+    const base = core.replace(/\s*\([^)]*\)\s*$/,"").trim();
+    const def = resolver(core) || (base && base!==core ? resolver(base) : null);
+    if(def){
+      const idx = window.__rw.push(def.name)-1;
+      out += esc(lead) + `<span class="ruleword" onclick="event.stopPropagation();openRuleInfo(__rw[${idx}])">${esc(core)}</span>` + esc(trail);
+    } else {
+      out += esc(part);
+    }
+  }
+  return out;
+}
+function rulesToHTML(rules){ return tokensToHTML(rules, ruleExact); }   // strict: special rules
+function eqToHTML(eq){ return tokensToHTML(eq, equipDef); }            // weapons/armour/command
+/* render a rule's text: paragraphs are separated by blank lines, and a sub-heading
+   wrapped in **double asterisks** becomes bold (rule text is transcribed verbatim
+   from the rulebook, which uses bold sub-headers like "Berserk Rage"). */
+function ruleTextHTML(text){
+  return String(text).split(/\n[ \t]*\n/).map(p=>p.trim()).filter(Boolean)
+    .map(p=>`<div class="rule">${esc(p).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>")}</div>`).join("");
+}
+function openRuleInfo(label){
+  const r=ruleDef(label);
+  if(!r){ openModal2(label||"Rule", `<div class="rule" style="color:var(--muted)">No rule reference available for this option.</div>`); return; }
+  openModal2(r.name, ruleTextHTML(r.text));
+}
+function mkRuleInfoBtn(label){
+  const b=document.createElement("button"); b.className="info"; b.textContent="i"; b.title="Rule reference";
+  b.onclick=(ev)=>{ ev.preventDefault(); ev.stopPropagation(); openRuleInfo(label); };
+  return b;
+}
+/* "all options" info button — a distinct list glyph (vs the round italic "i" used
+   for a single / chosen entry), used by dropdowns that show every option's rule. */
+function mkAllInfoBtn(title, onClick){
+  const b=document.createElement("button"); b.className="info list"; b.textContent="≣"; b.title=title||"Rules for all options";
+  b.onclick=(ev)=>{ ev.preventDefault(); ev.stopPropagation(); onClick(); };
+  return b;
+}
+/* A dropdown (choice / mustChoose) stays the picker, but its `i` button opens
+   ONE stacked window listing EVERY option in the dropdown with its full rule
+   text expanded — so the player can read/compare before picking. Options with
+   no defined rule are still listed, marked "no separate rule text". The chosen
+   option (if any) is flagged. */
+const SELNOTE=' <span style="color:var(--muted);font-weight:400">— selected</span>';
+function openOptionRules(title, choices, selChoice){
+  let html="";
+  choices.forEach(c=>{
+    const note = c===selChoice ? SELNOTE : "";
+    const cost = c.cost ? ` (+${c.cost}${c.per==='model'?'/model':''})` : "";
+    const def = ruleDef(c.label);
+    const body = def ? ruleTextHTML(def.text)
+                     : `<div class="rule" style="color:var(--muted)">No separate rule text.</div>`;
+    html += `<div class="lbl">${esc(c.label)}${esc(cost)}${note}</div>${body}`;
+  });
+  openModal2(title, html || `<div class="rule" style="color:var(--muted)">No options.</div>`);
+}
+/* mount profile/rules for one mount choice: its own prof/rules/eq, else matched
+   from unitInfo by name (same resolution as openMountInfo). */
+function mountChoiceData(c){
+  // `prof` may be a single stat row [name,M,…] or an array of such rows (a monster
+  // + its crew, e.g. the Arachnarok Spider). Normalise to `rows` (array of rows).
+  if(c.prof){ const rows=Array.isArray(c.prof[0])?c.prof:[c.prof]; return {rows, rules:c.rules||"", eq:c.eq||""}; }
+  const hit=mountProfile(c.label); if(hit) return {rows:[hit.row], rules:hit.rules||"", eq:hit.eq||""};
+  return null;
+}
+/* One mount rendered as a compact unit entity: profile table + clickable
+   equipment line + clickable special-rules line (same layout as a unit's info
+   page, NOT expanded — tap a rule/weapon to open it in the stacked window).
+   `statlineOnly` returns just the "M6 WS5 …" strip for the entry card. */
+function mountEntityHTML(c){
+  const d=mountChoiceData(c);
+  if(!d || !d.rows || !d.rows.length) return `<div class="rule" style="color:var(--muted)">No profile recorded for this mount yet.</div>`;
+  let h=`<table class="prof"><tr><th>Profile</th>${STAT_HEAD.map(s=>`<th>${s}</th>`).join("")}</tr>`;
+  h+=d.rows.map(row=>`<tr><td class="nm">${esc(row[0])}</td>${row.slice(1).map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`).join("");
+  h+=`</table>`;
+  if(d.eq && d.eq!=="—") h+=`<div class="lbl">Equipment</div><div class="rule">${eqToHTML(d.eq)}</div>`;
+  if(d.rules) h+=`<div class="lbl">Special rules</div><div class="rule">${rulesToHTML(d.rules)}</div>`;
+  return h;
+}
+/* Mount selection reuses the SAME magic-item picker (`openItemPicker`): a tick on
+   each mount, others lock once one is ticked (single-select), OK confirms, Cancel
+   closes, nothing ticked ⇒ no mount. Each mount's description is the compact unit
+   entity (profile + clickable equipment + clickable special rules) — passed as raw
+   `html` so the picker renders it instead of escaped text. */
+function openMountPicker(e,u,o){
+  window.__rw=[];                                            // rule indices for the entity HTML below
+  const items=o.choices.map((c,i)=>({c,i}))
+    .filter(({c})=>(!c.only||variantMatch(e,u,c.only)) && !mountChoiceBlocked(e,u,c))   // honour-gated mounts hidden until their honour is taken
+    .sort((a,b)=>a.c.cost-b.c.cost)
+    .map(({c})=>({ name:c.label, cost:c.cost, html:mountEntityHTML(c) }));
+  const cur=(e.opts.mount!=null && o.choices[e.opts.mount]) ? o.choices[e.opts.mount].label : null;
+  openItemPicker({
+    title:o.label||"Mount", multi:false, groups:[{label:"", items}],
+    selected:cur?[cur]:[], remaining:()=>Infinity,
+    onConfirm:(sel)=>{ const nm=sel[0]||null;
+      let idx = nm==null ? null : o.choices.findIndex(c=>c.label===nm);
+      e.opts.mount = (idx==null||idx<0) ? null : idx; render(); }
+  });
+}
+
+function renderCatalog(){
+  const el=document.getElementById("catalog"); el.innerHTML="";
+  CATS.forEach(([cat,label])=>{
+    const collapsed=!!collapsedCatalog[cat];
+    const h=document.createElement("h2"); h.className="sec cathead";
+    h.innerHTML=`<span class="cv">${collapsed?'▸':'▾'}</span><span>${label}</span><span class="cpts">${D.units[cat].length}</span>`;
+    h.onclick=()=>{ collapsedCatalog[cat]=!collapsed; render(); };
+    el.appendChild(h);
+    if(collapsed) return;
+    D.units[cat].forEach(u=>{
+      const base = u.isCharacter ? Math.min(...u.variants.map(v=>v.points)) : u.basePoints;
+      const ptlab = u.isCharacter ? base+"+ pts" : (u.perModel? base+" pts/model" : base+" pts");
+      const d=document.createElement("div"); d.className="catitem";
+      d.innerHTML=`<span>${u.name}<br><span class="pts">${ptlab}${u.isSpecialChar?' · unique':''}</span></span>`;
+      const info=document.createElement("button"); info.className="info"; info.textContent="i"; info.title="Stats & special rules";
+      info.onclick=(ev)=>{ ev.stopPropagation(); openUnitDetail(cat,u.id,0); }; d.appendChild(info);
+      const b=document.createElement("button"); b.className="add"; b.textContent="+"; b.title="Add to army";
+      b.onclick=()=>addUnit(cat,u.id); d.appendChild(b); el.appendChild(d);
+    });
+  });
+}
+
+function renderBars(){
+  const limit = +document.getElementById("limit").value||0;
+  const tot=grandTotal();
+  const tEl=document.getElementById("totalPts"); tEl.textContent=Math.round(tot*10)/10;
+  tEl.className="big"+(tot>limit?" over":"");
+  document.getElementById("totalNote").textContent="of "+limit;
+  const defs=[
+    ["Characters","characters",D.composition.charactersMax,"max"],
+    ["Core","core",D.composition.coreMin,"min"],
+    ["Special","special",D.composition.specialMax,"max"],
+    ["Rare","rare",D.composition.rareMax,"max"]
+  ];
+  document.getElementById("bars").innerHTML = defs.map(([lab,cat,frac,kind])=>{
+    const cap=limit*frac, used=catTotal(cat);
+    const pct=cap>0?Math.min(100,used/cap*100):0;
+    let cls="fill", flag="";
+    if(kind==="max" && used>cap+0.001){cls+=" bad"; flag=" ⚠";}
+    if(kind==="min"){ cls+= used>=cap-0.001?" good":""; flag = used<cap-0.001?" ⚠":""; }
+    return `<div class="bar"><div class="lab"><span>${lab} <span style="color:var(--muted)">(${kind} ${Math.round(frac*100)}%)</span></span>
+      <b>${Math.round(used)} / ${Math.round(cap)}${flag}</b></div>
+      <div class="track"><div class="${cls}" style="width:${pct}%"></div></div></div>`;
+  }).join("");
+}
+
+function renderRoster(){
+  const el=document.getElementById("roster"); el.innerHTML="";
+  if(state.length===0){ el.innerHTML='<div class="empty">No units yet. Add units from the catalogue on the left.</div>'; return; }
+  CATS.forEach(([cat,label])=>{
+    const items=state.filter(e=>e.cat===cat); if(!items.length) return;
+    const collapsed=!!collapsedCats[cat];
+    const h=document.createElement("h2"); h.className="sec cathead";
+    h.innerHTML=`<span class="cv">${collapsed?'▸':'▾'}</span><span>${label}</span><span class="cpts">${Math.round(catTotal(cat))} pts · ${items.length}</span>`;
+    h.onclick=()=>{ collapsedCats[cat]=!collapsed; render(); };
+    el.appendChild(h);
+    if(!collapsed) items.forEach(e=>el.appendChild(renderEntry(e)));
+  });
+}
+
+function renderEntry(e){
+  const u=findUnit(e.cat,e.id);
+  const wrap=document.createElement("div"); wrap.className="entry"; wrap.id="entry-"+e.uid;
+  const pts=entryPoints(e);
+  // head
+  const head=document.createElement("div"); head.className="ehead";
+  let nm = u.isCharacter ? u.variants[e.variant].name : u.name;
+  const cv=document.createElement("button"); cv.className="cvbtn"; cv.textContent=e.collapsed?"▸":"▾"; cv.title=e.collapsed?"Expand":"Collapse";
+  cv.onclick=()=>{ e.collapsed=!e.collapsed; render(); }; head.appendChild(cv);
+  const info=document.createElement("button"); info.className="info"; info.textContent="i"; info.title="Stats & special rules";
+  info.onclick=()=>openUnitDetail(e.cat,e.id,e.variant);
+  head.appendChild(info);
+  const t=document.createElement("span"); t.className="htitle";
+  const cntTag = (!u.isCharacter && u.perModel) ? ` <span class="cnt">×${e.count}</span>` : "";
+  t.innerHTML=`<span class="nm">${esc(nm)}</span>${cntTag} <span class="cat">${e.cat}</span>`;
+  t.style.cursor="pointer"; t.onclick=()=>{ e.collapsed=!e.collapsed; render(); }; head.appendChild(t);
+  const ept=document.createElement("span"); ept.className="ept"; ept.textContent=Math.round(pts*10)/10; head.appendChild(ept);
+  const dup=document.createElement("button"); dup.className="del dup"; dup.textContent="⧉"; dup.title="Duplicate";
+  dup.onclick=()=>duplicateEntry(e.uid); head.appendChild(dup);
+  const del=document.createElement("button"); del.className="del"; del.textContent="✕"; del.title="Remove";
+  del.onclick=()=>{ state=state.filter(x=>x.uid!==e.uid); if(generalUid===e.uid)generalUid=null; render(); };
+  head.appendChild(del); wrap.appendChild(head);
+
+  if(e.collapsed){ if(entryErrors(e,u).length) wrap.classList.add("invalid"); return wrap; }
+
+  const body=document.createElement("div"); body.className="ebody";
+
+  // Army General nomination (any eligible character may be the General; only one in the army)
+  if(u.isCharacter && !u.cannotBeGeneral){
+    const r=mkRow("General");
+    const lab=document.createElement("label"); lab.className="chk";
+    const c=document.createElement("input"); c.type="radio"; c.name="armyGeneral"; c.checked=generalUid===e.uid;
+    c.onchange=()=>{ generalUid=e.uid; render(); };
+    lab.append(c,document.createTextNode("Army General"));
+    r.appendChild(lab); body.appendChild(r);
+  }
+
+  // variant selector (characters with >1)
+  if(u.isCharacter && u.variants.length>1){
+    const r=mkRow("Profile");
+    const s=document.createElement("select");
+    u.variants.forEach((v,i)=>{ const o=document.createElement("option"); o.value=i; o.textContent=`${v.name} (${v.points})`; if(i===e.variant)o.selected=true; s.appendChild(o); });
+    s.onchange=()=>{ e.variant=+s.value; e.magic={}; render(); }; r.appendChild(s); body.appendChild(r);
+  }
+
+  // unit size — clamp to the unit's allowed min/max (open-ended max stays unbounded)
+  if(u.perModel){
+    const mn = u.unitSize ? u.unitSize[0] : 1;
+    const mx = u.unitSize && u.unitSize[1]!=null ? u.unitSize[1] : Infinity;
+    const clamp=(n)=>Math.max(mn,Math.min(mx,Math.floor(n)));
+    const r=mkRow("Models");
+    const st=document.createElement("div"); st.className="stepper";
+    const minus=document.createElement("button"); minus.textContent="–";
+    const inp=document.createElement("input"); inp.type="number"; inp.value=e.count;
+    inp.min=mn; if(mx!==Infinity) inp.max=mx;
+    const plus=document.createElement("button"); plus.textContent="+";
+    minus.disabled = e.count<=mn; plus.disabled = e.count>=mx;
+    minus.onclick=()=>{ e.count=clamp(e.count-1); render(); };
+    plus.onclick=()=>{ e.count=clamp(e.count+1); render(); };
+    inp.onchange=()=>{ e.count=clamp(+inp.value||mn); render(); };
+    st.append(minus,inp,plus); r.appendChild(st);
+    if(u.unitSize){ const sw=document.createElement("span");
+      const bad=e.count<mn||(mx!==Infinity&&e.count>mx);
+      sw.className=bad?"size-warn":"note"; sw.textContent=`(${mn}${mx===Infinity?'+':'–'+mx})`; r.appendChild(sw); }
+    body.appendChild(r);
+  }
+
+  // required attached models at a fixed ratio (e.g. Squig Herd Herders) — shown and
+  // auto-costed, so the player sees how many are included and their points.
+  if(u.attachedPerN){ const ap=u.attachedPerN, n=attachedCount(e,u);
+    const r=mkRow(ap.name+"s"); const sp=document.createElement("span"); sp.className="note";
+    sp.textContent=`${n} × ${ap.name} auto-included (+${n*ap.cost} pts) — one per ${ap.every} models`;
+    r.appendChild(sp); body.appendChild(r); }
+
+  // options (a run of 3+ plain add-on toggles collapses into one Upgrades picker)
+  renderOptions(e,u,body);
+
+  // lore selector + spell picker for wizards
+  if(u.lores && wizardActive(e,u)){
+    const avail=availableLores(e,u);
+    if(e.lore && !avail.includes(e.lore)){ e.lore=""; e.spells=[]; }   // gated lore no longer legal (e.g. sub-species removed)
+    const r=mkRow("Lore of Magic"); const s=document.createElement("select");
+    s.innerHTML='<option value="">— choose —</option>'+avail.map(l=>`<option ${e.lore===l?'selected':''}>${esc(l)}</option>`).join("");
+    s.onchange=()=>{ e.lore=s.value; e.spells=[]; render(); }; r.appendChild(s); body.appendChild(r);
+    body.appendChild(renderSpells(e,u));
+  }
+
+  // magic items (characters with a budget, or BSB)
+  const budget = magicBudget(e,u);
+  if(budget>0 || isBSB(e,u)){
+    body.appendChild(renderMagic(e,u,budget));
+  }
+
+  if(u.notes){ const n=document.createElement("div"); n.className="note"; n.textContent="ⓘ "+u.notes; body.appendChild(n); }
+  wrap.appendChild(body);
+  // mark invalid
+  if(entryErrors(e,u).length) wrap.classList.add("invalid");
+  return wrap;
+}
+
+function mkRow(label){ const r=document.createElement("div"); r.className="row";
+  if(label){ const l=document.createElement("label"); l.className="t"; l.textContent=label; r.appendChild(l);} return r; }
+
+/* A "plain" add-on toggle: a simple yes/no upgrade with no conditional show/hide
+   or army-wide validation (those read clearer as inline checkboxes). Only these
+   are eligible for auto-grouping. */
+function isPlainToggle(o){
+  return o && o.type==="toggle" && !o.only && !o.bsb && !o.requires &&
+         !o.requiresMount && !o.noGod && !o.oncePerArmy && !o.limitByUnit && !o.requiresChoice;
+}
+/* Render a unit's options, collapsing any contiguous run of 3+ plain toggles
+   (typically the book's "UPGRADES:" block) into a single multi-select picker so
+   the player reads/ticks them on one screen instead of chasing many i-buttons. */
+function renderOptions(e,u,body){
+  const opts=u.options||[]; let i=0;
+  while(i<opts.length){
+    if(isPlainToggle(opts[i])){
+      let j=i; while(j<opts.length && isPlainToggle(opts[j])) j++;
+      const run=opts.slice(i,j);
+      if(run.length>=3){ body.appendChild(renderToggleGroup(e,u,run)); i=j; continue; }
+    }
+    body.appendChild(renderOption(e,opts[i],u)); i++;
+  }
+}
+/* The grouped-upgrades picker: multi-select, no cap (tick any the rules allow),
+   each upgrade's rule shown inline; the i button shows only what's ticked. Each
+   toggle keeps its own boolean in e.opts, so points/validation/save are unchanged. */
+function renderToggleGroup(e,u,run){
+  const r=mkRow("Upgrades");
+  const chosen=()=>run.filter(o=>e.opts[o.id]);
+  const open=()=>{
+    const items=run.map(o=>{ const def=ruleDef(o.label);
+      const body=def?ruleTextHTML(def.text):`<span style="color:var(--muted)">No separate rule text.</span>`;
+      return { name:o.label, cost:o.cost||0, html:`<div class="d">${body}</div>` }; });
+    openItemPicker({
+      title:"Upgrades", multi:true,
+      groups:[{label:"Tick any that apply", items}],
+      selected: chosen().map(o=>o.label),
+      onConfirm:(names)=>{ run.forEach(o=>{ e.opts[o.id]=names.includes(o.label); }); render(); }
+    });
+  };
+  const labels=chosen().map(o=>o.label);
+  r.appendChild(pickBtn(labels.length?labels.join(", "):"Choose…", !labels.length, open));
+  r.appendChild(pickInfoBtn("Selected upgrades", ()=>openChosenInfoRows("Upgrades",
+    chosen().map(o=>{ const def=ruleDef(o.label); return {name:o.label, cost:o.cost||0, desc:def?def.text:"(no separate rule text)"}; }))));
+  return r;
+}
+function renderOption(e,o,u){
+  if(o.requires && !optionAvailable(o)) return document.createComment("");   // locked until its prerequisite unit is present
+  if(optGodBlocked(e,u,o)) return document.createComment("");                 // barred for this model's god (e.g. Khorne Wizard)
+  if(optMountBlocked(e,u,o)) return document.createComment("");               // mount-upgrade: hidden until that mount is chosen
+  if(optChoiceBlocked(e,u,o)) return document.createComment("");              // barred by a sibling choice (e.g. sub-species)
+  if(o.type==="choice"||o.type==="mustChoose"){
+    // Single-select slot → the same modal picker as magic items (radio mode): the
+    // list shows every option with its rule text inline, so there's no separate
+    // "all options" window; the i button shows only the chosen option.
+    const req = o.type==="mustChoose";
+    const r=mkRow(o.label);
+    const cur = (e.opts[o.id]!=null && o.choices[e.opts[o.id]]) ? o.choices[e.opts[o.id]] : null;
+    const open=()=>{
+      const items=o.choices
+        .filter(c=>!c.only || restrictOK(e,u,c.only))           // variant-gated choices hidden
+        .map(c=>{ const def=ruleDef(c.label);
+          const body=def?ruleTextHTML(def.text):`<span style="color:var(--muted)">No separate rule text.</span>`;
+          const it={ name:c.label, cost:c.cost||0, html:`<div class="d">${body}</div>` };
+          // conditional choices (e.g. Elven Honours) stay visible but disabled when
+          // the current mount forbids them — unless this is the current pick
+          const ce=honourCondOK(e,u,c);
+          if(!ce.ok && !(cur && cur.label===c.label)){ it.disabled=true; it.reason=ce.reason; }
+          return it; });
+      openItemPicker({
+        title:o.label, radio:true, requireOne:req,
+        groups:[{label:o.label, items}],
+        selected: cur?[cur.label]:[],
+        onConfirm:(names)=>{
+          if(!names.length){ if(!req) e.opts[o.id]=null; }      // mustChoose keeps its current pick
+          else e.opts[o.id]=o.choices.findIndex(c=>c.label===names[0]);
+          render(); }
+      });
+    };
+    const btnText = cur ? `${cur.label}${cur.cost?` (+${cur.cost}${cur.per==='model'?'/model':''})`:''}` : (req?"Choose…":"— none —");
+    r.appendChild(pickBtn(btnText, !cur, open));
+    r.appendChild(pickInfoBtn("Selected option", ()=>openChosenInfoRows(o.label,
+      cur?[{name:cur.label, cost:cur.cost||0, desc:(ruleDef(cur.label)?ruleDef(cur.label).text:"(no separate rule text)")}]:[])));
+    return r;
+  }
+  if(o.type==="toggle"){
+    if(o.only && !variantMatch(e,u,o.only)) return document.createComment("");
+    const r=mkRow(""); const lab=document.createElement("label"); lab.className="chk";
+    const c=document.createElement("input"); c.type="checkbox"; c.checked=!!e.opts[o.id];
+    c.onchange=()=>{ e.opts[o.id]=c.checked; render(); };
+    lab.append(c,document.createTextNode(o.label+(o.cost?` (+${o.cost}${o.per==='model'?'/model':''})`:""))); r.appendChild(lab);
+    if(hasRuleDef(o.label)) r.appendChild(mkRuleInfoBtn(o.label));
+    return r;
+  }
+  if(o.type==="command"){
+    const ROLE_RULE={leader:"Leader", musician:"Musician", standard:"Standard Bearer"};
+    const r=mkRow("Command"); (o.roles||["leader","musician","standard"]).forEach(role=>{
+      const lab=document.createElement("label"); lab.className="chk";
+      const c=document.createElement("input"); c.type="checkbox"; c.checked=e.opts.cmd[role];
+      c.onchange=()=>{ e.opts.cmd[role]=c.checked; if(role==="standard"&&!c.checked)e.magicStd=""; render(); };
+      const txt=role[0].toUpperCase()+role.slice(1)+` (+${CMD_COST[role]})`;
+      lab.append(c,document.createTextNode(txt)); r.appendChild(lab);
+      r.appendChild(mkRuleInfoBtn(ROLE_RULE[role]));
+    });
+    // magic standard picker, shown when Standard Bearer is taken
+    if(o.magicStandard && e.opts.cmd.standard){
+      const wrap=document.createElement("div"); wrap.style.flexBasis="100%";
+      const r2=mkRow("Magic Standard");
+      const cur=e.magicStd||"";
+      const isHob = findUnit(e.cat,e.id).keyword==="hobgoblin";
+      const banner=o.magicStandard;                              // this unit's banner budget
+      // legal standards within the banner budget, respecting Hobgoblin/blood/god limits
+      const groups=pickerGroups("Magic Standards",e,u,(it)=>it.cost<=banner && !(it.only==="Hobgoblins"&&!isHob));
+      const open=()=>openItemPicker({
+        title:"Magic Standard", multi:false, groups,
+        selected:cur?[cur]:[], remaining:()=>banner,            // a single standard ≤ banner budget
+        onConfirm:(sel)=>{ e.magicStd=sel[0]||""; render(); }
+      });
+      r2.appendChild(pickBtn(cur?`${cur} (${itemCost(cur)})`:"Choose…", !cur, open));
+      r2.appendChild(pickInfoBtn("Selected standard", ()=>openChosenInfoRows("Magic Standard", cur?[{name:cur,cost:itemCost(cur),desc:itemDescOf(cur)}]:[])));
+      const bd=document.createElement("span"); bd.className="note"; bd.textContent=`up to ${banner} pts`;
+      r2.appendChild(bd); wrap.appendChild(r2); r.appendChild(wrap);
+    }
+    return r;
+  }
+  if(o.type==="mount"){
+    const r=mkRow(o.label);
+    const cur = (e.opts.mount!=null && o.choices[e.opts.mount]) ? o.choices[e.opts.mount] : null;
+    // a "Choose…" button (like magic items) opens the rich mount picker
+    r.appendChild(pickBtn(cur?`${cur.label} (+${cur.cost})`:"Choose…", !cur, ()=>openMountPicker(e,u,o)));
+    return r;
+  }
+  if(o.type==="multi"){
+    const r=mkRow(o.label);
+    if(o.repeatable){
+      const st=document.createElement("div"); st.className="stepper";
+      const m=document.createElement("button"); m.textContent="–"; const inp=document.createElement("input"); inp.type="number"; inp.value=e.opts[o.id]||0;
+      const p=document.createElement("button"); p.textContent="+";
+      m.onclick=()=>{ e.opts[o.id]=Math.max(0,(e.opts[o.id]||0)-1); render(); };
+      p.onclick=()=>{ e.opts[o.id]=Math.min(o.max,(e.opts[o.id]||0)+1); render(); };
+      inp.onchange=()=>{ e.opts[o.id]=Math.max(0,Math.min(o.max,Math.floor(+inp.value||0))); render(); };
+      st.append(m,inp,p); r.appendChild(st);
+      const n=document.createElement("span"); n.className="note"; n.textContent=`× ${o.choices[0].cost} pts each (max ${o.max})`; r.appendChild(n);
+    } else {
+      // multi-select upgrades use the same modal picker as magic items/mounts, so
+      // each upgrade shows its rule text inline and the cap is enforced (max picks).
+      const sel=(e.opts[o.id]||[]).filter(i=>o.choices[i]);
+      const labels=sel.map(i=>o.choices[i].label);
+      const open=()=>{
+        const items=o.choices.map(c=>{
+          const def=ruleDef(c.label);
+          const body=def?ruleTextHTML(def.text):`<span style="color:var(--muted)">No separate rule text.</span>`;
+          return { name:c.label, cost:c.cost, html:`<div class="d">${body}</div>` };
+        });
+        openItemPicker({
+          title:o.label, multi:true, maxPicks:o.max,
+          groups:[{label:`Choose up to ${o.max}`, items}],
+          selected:labels,
+          onConfirm:(names)=>{ e.opts[o.id]=names.map(n=>o.choices.findIndex(c=>c.label===n)).filter(i=>i>=0); render(); }
+        });
+      };
+      r.appendChild(pickBtn(labels.length?labels.join(", "):"Choose…", !labels.length, open));
+      r.appendChild(pickInfoBtn("Selected upgrades", ()=>openChosenInfoRows(o.label,
+        sel.map(i=>{ const c=o.choices[i], def=ruleDef(c.label);
+          return { name:c.label, cost:c.cost, desc:def?def.text:"(no separate rule text)" }; }))));
+      const n=document.createElement("span"); n.className="note"; n.textContent=`(up to ${o.max})`; r.appendChild(n);
+    }
+    return r;
+  }
+  if(o.type==="perN"){
+    // "one X for every N models" — a stepper whose max tracks the unit's size.
+    const r=mkRow(o.label);
+    const max=perNMax(e,o), cur=perNCount(e,o);
+    if(cur!==(e.opts[o.id]||0)) e.opts[o.id]=cur;               // clamp stored value to the live max
+    const st=document.createElement("div"); st.className="stepper";
+    const m=document.createElement("button"); m.textContent="–";
+    const inp=document.createElement("input"); inp.type="number"; inp.value=cur;
+    const p=document.createElement("button"); p.textContent="+";
+    m.onclick=()=>{ e.opts[o.id]=Math.max(0,cur-1); render(); };
+    p.onclick=()=>{ e.opts[o.id]=Math.min(max,cur+1); render(); };
+    inp.onchange=()=>{ e.opts[o.id]=Math.max(0,Math.min(max,Math.floor(+inp.value||0))); render(); };
+    if(max<=0){ m.disabled=p.disabled=inp.disabled=true; }
+    st.append(m,inp,p); r.appendChild(st);
+    const n=document.createElement("span"); n.className="note";
+    n.textContent=`+${o.cost} pts each · one per ${o.n} models (max ${max})`; r.appendChild(n);
+    if(hasRuleDef(o.label)) r.appendChild(mkRuleInfoBtn(o.label));
+    return r;
+  }
+  return document.createComment("");
+}
+
+/* ---------- helpers for variant/wizard/magic ---------- */
+function variantMatch(e,u,only){ if(!u.isCharacter) return true; return u.variants[e.variant].name===only; }
+function wizardActive(e,u){ return wizardLevel(e,u)>0; }
+function magicBudget(e,u){ if(!u.isCharacter) return 0; let b=u.variants[e.variant].magicBudget||0; return b; }
+function isBSB(e,u){ return u.isCharacter && (u.options||[]).some(o=>o.bsb) && e.opts.bsb; }
+
+/* ---------- daemon god alignment & conditional (cross-unit) options ---------- */
+// A model's god: a fixed `god` on the unit, or derived from a chosen "align" option.
+function entryGod(e,u){
+  if(u.god) return u.god;
+  const o=(u.options||[]).find(o=>o.id==="align");
+  if(o){ const i=e.opts.align; if(i!=null && o.choices[i]) return o.choices[i].god||null; }
+  return null;
+}
+function godOK(it,god){ return !it.god || it.god===god; }
+function unitHasTag(u,t){ return Array.isArray(u.tags) && u.tags.includes(t); }
+// An option may be barred for certain gods (e.g. Khornate Daemons can't take a
+// Wizard upgrade): `noGod:["Khorne"]`. True ⇒ the option is unavailable/ignored.
+function optGodBlocked(e,u,o){ return !!(o && o.noGod && o.noGod.includes(entryGod(e,u))); }
+// The model's chosen mount (a `mount` option's selected choice), or null.
+function mountOptionOf(u){ return (u.options||[]).find(o=>o.type==="mount")||null; }
+function selectedMount(e,u){ const o=mountOptionOf(u); if(!o) return null; const i=e.opts.mount; return (i!=null && o.choices[i])?o.choices[i]:null; }
+/* ---------- conditional choices (e.g. High Elf Elven Honours) ----------
+   A `choice`/`mustChoose` option with id "honour" exposes the chosen label; a
+   honour choice may carry `cond:{mounts:[keys…]}` (with "__foot__" = on foot) so
+   the picker shows every honour but disables the ones the current mount forbids,
+   and a `mount` choice may carry `requiresHonour` so it only unlocks for its
+   honour. Generic: `honourCondOK` returns {ok:true} for any choice without cond. */
+function honourOption(u){ return (u.options||[]).find(o=>o.id==="honour" && (o.type==="choice"||o.type==="mustChoose"))||null; }
+function selectedHonour(e,u){ const o=honourOption(u); if(!o) return null; const i=e.opts[o.id]; return (i!=null && o.choices[i])?o.choices[i].label:null; }
+// a mount choice gated by an Honour (`requiresHonour:"Name"|[…]`). True ⇒ not unlocked.
+function mountChoiceBlocked(e,u,c){ if(!c||!c.requiresHonour) return false; const want=Array.isArray(c.requiresHonour)?c.requiresHonour:[c.requiresHonour]; return !want.includes(selectedHonour(e,u)); }
+// the model's current mount key, or "__foot__" if none / blocked
+function currentMountKey(e,u){ const m=selectedMount(e,u); if(!m||mountChoiceBlocked(e,u,m)) return "__foot__"; return m.key||"__mounted__"; }
+// honour eligibility vs the chosen mount → {ok, reason}; ok=false ⇒ shown disabled
+function honourCondOK(e,u,c){
+  if(!c||!c.cond||!c.cond.mounts) return {ok:true};
+  if(c.cond.mounts.includes(currentMountKey(e,u))) return {ok:true};
+  const mo=mountOptionOf(u);
+  const label=(k)=> k==="__foot__"?"on foot":(((mo&&mo.choices.find(x=>x.key===k))||{}).label||k);
+  return {ok:false, reason:"Requires: "+c.cond.mounts.map(label).join(" or ")};
+}
+// drop a mount whose unlocking Honour is no longer selected (keeps state legal)
+function reconcileEntry(e){ const u=findUnit(e.cat,e.id); if(!u) return;
+  const mo=mountOptionOf(u);
+  if(mo && e.opts.mount!=null){ const c=mo.choices[e.opts.mount];
+    // drop the chosen mount if it became illegal: honour-gated and its honour is
+    // gone, or restricted to a variant the model no longer is (e.g. Royal
+    // Hippogryph is Baron-only — switching off Baron deselects it)
+    if(!c || mountChoiceBlocked(e,u,c) || (c.only && !variantMatch(e,u,c.only))) e.opts.mount=null;
+  }
+  // clear any mount-gated upgrade toggles whose mount is no longer the chosen one,
+  // so a switched-away mount's upgrades (e.g. Royal Hippogryph Bloodrage) don't
+  // linger in state and silently reappear if that mount is picked again
+  (u.options||[]).forEach(o=>{ if(o.requiresMount && e.opts[o.id] && optMountBlocked(e,u,o)) e.opts[o.id]=false; });
+  // reset options barred by a sibling choice (e.g. sub-species) so a switched-away
+  // upgrade doesn't linger; clamp perN counters to the unit's current model count
+  (u.options||[]).forEach(o=>{
+    if(optChoiceBlocked(e,u,o)){ if(o.type==="perN") e.opts[o.id]=0; else if(o.type==="toggle") e.opts[o.id]=false; }
+    else if(o.type==="perN"){ e.opts[o.id]=perNCount(e,o); }
+  });
+}
+// An option may require a specific mount to be chosen first (`requiresMount:"key"`
+// or `["keyA","keyB"]`, matched against the mount choice's `key`). Used so a
+// mount's own upgrades (e.g. Royal Hippogryph talons, Great Taurus Flaming Breath)
+// only appear/charge once that mount is selected. True ⇒ option unavailable/ignored.
+function optMountBlocked(e,u,o){
+  if(!o || !o.requiresMount) return false;
+  const want=Array.isArray(o.requiresMount)?o.requiresMount:[o.requiresMount];
+  const m=selectedMount(e,u);
+  return !(m && want.includes(m.key));
+}
+// a model's Bloodline (VC): a fixed field on the unit entry.
+function entryBlood(e,u){ return u.bloodline || null; }
+/* ---- equipment access (magic weapon / armour gating) ----
+   A magic item that IS a mundane weapon or armour type (e.g. a magic heavy
+   armour, a magic great weapon) may only be taken by a model that can use that
+   type — i.e. it has it in base equipment or can buy it. Each such item carries
+   `requiresAccess:"heavy armour"` (or an array = any-of); each character declares
+   the union of types it has/can buy in `access:[…]` (unit-level, optionally
+   extended per variant). Items with no `requiresAccess` (a generic magic sword,
+   a talisman) are unrestricted. Tokens are matched after normalising through a
+   small alias map so "heavy lance"≡"lance", "polearm"≡"halberd", etc. */
+const ACCESS_ALIASES={
+  "two hand weapons":"additional hand weapon","paired weapons":"additional hand weapon","additional weapon":"additional hand weapon",
+  "double-handed weapon":"great weapon","great sword":"great weapon",
+  "polearm":"halberd",
+  "heavy lance":"lance","light lance":"lance","cavalry spear":"lance",
+  "full plate armour":"heavy armour","gromril armour":"heavy armour",
+  "gut-plate":"light armour","gut plate":"light armour"   // Ogre Kingdoms base armour ≈ light armour tier
+};
+function normAccess(s){
+  const t=String(s||"").toLowerCase().replace(/\s*\([^)]*\)\s*/g," ").replace(/[^a-z0-9 +'-]/g," ").replace(/\s+/g," ").trim();
+  return ACCESS_ALIASES[t]||t;
+}
+function modelAccess(e,u){
+  const set=new Set();
+  (u.access||[]).forEach(a=>set.add(normAccess(a)));
+  if(u.isCharacter && u.variants && u.variants[e.variant] && u.variants[e.variant].access)
+    u.variants[e.variant].access.forEach(a=>set.add(normAccess(a)));
+  return set;
+}
+// light/medium/heavy armour form a tier: a model that may wear a heavier armour
+// may also take a lighter magic armour (a magic armour replaces the mundane one).
+// Shields, barding and weapons are matched exactly.
+const ARMOUR_RANK={"light armour":1,"medium armour":2,"heavy armour":3};
+function hasAccess(e,u,req){
+  const acc=modelAccess(e,u);
+  let maxArmour=0; acc.forEach(a=>{ if(ARMOUR_RANK[a]>maxArmour) maxArmour=ARMOUR_RANK[a]; });
+  return (Array.isArray(req)?req:[req]).map(normAccess).some(r=>
+    ARMOUR_RANK[r] ? maxArmour>=ARMOUR_RANK[r] : acc.has(r));
+}
+// unified magic-item eligibility for a model: variant/keyword restriction (`only`),
+// Bloodline list (`blood:[...]`), vampire-only (`vampireOnly`), god (`god`), and
+// equipment access (`requiresAccess` — magic weapon/armour must match a usable type).
+function itemAllowed(it,e,u){
+  if(it.only && !restrictOK(e,u,it.only)) return false;
+  if(it.blood && !it.blood.includes(entryBlood(e,u))) return false;
+  if(it.vampireOnly && !unitHasTag(u,"Vampire")) return false;
+  if(it.god && !godOK(it,entryGod(e,u))) return false;
+  if(it.requiresAccess && !hasAccess(e,u,it.requiresAccess)) return false;
+  return true;
+}
+// requires:{unit:"id"|["id",...]} — option only available if such a unit is in the army.
+function armyHas(idOrArr){ const ids=Array.isArray(idOrArr)?idOrArr:[idOrArr]; return state.some(x=>ids.includes(x.id)); }
+function optionAvailable(o){ if(!o||!o.requires) return true; if(o.requires.unit) return armyHas(o.requires.unit); return true; }
+// army magic-item optgroups: grouped by god when the book uses god sections, else one "Army" group.
+function appendItemGroups(s, items, mk){
+  if(D.godSections){
+    const order=["Undivided","Khorne","Nurgle","Slaanesh","Tzeentch"], bySec={};
+    (items||[]).forEach(it=>{ const o=mk(it); if(!o) return; const sec=it.god||"Undivided"; (bySec[sec]=bySec[sec]||[]).push(o); });
+    order.forEach(sec=>{ if(bySec[sec]){ const g=document.createElement("optgroup"); g.label=sec; bySec[sec].forEach(o=>g.appendChild(o)); s.appendChild(g); } });
+  } else {
+    const g=document.createElement("optgroup"); g.label=D.name;
+    (items||[]).forEach(it=>{ const o=mk(it); if(o)g.appendChild(o); });
+    if(g.children.length) s.appendChild(g);
+  }
+}
+
+function giftsCost(e){ return (e.gifts||[]).reduce((s,nm)=>s+(nm?itemCost(nm):0),0); }
+/* A "multi-pick" magic category (e.g. Daemonic Gifts): take several, each once,
+   all drawn from the same magic-item budget — alongside the per-category items. */
+function renderMultiItemCat(e,u,cat,budget){
+  e.gifts = e.gifts || [];
+  e.gifts = e.gifts.filter(nm=>{ const it=findItem(nm); return it && itemAllowed(it,e,u); });   // drop now-illegal gifts
+  const wrap=document.createElement("div"); wrap.style.borderTop="1px dashed var(--line)"; wrap.style.paddingTop="6px"; wrap.style.marginTop="4px";
+  const r=mkRow(cat);
+  // budget already spent on everything EXCEPT the gifts in this category
+  const base = (budget>0) ? budget - (spentMagic(e) - giftsCost(e)) : Infinity;
+  const open=()=>openItemPicker({
+    title:cat, multi:true, groups:pickerGroups(cat,e,u,null),
+    selected:e.gifts.slice(),
+    remaining:(sel)=> isFinite(base) ? base - sel.reduce((s,n)=>s+itemCost(n),0) : Infinity,
+    onConfirm:(sel)=>{ e.gifts=sel; render(); }
+  });
+  r.appendChild(pickBtn(e.gifts.length?`Edit (${e.gifts.length})…`:"Choose…", !e.gifts.length, open));
+  r.appendChild(pickInfoBtn("Selected "+cat, ()=>openChosenInfoRows(cat, e.gifts.map(nm=>({name:nm,cost:itemCost(nm),desc:itemDescOf(nm)})))));
+  wrap.appendChild(r);
+  e.gifts.forEach(nm=>{
+    const row=mkRow("");
+    const chip=document.createElement("span"); chip.className="pickchip"; chip.title="Edit selection";
+    chip.textContent=`${nm} (${itemCost(nm)})`; chip.onclick=open;
+    const x=document.createElement("button"); x.className="del"; x.textContent="✕"; x.title="Remove"; x.style.marginLeft="6px";
+    x.onclick=()=>{ e.gifts=e.gifts.filter(g=>g!==nm); render(); };
+    row.appendChild(chip); row.appendChild(x); wrap.appendChild(row);
+  });
+  return wrap;
+}
+/* Vampiric Powers picker (VC): multi-pick from D.vampiricPowers, filtered by the
+   model's Bloodline, drawing from the same budget as magic items. */
+function renderPowers(e,u,budget){
+  e.powers = e.powers || [];
+  const bl=entryBlood(e,u);
+  e.powers=e.powers.filter(nm=>{ const p=powerDef(nm); return p && (!p.blood || p.blood.includes(bl)); }); // drop illegal on bloodline change
+  const wrap=document.createElement("div"); wrap.style.borderTop="1px dashed var(--line)"; wrap.style.paddingTop="6px"; wrap.style.marginTop="4px";
+  const base = (budget>0) ? budget - (spentMagic(e) - powersCost(e)) : Infinity;
+  const legal=(D.vampiricPowers||[]).filter(p=>!p.blood || p.blood.includes(bl))
+    .map(p=>({name:p.name, cost:p.cost, desc:p.desc||""}));
+  const r=mkRow("Vampiric Powers");
+  const open=()=>openItemPicker({
+    title:"Vampiric Powers", multi:true, groups:[{label:"Vampiric Powers", items:legal}],
+    selected:e.powers.slice(),
+    remaining:(sel)=> isFinite(base) ? base - sel.reduce((s,n)=>s+powerCost(n),0) : Infinity,
+    onConfirm:(sel)=>{ e.powers=sel; render(); }
+  });
+  r.appendChild(pickBtn(e.powers.length?`Edit (${e.powers.length})…`:"Choose…", !e.powers.length, open));
+  r.appendChild(pickInfoBtn("Selected powers", ()=>openChosenInfoRows("Vampiric Powers", e.powers.map(nm=>{ const p=powerDef(nm); return {name:nm, cost:p?p.cost:0, desc:p?p.desc:""}; }))));
+  wrap.appendChild(r);
+  e.powers.forEach(nm=>{ const row=mkRow("");
+    const chip=document.createElement("span"); chip.className="pickchip"; chip.title="Edit selection";
+    chip.textContent=`${nm} (${powerCost(nm)})`; chip.onclick=open;
+    const x=document.createElement("button"); x.className="del"; x.textContent="✕"; x.title="Remove"; x.style.marginLeft="6px";
+    x.onclick=()=>{ e.powers=e.powers.filter(p=>p!==nm); render(); };
+    row.appendChild(chip); row.appendChild(x); wrap.appendChild(row); });
+  return wrap;
+}
+function openPowerInfo(bl){
+  const lines=(D.vampiricPowers||[]).filter(p=>!bl||!p.blood||p.blood.includes(bl))
+    .map(p=>`<b>${p.name}</b> (${p.cost})${p.blood?` <span class="note">[${p.blood.join("/")}]</span>`:""}<br>${p.desc||""}`);
+  openModal("Vampiric Powers", lines.join("<br><br>")||"No powers.");
+}
+/* Virtue picker (Bretonnia): one per model from D.virtues; shows the duplicate
+   surcharge (cost ×N for the Nth model in the army carrying the same Virtue). */
+function renderVirtue(e,u,budget){
+  const wrap=document.createElement("div"); wrap.style.borderTop="1px dashed var(--line)"; wrap.style.paddingTop="6px"; wrap.style.marginTop="4px";
+  const cur=e.virtue||"";
+  const base = (budget>0) ? budget-(spentMagic(e)-virtueBase(e)) : Infinity;   // base cost must fit the budget
+  const legal=(D.virtues||[]).map(v=>({name:v.name, cost:v.cost, desc:v.desc||""}));
+  const r=mkRow("Virtue");
+  const open=()=>openItemPicker({
+    title:"Virtue of the Knight", multi:false, groups:[{label:"Virtues of the Knight", items:legal}],
+    selected:cur?[cur]:[],
+    remaining:(sel)=> isFinite(base) ? base - sel.reduce((s,n)=>{ const v=virtueDef(n); return s+(v?v.cost:0); },0) : Infinity,
+    onConfirm:(sel)=>{ e.virtue=sel[0]||""; render(); }
+  });
+  r.appendChild(pickBtn(cur?`${cur} (${virtueBase(e)})`:"Choose…", !cur, open));
+  r.appendChild(pickInfoBtn("Selected virtue", ()=>{ const v=virtueDef(cur); openChosenInfoRows("Virtue", v?[{name:v.name,cost:v.cost,desc:v.desc}]:[]); }));
+  const rank=virtueRank(e);
+  if(cur && rank>1){ const n=document.createElement("span"); n.className="size-warn"; n.textContent=`duplicate ×${rank} → ${virtueCost(e)} pts`; r.appendChild(n); }
+  wrap.appendChild(r);
+  return wrap;
+}
+function openVirtueInfo(){
+  const lines=(D.virtues||[]).map(v=>`<b>${v.name}</b> (${v.cost})<br>${v.desc||""}`);
+  openModal("Virtues of the Knight", lines.join("<br><br>")||"No virtues.");
+}
+/* points still available for one magic-item slot (current pick in that slot is refundable) */
+function magicSlotRemaining(e,budget,slotKey){
+  const cur=e.magic[slotKey]?itemCost(e.magic[slotKey]):0;
+  return budget - spentMagic(e) + cur;
+}
+/* one magic-item slot. Opens the picker for `sourceCat` (single-pick). Items over
+   the remaining budget are disabled in the list; the chosen item is shown on the
+   button and re-opens the picker when tapped. */
+function addMagicSlot(box,e,u,label,slotKey,sourceCat,budget,extra){
+  const cur=e.magic[slotKey]||"";
+  const base = budget>0 ? budget - spentMagic(e) + (cur?itemCost(cur):0) : Infinity;
+  const r=mkRow(label);
+  const open=()=>openItemPicker({
+    title:label, multi:false, groups:pickerGroups(sourceCat,e,u,extra),
+    selected: cur?[cur]:[],
+    remaining:(sel)=> isFinite(base) ? base - sel.reduce((s,n)=>s+itemCost(n),0) : Infinity,
+    onConfirm:(sel)=>{ e.magic[slotKey]=sel[0]||""; render(); }
+  });
+  r.appendChild(pickBtn(cur?`${cur} (${itemCost(cur)})`:"Choose…", !cur, open));
+  r.appendChild(pickInfoBtn("Selected item", ()=>openChosenInfoRows(label, cur?[{name:cur,cost:itemCost(cur),desc:itemDescOf(cur)}]:[])));
+  box.appendChild(r);
+}
+function renderMagic(e,u,budget){
+  const box=document.createElement("div"); box.className="magic";
+  const god=entryGod(e,u);
+  if(D.godSections){   // drop selections no longer legal for this model's god (e.g. alignment changed)
+    for(const cat in e.magic){ const nm=e.magic[cat]; if(nm){ const it=findItem(nm); if(it && it.god && it.god!==god) e.magic[cat]=""; } }
+    e.gifts=(e.gifts||[]).filter(nm=>{ const it=findItem(nm); return !(it && it.god && it.god!==god); });
+  }
+  // drop any stored slot pick that is no longer legal for this model (equipment
+  // access lost, variant switched, etc.) so a loaded save can't keep an illegal item
+  for(const cat in e.magic){ const nm=e.magic[cat]; if(nm){ const it=findItem(nm); if(it && !itemAllowed(it,e,u)) e.magic[cat]=""; } }
+  const used=spentMagic(e);
+  const over=used>budget;
+  box.innerHTML=`<div class="mt">Magic Items</div>`;
+  const bd=document.createElement("div"); bd.className="budget"+(over?" over":"");
+  bd.innerHTML=`Spent <b>${used}</b> / ${budget} pts <span class="note">· ${Math.max(0,budget-used)} left</span>`; box.appendChild(bd);
+  const wizard = wizardActive(e,u);
+  const multiCats = D.multiPickCategories||[];
+  for(const cat in D.magicItems){
+    if(cat==="Magic Standards") continue;            // standards handled separately (BSB only, no limit)
+    if(u.magicCatsOnly && !u.magicCatsOnly.includes(cat)) continue; // e.g. Wood Elf tree-characters: Spites only
+    if(cat==="Arcane Items"){
+      if(!wizard) continue;                           // only Wizards carry Arcane Items
+      ARCANE_SUBCATS.forEach(sub=>addMagicSlot(box,e,u,"Arcane — "+sub,"Arcane Items:"+sub,"Arcane Items",budget,(it)=>arcaneType(it.name)===sub));
+      continue;
+    }
+    if(multiCats.includes(cat)){ box.appendChild(renderMultiItemCat(e,u,cat,budget)); continue; }
+    addMagicSlot(box,e,u,cat,cat,cat,budget,null);
+  }
+  // Vampiric Powers (VC) — vampire characters only, share the budget
+  if(D.vampiricPowers && unitHasTag(u,"Vampire")) box.appendChild(renderPowers(e,u,budget));
+  // Virtue of the Knight (Bretonnia) — one per eligible character, shares the budget
+  if(D.virtues && u.virtueEligible) box.appendChild(renderVirtue(e,u,budget));
+  // Battle Standard Bearer: a Magic Standard with no points limit, in addition to other items
+  if(isBSB(e,u)){
+    const r=mkRow("Magic Standard");
+    const cur=e.magicStd||"";
+    const open=()=>openItemPicker({
+      title:"Magic Standard (BSB)", multi:false,
+      groups:pickerGroups("Magic Standards",e,u,null),   // BSB: no points limit
+      selected:cur?[cur]:[], remaining:()=>Infinity,
+      onConfirm:(sel)=>{ e.magicStd=sel[0]||""; render(); }
+    });
+    r.appendChild(pickBtn(cur?`${cur} (${itemCost(cur)})`:"Choose…", !cur, open));
+    r.appendChild(pickInfoBtn("Selected standard", ()=>openChosenInfoRows("Magic Standard", cur?[{name:cur,cost:itemCost(cur),desc:itemDescOf(cur)}]:[])));
+    const n=document.createElement("span"); n.className="note"; n.textContent="no points limit (BSB)";
+    r.appendChild(n); box.appendChild(r);
+  }
+  return box;
+}
+function restrictOK(e,u,only){
+  if(only==="Daemonsmith") return u.id==="daemonsmith";
+  if(only==="Hobgoblins") return false; // standards only; characters can't take in budget
+  // Variant-gated restriction: if `only` names one (or "A or B") of THIS unit's own
+  // variants, enforce it (e.g. "Level 3 Wizard — Count only", "Baron or Paladin").
+  // Otherwise we don't model the keyword, so don't hide it.
+  if(u.isCharacter && Array.isArray(u.variants)){
+    const names=u.variants.map(v=>v.name);
+    const wanted=String(only).split(/\s+or\s+/).map(s=>s.trim());
+    if(wanted.some(w=>names.includes(w))) return wanted.includes(u.variants[e.variant].name);
+  }
+  return true;
+}
+
+/* ---------- standard bearer magic standard selector ---------- */
+function renderStandardPicker(e,u){ /* integrated into command via separate row */ }
+
+/* =========================== VALIDATION =========================== */
+function entryErrors(e,u){
+  const errs=[];
+  if(u.perModel && u.unitSize){ const[mn,mx]=u.unitSize;
+    if(e.count<mn) errs.push(`${u.name}: below minimum size (${mn}).`);
+    if(mx!=null && e.count>mx) errs.push(`${u.name}: above maximum size (${mx}).`); }
+  const b=magicBudget(e,u);
+  if(b>0){ const used=spentMagic(e);
+    if(used>b) errs.push(`${u.variants[e.variant].name}: magic items/powers exceed ${b} pt budget.`); }
+  // a chosen conditional choice (Elven Honour) whose mount requirement is unmet
+  const ho=honourOption(u);
+  if(ho && e.opts[ho.id]!=null){ const c=ho.choices[e.opts[ho.id]]; const ce=honourCondOK(e,u,c);
+    if(!ce.ok){ const who=u.isCharacter?u.variants[e.variant].name:u.name; errs.push(`${who}: ${c.label} — ${ce.reason}.`); } }
+  return errs;
+}
+
+function renderValidation(){
+  const el=document.getElementById("validation"); el.innerHTML="";
+  const limit=+document.getElementById("limit").value||0;
+  const errs=[], warns=[];
+  const tot=grandTotal();
+  if(tot>limit) errs.push(`Army is ${Math.round((tot-limit)*10)/10} pts over the ${limit} pt limit.`);
+
+  // category caps
+  if(catTotal("characters")>limit*D.composition.charactersMax+0.001)
+    errs.push(`Characters exceed ${Math.round(D.composition.charactersMax*100)}% (${Math.round(catTotal("characters"))}/${Math.round(limit*D.composition.charactersMax)}).`);
+  if(catTotal("special")>limit*D.composition.specialMax+0.001)
+    errs.push(`Special exceeds ${Math.round(D.composition.specialMax*100)}%.`);
+  if(catTotal("rare")>limit*D.composition.rareMax+0.001)
+    errs.push(`Rare exceeds ${Math.round(D.composition.rareMax*100)}%.`);
+  if(state.length && catTotal("core")<limit*D.composition.coreMin-0.001)
+    warns.push(`Core is below the ${Math.round(D.composition.coreMin*100)}% minimum (${Math.round(catTotal("core"))}/${Math.round(limit*D.composition.coreMin)}).`);
+
+  // single unit/character 25% cost limit
+  state.forEach(e=>{ const u=findUnit(e.cat,e.id); const p=entryPoints(e);
+    if(limit && p>limit*D.composition.singleUnitMax+0.001)
+      errs.push(`${u.isCharacter?u.variants[e.variant].name:u.name} costs ${Math.round(p)} pts — over the 25% single-unit cap.`); });
+
+  // duplicate special/rare caps
+  const cap=dupCap(limit);
+  ["special","rare"].forEach(c=>{
+    const counts={};
+    state.filter(e=>e.cat===c).forEach(e=>{ counts[e.id]=(counts[e.id]||0)+1; });
+    for(const id in counts){ if(counts[id]>cap[c]){ const u=findUnit(c,id);
+      errs.push(`Too many ${u.name} (${counts[id]}). Limit is ${cap[c]} duplicate ${c} choice(s) at ${limit} pts.`); } }
+  });
+
+  // special character uniqueness
+  const scCount={};
+  state.forEach(e=>{ const u=findUnit(e.cat,e.id); if(u.isSpecialChar){ scCount[e.id]=(scCount[e.id]||0)+1; } });
+  for(const id in scCount){ if(scCount[id]>1){ const u=findUnit("characters",id); errs.push(`${u.name} is a special character — may be taken only once.`); } }
+
+  // expendable core requires a non-expendable core
+  const coreEntries=state.filter(e=>e.cat==="core");
+  const hasExp=coreEntries.some(e=>findUnit("core",e.id).expendable);
+  const hasNonExp=coreEntries.some(e=>!findUnit("core",e.id).expendable);
+  if(hasExp && !hasNonExp) errs.push(`Expendable Core units require at least one non-Expendable Core unit.`);
+
+  // slaves <= hobgoblin units
+  const slaveUnits=coreEntries.filter(e=>["orcslaves","goblinslaves"].includes(e.id)).length;
+  const hobUnits=coreEntries.filter(e=>["cutthroats","archers"].includes(e.id)).length;
+  if(slaveUnits>hobUnits) errs.push(`Slave units (${slaveUnits}) exceed Hobgoblin Cutthroat/Archer units (${hobUnits}).`);
+
+  // army-wide magic item uniqueness (incl. standards)
+  const itemNames=[];
+  state.forEach(e=>{ Object.values(e.magic).forEach(nm=>{ if(nm)itemNames.push(nm); }); if(e.magicStd)itemNames.push(e.magicStd); });
+  const seen={};
+  itemNames.forEach(nm=>{ seen[nm]=(seen[nm]||0)+1; });
+  for(const nm in seen){ if(seen[nm]>1 && !itemCommon(nm)) errs.push(`Magic item "${nm}" taken ${seen[nm]}× — unique items may be taken only once.`); }
+
+  // per-entry size/budget
+  state.forEach(e=>{ entryErrors(e,findUnit(e.cat,e.id)).forEach(m=>errs.push(m)); });
+
+  // capped upgrades: oncePerArmy (=1) or limitByUnit (= number of source units, e.g. one per Despot)
+  const optTaken={}, optMax={};
+  state.forEach(e=>{ const u=findUnit(e.cat,e.id); (u.options||[]).forEach(o=>{
+    if(o.type==="toggle" && e.opts[o.id] && optionAvailable(o) && (o.oncePerArmy || o.limitByUnit)){
+      optTaken[o.label]=(optTaken[o.label]||0)+1;
+      optMax[o.label]= o.limitByUnit ? state.filter(x=>o.limitByUnit.includes(x.id)).length : 1;
+    }
+  }); });
+  for(const k in optTaken){ const mx=optMax[k];
+    if(optTaken[k]>mx) errs.push(`"${k}" may be taken on ${mx===1?"only one unit":("only "+mx+" units")} (taken ${optTaken[k]}×).`); }
+
+  // Undead: army must include at least one Wizard using the required lore
+  // (VC Lore of Necromancy; TK Lore of Nehekhara — its highest-level wizard is the Hierophant).
+  if(D.requireWizardLore && state.length){
+    const lore=D.requireWizardLore;
+    const ok=state.some(e=>{ const u=findUnit(e.cat,e.id); if(!wizardActive(e,u)) return false;
+      const av=availableLores(e,u);
+      return e.lore===lore || (av.length===1 && av[0]===lore); });   // explicit pick, or the model's only legal lore
+    if(!ok) errs.push(D.requireWizardLoreMsg || `Your army must include at least one Wizard using the Lore of ${lore}.`);
+  }
+
+  // forced / forbidden General (special characters etc.)
+  state.forEach(e=>{ const u=findUnit(e.cat,e.id);
+    if(u.mustBeGeneral && e.uid!==generalUid)
+      errs.push(`${u.isCharacter?u.variants[e.variant].name:u.name} must be nominated as the Army General.`);
+  });
+
+  // Army General: exactly one character must be nominated
+  const chars=state.filter(e=>e.cat==="characters");
+  if(chars.length && !chars.some(e=>e.uid===generalUid))
+    errs.push(`You must nominate one of your characters as the Army General.`);
+
+  // render
+  if(!state.length){ el.innerHTML='<div class="vmsg ok">Add units to begin.</div>'; return; }
+  if(!errs.length) el.innerHTML+=`<div class="vmsg ok">✔ Legal so far (${Math.round(tot)} / ${limit} pts).</div>`;
+  errs.forEach(m=>el.innerHTML+=`<div class="vmsg err">✕ ${m}</div>`);
+  warns.forEach(m=>el.innerHTML+=`<div class="vmsg warn">⚠ ${m}</div>`);
+}
+
+function dupCap(limit){
+  for(const r of D.duplicateCaps){ if(limit<=r.upTo) return r; }
+  return D.duplicateCaps[D.duplicateCaps.length-1];
+}
+
+/* =========================== EXPORT =========================== */
+function exportList(){
+  const limit=+document.getElementById("limit").value||0;
+  let out=`${D.name} — ${grandTotal().toFixed(0)} / ${limit} pts\n${"=".repeat(40)}\n`;
+  CATS.forEach(([cat,label])=>{
+    const items=state.filter(e=>e.cat===cat); if(!items.length) return;
+    out+=`\n${label.toUpperCase()} — ${Math.round(catTotal(cat))} pts\n`;
+    items.forEach(e=>{ const u=findUnit(cat,e.id);
+      let nm=u.isCharacter?u.variants[e.variant].name:`${u.perModel?e.count+'× ':''}${u.name}`;
+      if(e.uid===generalUid) nm+=" [General]";
+      out+=`  • ${nm} … ${Math.round(entryPoints(e)*10)/10} pts\n`;
+      out+=describe(e,u).map(s=>`      - ${s}`).join("\n"); if(describe(e,u).length)out+="\n";
+    });
+  });
+  const fname=(currentSaveName||"army-list").replace(/[^a-z0-9\-_ ]/gi,"_")+".txt";
+  if(window.armyAPI){
+    window.armyAPI.saveText(fname,out).then(r=>{ if(r&&r.ok) toast("Exported list"); });
+  } else {
+    const blob=new Blob([out],{type:"text/plain"});
+    const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=fname; a.click();
+  }
+  navigator.clipboard && navigator.clipboard.writeText(out);
+}
+function describe(e,u){
+  const d=[];
+  (u.options||[]).forEach(o=>{
+    if(o.requires && !optionAvailable(o)) return;
+    if(optChoiceBlocked(e,u,o)) return;
+    if((o.type==="choice")&&e.opts[o.id]!=null) d.push(o.choices[e.opts[o.id]].label);
+    else if(o.type==="mustChoose") d.push(o.choices[e.opts[o.id]].label);
+    else if(o.type==="toggle"&&e.opts[o.id]) d.push(o.label);
+    else if(o.type==="perN"){ const c=perNCount(e,o); if(c) d.push(`${c}× ${o.label}`); }
+    else if(o.type==="mount"&&e.opts.mount!=null) d.push("Mount: "+o.choices[e.opts.mount].label);
+    else if(o.type==="command"){ const c=e.opts.cmd; const cc=[]; if(c.leader)cc.push("Leader"); if(c.musician)cc.push("Musician"); if(c.standard)cc.push("Standard"); if(cc.length)d.push(cc.join(", ")); }
+    else if(o.type==="multi"){ if(o.repeatable){ if(e.opts[o.id])d.push(`${e.opts[o.id]}× ${o.choices[0].label}`); } else (e.opts[o.id]||[]).forEach(i=>d.push(o.choices[i].label)); }
+  });
+  if(u.attachedPerN){ const n=attachedCount(e,u); if(n) d.push(`${n}× ${u.attachedPerN.name} (required)`); }
+  if(e.lore){ d.push("Lore: "+e.lore);
+    const lore=loreData(e.lore); if(lore && lore.attribute) d.push("Lore Attribute: "+lore.attribute.name); }
+  { const ks=knownSpells(e); if(ks.length) d.push("Spells: "+ks.join(", ")); }
+  Object.entries(e.magic).forEach(([cat,nm])=>{ if(nm)d.push(nm); });
+  (e.gifts||[]).forEach(nm=>d.push(nm));
+  (e.powers||[]).forEach(nm=>d.push("Power: "+nm));
+  if(e.virtue) d.push("Virtue: "+e.virtue);
+  if(e.magicStd) d.push("Standard: "+e.magicStd);
+  return d;
+}
+
+/* =========================== SAVE / LOAD =========================== */
+/* Works in two environments:
+   - Electron desktop: window.armyAPI (file dialogs + on-disk library).
+   - Plain browser:    localStorage library + Blob/file-input fallback.   */
+const SAVE_APP="chaos-dwarfs-army-builder", SAVE_VER=1;
+const LS_LIB="cd-army-library";          // browser-fallback library store
+let currentSaveName=null;                // display name of the current army
+let currentSaveFile=null;                // library filename it maps to (if any)
+
+function toast(msg){
+  let t=document.getElementById("toast");
+  if(!t){ t=document.createElement("div"); t.id="toast"; t.className="toast"; document.body.appendChild(t); }
+  t.textContent=msg; t.classList.add("show");
+  clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"),1800);
+}
+function updateSaveStatus(){
+  const el=document.getElementById("saveStatus");
+  if(!el) return;
+  el.textContent = currentSaveName ? ("Current army: "+currentSaveName) : "Unsaved army";
+}
+function fileSafe(name){ return (String(name||"untitled").replace(/[^a-z0-9\-_ ]/gi,"_").trim().slice(0,80)||"untitled"); }
+
+/* ---- temporary autosave draft ----
+   Mobile browsers freeze/kill backgrounded tabs and lose unsaved work. We mirror
+   the current roster to localStorage on every change (debounced) and on the
+   page being hidden/closed, then silently restore it on the next launch. This is
+   separate from the named library/file saves; it is the "you didn't lose your
+   work" safety net, not a save slot. */
+const LS_DRAFT="cd-army-draft";
+let _draftT=null;
+function saveDraft(){
+  try{
+    if(!state.length){ localStorage.removeItem(LS_DRAFT); return; }
+    const snap=serializeArmy(currentSaveName);
+    snap.draft=true; snap.savedName=currentSaveName||null;   // keep "unsaved" state across reload
+    localStorage.setItem(LS_DRAFT, JSON.stringify(snap));
+  }catch(_){ /* private mode / quota — best effort */ }
+}
+function scheduleDraft(){ clearTimeout(_draftT); _draftT=setTimeout(saveDraft,400); }
+function clearDraft(){ clearTimeout(_draftT); try{ localStorage.removeItem(LS_DRAFT); }catch(_){} }
+function restoreDraft(){
+  let snap=null;
+  try{ snap=JSON.parse(localStorage.getItem(LS_DRAFT)||"null"); }catch(_){ snap=null; }
+  if(!snap || !Array.isArray(snap.state) || !snap.state.length) return false;
+  if(!applyArmy(snap)) return false;                 // applyArmy switches army, loads state, renders
+  currentSaveName = snap.savedName || null;          // restore "unsaved" status, not the draft's placeholder name
+  currentSaveFile = null;
+  updateSaveStatus();
+  showRestoreNotice();
+  return true;
+}
+function showRestoreNotice(){
+  let n=document.getElementById("restoreNote");
+  if(!n){ n=document.createElement("div"); n.id="restoreNote"; n.className="restore-note"; document.body.appendChild(n); }
+  n.innerHTML='<span>Restored your unsaved work from last time.</span>'
+    +'<button class="btn" onclick="discardDraft()">Discard</button>'
+    +'<button class="btn" onclick="dismissRestore()">Dismiss</button>';
+  requestAnimationFrame(()=>n.classList.add("show"));
+}
+function dismissRestore(){ const n=document.getElementById("restoreNote"); if(n) n.classList.remove("show"); }
+function discardDraft(){
+  clearDraft();
+  state=[]; generalUid=null; currentSaveName=null; currentSaveFile=null;
+  render(); updateSaveStatus(); dismissRestore(); toast("Unsaved work discarded");
+}
+
+/* ---- (de)serialize the whole roster ---- */
+function serializeArmy(name){
+  return {
+    app:SAVE_APP, version:SAVE_VER, army:D.id,
+    name: name||currentSaveName||"Untitled",
+    savedAt: new Date().toISOString(),
+    limit: +document.getElementById("limit").value||0,
+    points: Math.round(grandTotal()),
+    uidc, generalUid,
+    state: JSON.parse(JSON.stringify(state))
+  };
+}
+/* migrate a roster entry saved before a format change:
+   - the single "Arcane Items" pick became three slots (Relic/Charm/Staff). */
+function migrateEntry(e){
+  if(!e) return;
+  if(e.gifts==null) e.gifts=[];
+  if(e.powers==null) e.powers=[];
+  if(e.sigSpells==null) e.sigSpells=[];
+  if(e.virtue==null) e.virtue="";
+  if(e.magic && e.magic["Arcane Items"]){
+    const nm=e.magic["Arcane Items"];
+    if(nm) e.magic["Arcane Items:"+arcaneType(nm)]=nm;
+    delete e.magic["Arcane Items"];
+  }
+}
+function applyArmy(data){
+  if(!data || !Array.isArray(data.state)){ alert("That file is not a valid army."); return false; }
+  if(data.app && data.app!==SAVE_APP){
+    if(!confirm("This file was not created by this app. Try to load it anyway?")) return false;
+  }
+  if(data.army && data.army!==D.id){
+    if(ARMY_BOOKS[data.army]){ switchArmy(data.army, true); }
+    else if(!confirm(`This army ("${data.army}") isn't loaded. Load it under ${D.name} anyway?`)) return false;
+  }
+  state = JSON.parse(JSON.stringify(data.state));
+  state.forEach(migrateEntry);                       // upgrade older save formats
+  uidc = data.uidc || (state.reduce((m,e)=>Math.max(m,e.uid||0),0)+1);
+  generalUid = data.generalUid || null;
+  if(data.limit) document.getElementById("limit").value=data.limit;
+  currentSaveName = data.name||null;
+  currentSaveFile = null;            // set by library load when applicable
+  render(); updateSaveStatus();
+  return true;
+}
+
+/* ---- browser-fallback library store ----
+   Primary store is IndexedDB (persists on file:// across Chrome/Firefox/Safari,
+   unlike localStorage which Safari blocks on file://). localStorage is used as a
+   fallback when IndexedDB is unavailable, and legacy localStorage entries are
+   read so older saves still appear. */
+function lsLibRead(){ try{ return JSON.parse(localStorage.getItem(LS_LIB)||"{}"); }catch(_){ return {}; } }
+function lsLibWrite(o){ try{ localStorage.setItem(LS_LIB, JSON.stringify(o)); return true; }catch(_){ return false; } }
+
+const IDB_NAME="cd-army-builder", IDB_STORE="armies";
+let _idbPromise=null;
+function idbOpen(){
+  if(_idbPromise) return _idbPromise;
+  _idbPromise=new Promise((res,rej)=>{
+    if(!window.indexedDB){ rej(new Error("no-indexeddb")); return; }
+    const req=indexedDB.open(IDB_NAME,1);
+    req.onupgradeneeded=()=>{ const db=req.result; if(!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE,{keyPath:"file"}); };
+    req.onsuccess=()=>res(req.result);
+    req.onerror=()=>rej(req.error||new Error("indexeddb-open-failed"));
+  });
+  return _idbPromise;
+}
+function idbTx(mode,fn){ return idbOpen().then(db=>new Promise((res,rej)=>{
+  const tx=db.transaction(IDB_STORE,mode); const st=tx.objectStore(IDB_STORE); let out;
+  out=fn(st); tx.oncomplete=()=>res(out&&out.result!==undefined?out.result:out); tx.onerror=()=>rej(tx.error); tx.onabort=()=>rej(tx.error);
+})); }
+function idbAll(){ return idbTx("readonly",st=>st.getAll()).then(r=>r||[]); }
+function idbPut(rec){ return idbTx("readwrite",st=>st.put(rec)); }
+function idbGet(file){ return idbTx("readonly",st=>st.get(file)); }
+function idbDel(file){ return idbTx("readwrite",st=>st.delete(file)); }
+
+/* unified browser-store ops (IndexedDB first, localStorage fallback) */
+async function libSave(file,data){
+  try{ await idbPut({file,data}); return true; }
+  catch(_){ const lib=lsLibRead(); lib[file]=data; return lsLibWrite(lib); }
+}
+async function libAll(){
+  let recs=[];
+  try{ recs=(await idbAll()).map(r=>({file:r.file,data:r.data})); }catch(_){}
+  try{ const lib=lsLibRead(); for(const f in lib){ if(!recs.some(r=>r.file===f)) recs.push({file:f,data:lib[f]}); } }catch(_){}
+  return recs;
+}
+async function libGet(file){
+  try{ const r=await idbGet(file); if(r&&r.data) return r.data; }catch(_){}
+  try{ return lsLibRead()[file]||null; }catch(_){ return null; }
+}
+async function libDelete(file){
+  try{ await idbDel(file); }catch(_){}
+  try{ const lib=lsLibRead(); delete lib[file]; lsLibWrite(lib); }catch(_){}
+}
+
+/* ---- LIBRARY: quick save ---- */
+async function saveArmy(){
+  if(!state.length){ toast("Nothing to save"); return; }
+  let name=currentSaveName;
+  if(!name){
+    name=await modalPrompt("Save army as", "My "+D.name, "Save");
+    if(!name) return;
+  }
+  const data=serializeArmy(name);
+  if(window.armyAPI){
+    const r=await window.armyAPI.saveArmy(name,data);
+    currentSaveFile=(r&&r.file)||currentSaveFile;
+  } else {
+    const file=fileSafe(name)+".json";
+    const ok=await libSave(file,data);
+    if(!ok){ toast("Could not save — browser storage unavailable"); return; }
+    currentSaveFile=file;
+  }
+  currentSaveName=name; updateSaveStatus(); clearDraft(); toast('Saved "'+name+'"');
+}
+
+/* ---- FILE: save a .json anywhere ---- */
+async function saveArmyToFile(){
+  if(!state.length){ toast("Nothing to save"); return; }
+  const name=currentSaveName||(fileSafe(D.name)+"-army");
+  const data=serializeArmy(name);
+  if(window.armyAPI){
+    const r=await window.armyAPI.saveJson(name,data);
+    if(r&&r.ok) toast("Saved to file");
+  } else {
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+    const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=fileSafe(name)+".json"; a.click();
+  }
+}
+
+/* ---- FILE: open a .json from disk ---- */
+async function openArmyFromFile(){
+  if(window.armyAPI){
+    const r=await window.armyAPI.openJson();
+    if(r&&r.ok && applyArmy(r.data)) toast("Loaded");
+  } else {
+    const inp=document.createElement("input"); inp.type="file"; inp.accept=".json,application/json";
+    inp.onchange=()=>{ const f=inp.files[0]; if(!f) return;
+      const rd=new FileReader(); rd.onload=()=>{ try{ if(applyArmy(JSON.parse(rd.result))) toast("Loaded"); }catch(_){ alert("Could not read that file."); } };
+      rd.readAsText(f);
+    };
+    inp.click();
+  }
+}
+
+/* ---- LIBRARY: manager modal ---- */
+async function listLibrary(){
+  if(window.armyAPI) return await window.armyAPI.listArmies();
+  const recs=await libAll();
+  return recs.map(({file,data})=>({ file, name:(data&&data.name)||file, army:(data&&data.army)||null, savedAt:(data&&data.savedAt)||null, points:(data&&data.points)??null, limit:(data&&data.limit)??null }))
+    .filter(it=>!it.army || it.army===D.id)
+    .sort((a,b)=>String(b.savedAt).localeCompare(String(a.savedAt)));
+}
+async function libraryLoad(file){
+  let data;
+  if(window.armyAPI) data=await window.armyAPI.loadArmy(file);
+  else data=await libGet(file);
+  if(applyArmy(data)){ currentSaveFile=file; closeModal(); toast("Loaded"); }
+}
+async function libraryDelete(file,name){
+  if(!confirm('Delete "'+name+'" from the library?')) return;
+  if(window.armyAPI) await window.armyAPI.deleteArmy(file);
+  else await libDelete(file);
+  if(currentSaveFile===file){ currentSaveFile=null; }
+  openLibrary();
+}
+async function openLibrary(){
+  const items=await listLibrary();
+  document.getElementById("modalTitle").textContent="Army library";
+  const body=document.getElementById("modalBody");
+  if(!items.length){
+    body.innerHTML='<p style="opacity:.7">No saved armies yet. Build a list and press <b>Save</b>.</p>';
+  } else {
+    body.innerHTML='<div class="liblist">'+items.map(it=>{
+      const when=it.savedAt? new Date(it.savedAt).toLocaleString():"";
+      const pts=(it.points!=null)?(it.points+(it.limit?(" / "+it.limit):"")+" pts"):"";
+      const fa=encodeURIComponent(it.file), na=(it.name||"").replace(/"/g,"&quot;");
+      return '<div class="librow"><div class="libmeta"><div class="libname">'+na+'</div>'+
+             '<div class="libsub">'+[pts,when].filter(Boolean).join(" · ")+'</div></div>'+
+             '<div class="libacts"><button class="btn primary" onclick="libraryLoad(decodeURIComponent(\''+fa+'\'))">Load</button>'+
+             '<button class="btn" onclick="libraryDelete(decodeURIComponent(\''+fa+'\'),\''+na+'\')">Delete</button></div></div>';
+    }).join("")+'</div>';
+  }
+  openModalRaw();
+}
+/* open the shared modal without going through a unit-specific builder */
+function openModalRaw(){ document.getElementById("modalBg").classList.add("open"); }
+
+/* ---------- army switching ---------- */
+function switchArmy(id, keepState){
+  if(!ARMY_BOOKS[id]) return;
+  if(!keepState && state.length && !confirm("Switching armies will clear the current roster. Continue?")){
+    const sel=document.getElementById("armySel"); if(sel) sel.value=CURRENT_ARMY; return;
+  }
+  CURRENT_ARMY=id; D=ARMY_BOOKS[id];
+  if(!keepState){ state=[]; generalUid=null; currentSaveName=null; currentSaveFile=null; }
+  collapsedCats={}; collapsedCatalog={};
+  const sub=document.getElementById("titleSub"); if(sub) sub.textContent="WARHAMMER — "+D.name.toUpperCase();
+  const sel=document.getElementById("armySel"); if(sel) sel.value=id;
+  render(); updateSaveStatus();
+}
+function renderArmySelect(){
+  const s=document.getElementById("armySel"); if(!s) return; s.innerHTML="";
+  BOOK_IDS.forEach(id=>{ const o=document.createElement("option"); o.value=id; o.textContent=ARMY_BOOKS[id].name; if(id===CURRENT_ARMY)o.selected=true; s.appendChild(o); });
+  s.onchange=()=>switchArmy(s.value,false);
+}
+
+document.getElementById("limit").addEventListener("input",render);
+document.getElementById("modalBg").addEventListener("click",e=>{ if(e.target.id==="modalBg") closeModal(); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeModal(); });
+
+/* desktop menu -> same actions as the buttons */
+if(window.armyAPI && window.armyAPI.onMenu){
+  window.armyAPI.onMenu("menu:save",       ()=>saveArmy());
+  window.armyAPI.onMenu("menu:saveAs",     ()=>saveArmyToFile());
+  window.armyAPI.onMenu("menu:open",       ()=>openArmyFromFile());
+  window.armyAPI.onMenu("menu:library",    ()=>openLibrary());
+  window.armyAPI.onMenu("menu:exportText", ()=>exportList());
+}
+
+renderArmySelect();
+{ const _v=document.getElementById("appVersion"); if(_v) _v.textContent="v"+APP_VERSION; }
+document.getElementById("titleSub").textContent="WARHAMMER — "+D.name.toUpperCase();
+render();
+updateSaveStatus();
+
+/* restore any unsaved work, then keep the draft current as the user edits */
+restoreDraft();
+if(document.addEventListener) document.addEventListener("visibilitychange",()=>{ if(document.hidden) saveDraft(); });
+if(window.addEventListener){
+  window.addEventListener("pagehide",saveDraft);
+  window.addEventListener("beforeunload",saveDraft);
+}
+</script>
+<script src="mobile-init.js"></script>
+</body>
+</html>
