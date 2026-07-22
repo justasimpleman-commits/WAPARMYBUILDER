@@ -874,12 +874,12 @@ function loadoutHTML(items, kind){
         return `<span class="ruleword" onclick="event.stopPropagation();openRuleInfo(__rw[${i}])">${esc(disp)}</span>`; }
     } else {
       if(itemDescOf(base)){ const i=window.__iw.push(base)-1;
-        return `<span class="ruleword" onclick="event.stopPropagation();openItemInfo(__iw[${i}])">${esc(disp)}</span>`; }
+        return `<span class="ruleword" onclick="event.stopPropagation();openLoadoutItemInfo(__iw[${i}])">${esc(disp)}</span>`; }
     }
     return esc(disp);
   }).join(", ");
 }
-function openItemInfo(name){ openModal2(name, `<div class="rule">${esc(itemDescOf(name)||"(no description)")}</div>`); }
+function openLoadoutItemInfo(name){ openModal2(name, `<div class="rule">${esc(itemDescOf(name)||"(no description)")}</div>`); }
 /* open the dynamic detail popup for a roster entry (from the summary or elsewhere) */
 function openEntryInfo(uid){ const e=state.find(x=>x.uid===uid); if(e) openUnitDetail(e.cat,e.id,e.variant,e); }
 
