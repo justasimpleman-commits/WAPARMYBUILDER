@@ -216,7 +216,7 @@
     "Magma Cannon": `A magma cannon is a fire thrower with the following profile: Range 6", Strength 5, Special Rules: Flaming Attacks, Multiple Wounds (D3).`,
     "Steam Cannonade": `A steam cannonade is an organ gun with the following profile: Range 12/24", Strength 5, Special Rules: Multiple Shots (Artillery Dice + D6), Rapid Fire. If a Destroyed! result is rolled on the Black Powder Misfire chart, the Steam Cannonade is destroyed and may not be used again, and the Iron Daemon it is mounted on suffers D6 wounds with no saves allowed.`,
     "Doomfire": `Doomfire is a stone thrower with the following profile: Range 12-60", Strength 5(10), Special Rules: Cumbersome, Flaming Attacks, Move or Fire, Multiple Wounds (D6). Any unit that suffers one or more casualties from this weapon must take a Panic test.`,
-    "Dreadquake Mortar": `A dreadquake mortar is a mortar that uses the large round template, with the following profile: Range 12-72", Strength 4(8), Special Rules: Armour Piercing (1), Multiple Wounds (D6).`,
+    "Dreadquake Mortar": `A dreadquake mortar is a mortar that uses the large round template, with the following profile: Range 12-72", Strength 4(8), Special Rules: Armour Piercing (1), Multiple Wounds (D6). All models in a unit suffering casualties from a Dreadquake Mortar in the previous turn must pass a test exactly as if they were moving through dangerous terrain if they wish to move (including charging, reforming, characters leaving the unit, etc) and suffer -1 To Hit with missile weapons. War machines can only fire on a 4+ on a D6. If the Dreadquake Mortar rolls a misfire it suffers an additional -1 modifier to the result.`,
     "Demolition Rocket": `Instead of firing normally, a Deathshrieker may fire a demolition rocket. Demolition rockets are rocket launchers that do not fire indirectly by default and use the small round template, with the following profile: Range 12-48", Strength 4(8), Special Rules: Flaming Attacks, Multiple Wounds (D3).`,
     "Mace Tail": `The Lammasu gains +1 Attack.`,
     "Runes of Hate": `A Giant with Runes of Hate becomes subject to the Berserk Rage rule from Frenzy. In addition, whenever the Giant is called upon to roll for a random number of attacks, this may be re-rolled.`,
@@ -259,6 +259,9 @@
     "Altar of Hashut": `A Sorcerer-Prophet with an Altar of Hashut gains the Magical Ward (4+) and Unbreakable special rules. In addition, their troop type changes to War Machine and they count as being part of the crew. Randomise any missile hits between the Sorcerer-Prophet and the crew. The Sorcerer-Prophet can never choose to leave the Altar during the game. If the Sorcerer-Prophet is killed, the whole Altar is also removed as a casualty.`,
     "Blessing of Hashut": `A Sorcerer-Prophet on an Altar of Hashut adds +12" to the range of their spells.`,
     "Sacrifices to Hashut": `Once per Magic phase, the Sorcerer-Prophet may sacrifice one of the slaves chained to the Altar to Hashut before they attempt to cast a spell. Roll a D6 and add the result to the casting result of the spell. However, if a 1 is rolled, the Sorcerer-Prophet instead suffers a Wound with no saves of any kind possible.`,
+
+    "Ogre Slave": `An Ogre Slave has the Fear and Natural Armour (6+) special rules. In addition, it increases the Unit Strength of the war machine by 3 rather than 1 and gives it Line of Sight (2).`,
+    "Slave Ogre": `An Ogre Slave has the Fear and Natural Armour (6+) special rules. In addition, it increases the Unit Strength of the war machine by 3 rather than 1 and gives it Line of Sight (2).`,
 
     "Gore Blades": `When attacking the model in close combat, every enemy 'To Hit' roll of a natural 1 inflicts a Strength 3 hit on the attacking model(s).`,
     "Brazen Wings": `The model gains the Fly (7) special rule.`,
@@ -333,7 +336,7 @@
     immortals:{profile:[["Immortal",3,5,3,4,4,1,2,2,9]],eq:"Great weapon, heavy armour",rules:"Blackshard Armour, Contempt, Relentless, Stubborn"},
     renders:{profile:[["Bull Centaur Render",7,4,2,4,5,3,3,3,8]],eq:"Hand weapon, light armour, shield",rules:"Contempt, Natural Armour (5+)"},
     lammasu:{profile:[["Lammasu",6,3,0,5,5,4,1,2,8]],eq:"—",rules:"Fly (8), Magic Resistance (3); Sorcerous Miasma. Level 1 Wizard — Death, Fire, Shadow"},
-    dreadquake:{profile:[["Dreadquake Mortar","–","–","–","–",7,"–","–","–","–"],["Crew",3,4,3,3,4,1,2,1,9],["Ogre Slave",6,3,2,4,4,3,2,3,7]],eq:"Hand weapon, dreadquake mortar, light armour (crew of 3)",rules:"Contempt, Resolute"},
+    dreadquake:{profile:[["Dreadquake Mortar","–","–","–","–",7,"–","–","–","–"],["Crew",3,4,3,3,4,1,2,1,9],["Ogre Slave",6,3,2,4,4,3,2,3,7]],eq:"Hand weapon, dreadquake mortar, light armour (crew of 3)",rules:"War Machine. Crew: 3 Crew (Chaos Dwarf). Contempt, Resolute. Ogre Slave."},
     hellcannon:{profile:[["Hellcannon",3,4,3,5,6,5,1,5,4],["Chaos Dwarf Handler",3,4,3,3,4,1,2,1,9]],eq:"Hand weapon, doomfire, light armour (Handlers)",rules:"Daemonic, Mixed Unit, Natural Armour (4+); Caged Fury; Spew Ichor"},
     juggernaut:{profile:[["Juggernaut Siege Tower",6,"–","–",5,6,10,"–","–","–"],["Crew","–",4,3,3,"–","–",2,1,9]],eq:"Hand weapon, crossbow, medium armour (crew of 3)",rules:"Terror, Unbreakable; Siege Tower; Siege Cannons"},
     kolossus:{profile:[["Kolossus",6,4,3,6,7,6,1,5,10]],eq:"Bane maces, heavy armour",rules:"Animated Construct, Hellbound"},

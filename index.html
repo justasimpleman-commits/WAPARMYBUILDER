@@ -77,6 +77,20 @@
   .note{font-size:11px;color:var(--muted);font-style:italic}
   textarea{width:100%;height:200px;background:#0f0b08;border:1px solid var(--line);color:var(--ink);border-radius:6px;padding:8px;font-family:monospace;font-size:12px}
   @media(max-width:980px){.wrap{grid-template-columns:1fr}.catalog,.validation{border:none;border-bottom:1px solid var(--line)}}
+  .profwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  /* mobile: larger tap targets, edge-to-edge modal, readable stat table */
+  @media(max-width:600px){
+    .info{width:26px;height:26px;font-size:14px}
+    .summary .srow{padding:6px 4px;font-size:13px}
+    .summary .srow .sinfo{width:24px;height:24px;font-size:13px}
+    .summary .srow .spts{min-width:40px}
+    .modal-bg{padding:0;align-items:flex-end}
+    .modal{max-width:100%;max-height:92vh;border-radius:12px 12px 0 0;border-width:1px 0 0}
+    .modal .mbody{padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
+    .modal table.prof{font-size:11px}
+    .modal table.prof th,.modal table.prof td{padding:4px 5px}
+    .modal .rule .ruleword{text-underline-offset:3px}
+  }
   /* info button */
   .info{background:none;border:1px solid var(--line);color:var(--fire2);border-radius:50%;width:20px;height:20px;
     font-size:12px;line-height:1;cursor:pointer;flex:none;font-style:italic;font-weight:700}
@@ -90,11 +104,15 @@
   /* army summary */
   .summary .scat{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--fire2);margin:10px 0 3px;display:flex;justify-content:space-between}
   .summary .scat b{color:var(--ink)}
-  .summary .srow{display:flex;justify-content:space-between;padding:2px 4px;border-radius:4px;cursor:pointer;font-size:12.5px}
+  .summary .srow{display:flex;align-items:center;gap:6px;padding:3px 4px;border-radius:4px;cursor:pointer;font-size:12.5px}
   .summary .srow:hover{background:var(--panel2)}
-  .summary .srow .ct{color:var(--fire2);font-weight:700}
+  .summary .srow .snm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .summary .srow .ct{color:var(--fire2);font-weight:700;flex:none}
+  .summary .srow .spts{flex:none;color:var(--ink);font-weight:700;min-width:34px;text-align:right}
+  .summary .srow .sinfo{width:18px;height:18px;font-size:11px}
   .summary .grand{margin-top:10px;padding-top:8px;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-weight:700}
   .summary .empty{font-size:12px}
+  .modal .lbl.loadout{border-top:1px dashed var(--line);padding-top:10px}
   /* modal */
   .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
   .modal-bg.open{display:flex}
@@ -793,9 +811,13 @@ function renderSummary(){
     html+=`<div class="scat"><span>${label}</span><b>${Math.round(catTotal(cat))}</b></div>`;
     items.forEach(e=>{ const u=findUnit(cat,e.id);
       const nm = u.isCharacter ? u.variants[e.variant].name : u.name;
-      const ct = isLone(u) ? "" : `<span class="ct">${e.count}</span>`;
+      const ct = isLone(u) ? "" : `<span class="ct">×${e.count}</span>`;
       const genTag = (cat==="characters" && e.uid===generalUid) ? ' <span style="color:var(--fire2)" title="Army General">★</span>' : '';
-      html+=`<div class="srow" onclick="scrollToEntry(${e.uid})"><span>${esc(nm)}${genTag}</span>${ct}</div>`;
+      const price = Math.round(entryPoints(e)*10)/10;
+      html+=`<div class="srow" onclick="scrollToEntry(${e.uid})">`
+        +`<button class="info sinfo" title="Details & loadout" onclick="event.stopPropagation();openEntryInfo(${e.uid})">i</button>`
+        +`<span class="snm">${esc(nm)}${genTag}</span>${ct}`
+        +`<span class="spts">${price}</span></div>`;
     });
   });
   html+=`<div class="grand"><span>Total</span><span>${Math.round(grandTotal()*10)/10}</span></div>`;
@@ -807,17 +829,72 @@ function scrollToEntry(uid){ const n=document.getElementById("entry-"+uid);
 
 /* ---------- unit detail (stats + special rules) ---------- */
 const STAT_HEAD=["M","WS","BS","S","T","W","I","A","Ld"];
-function openUnitDetail(cat,id,variant){
+
+/* Purchased loadout of ONE roster entry, split for the detail popup:
+   - equip: weapon/armour/command/mount/plain upgrades (clickable via ruleDef)
+   - magic: magic items / gifts / powers / virtue / magic standard / runes (clickable via item desc)
+   Mirrors describe() so the popup matches export exactly. */
+function entryLoadout(e,u){
+  const equip=[], magic=[];
+  (u.options||[]).forEach(o=>{
+    if(o.requires && !optionAvailable(o)) return;
+    if(optChoiceBlocked(e,u,o)) return;
+    if(o.type==="choice" && e.opts[o.id]!=null && o.choices[e.opts[o.id]]) equip.push(o.choices[e.opts[o.id]].label);
+    else if(o.type==="mustChoose" && o.choices[e.opts[o.id]]) equip.push(o.choices[e.opts[o.id]].label);
+    else if(o.type==="toggle" && e.opts[o.id]) equip.push(o.label);
+    else if(o.type==="perN"){ const c=perNCount(e,o); if(c) equip.push(`${c}× ${o.label}`); }
+    else if(o.type==="mount" && e.opts.mount!=null && o.choices[e.opts.mount]) equip.push("Mount: "+o.choices[e.opts.mount].label);
+    else if(o.type==="command"){ const c=e.opts.cmd||{}; if(c.leader)equip.push("Leader"); if(c.musician)equip.push("Musician"); if(c.standard)equip.push("Standard Bearer"); }
+    else if(o.type==="multi"){ if(o.repeatable){ if(e.opts[o.id])equip.push(`${e.opts[o.id]}× ${o.choices[0].label}`); } else (e.opts[o.id]||[]).forEach(i=>{ if(o.choices[i]) equip.push(o.choices[i].label); }); }
+  });
+  if(u.attachedPerN){ const n=attachedCount(e,u); if(n) equip.push(`${n}× ${u.attachedPerN.name}`); }
+  Object.entries(e.magic||{}).forEach(([cat,nm])=>{ if(nm) magic.push(nm); });
+  (e.gifts||[]).forEach(nm=>magic.push(nm));
+  (e.powers||[]).forEach(nm=>magic.push("Power: "+nm));
+  if(e.virtue) magic.push("Virtue: "+e.virtue);
+  if(e.magicStd) magic.push("Standard: "+e.magicStd);
+  if(e.runes){ for(const cat in e.runes){ const list=e.runes[cat]; if(list && list.length){
+    const g=runeGroup(list); Object.keys(g).forEach(n=>magic.push(g[n]>1?`${n} ×${g[n]}`:n)); } } }
+  const spells = e.lore ? knownSpells(e) : [];
+  return {equip, magic, spells, lore:e.lore};
+}
+/* Render a purchased-loadout list as a clickable comma-line.
+   kind "equip" → resolve via ruleDef/openRuleInfo; kind "item" → itemDescOf/openItemInfo.
+   A leading "N× ", "Mount: "/"Power: "/etc. prefix and a trailing (parenthetical)
+   are stripped for the lookup but kept in the display. */
+function loadoutHTML(items, kind){
+  window.__rw = window.__rw || []; window.__iw = window.__iw || [];
+  return (items||[]).map(disp=>{
+    const base = String(disp)
+      .replace(/^\d+×\s*/,"").replace(/^(Mount|Power|Virtue|Standard):\s*/,"")
+      .replace(/\s+×\d+$/,"").replace(/\s*\([^)]*\)\s*$/,"").trim();
+    if(kind==="equip"){
+      const def=ruleDef(base);
+      if(def){ const i=window.__rw.push(def.name)-1;
+        return `<span class="ruleword" onclick="event.stopPropagation();openRuleInfo(__rw[${i}])">${esc(disp)}</span>`; }
+    } else {
+      if(itemDescOf(base)){ const i=window.__iw.push(base)-1;
+        return `<span class="ruleword" onclick="event.stopPropagation();openItemInfo(__iw[${i}])">${esc(disp)}</span>`; }
+    }
+    return esc(disp);
+  }).join(", ");
+}
+function openItemInfo(name){ openModal2(name, `<div class="rule">${esc(itemDescOf(name)||"(no description)")}</div>`); }
+/* open the dynamic detail popup for a roster entry (from the summary or elsewhere) */
+function openEntryInfo(uid){ const e=state.find(x=>x.uid===uid); if(e) openUnitDetail(e.cat,e.id,e.variant,e); }
+
+function openUnitDetail(cat,id,variant,e){
   const u=findUnit(cat,id); const inf=D.unitInfo[id];
+  window.__rw=[]; window.__iw=[];
   let html="";
   if(inf && inf.profile){
     const showPts = u.isCharacter;
-    html+=`<table class="prof"><tr><th>Profile</th>${STAT_HEAD.map(s=>`<th>${s}</th>`).join("")}${showPts?"<th>Pts</th>":""}</tr>`;
+    html+=`<div class="profwrap"><table class="prof"><tr><th>Profile</th>${STAT_HEAD.map(s=>`<th>${s}</th>`).join("")}${showPts?"<th>Pts</th>":""}</tr>`;
     inf.profile.forEach((row,i)=>{
       let pts=""; if(showPts && u.variants[i]) pts=u.variants[i].points;
       html+=`<tr><td class="nm">${esc(row[0])}</td>${row.slice(1).map(v=>`<td>${esc(v)}</td>`).join("")}${showPts?`<td><b>${pts}</b></td>`:""}</tr>`;
     });
-    html+=`</table>`;
+    html+=`</table></div>`;
   }
   const meta=[];
   if(u.unitSize) meta.push(`Unit size: ${u.unitSize[0]}${u.unitSize[1]==null?"+":"–"+u.unitSize[1]}`);
@@ -832,6 +909,25 @@ function openUnitDetail(cat,id,variant){
     html+=`<div class="lbl">Special rules <span style="color:var(--muted);font-weight:400">— click a rule to open it</span></div><div class="rule">${rulesToHTML(inf.rules)}</div>`;
   }
   if(u.notes) html+=`<div class="lbl">Note</div><div class="rule" style="color:var(--muted)">${esc(u.notes)}</div>`;
+  // ---- dynamic: what THIS roster entry has actually purchased ----
+  if(e){
+    const lo=entryLoadout(e,u);
+    const hasEq = lo.equip.length || lo.lore || lo.spells.length;
+    if(hasEq){
+      html+=`<div class="lbl loadout">Equipment &amp; upgrades <span style="color:var(--muted);font-weight:400">— on this unit</span></div>`;
+      const eqLine=[];
+      if(lo.equip.length) eqLine.push(loadoutHTML(lo.equip,"equip"));
+      html+=`<div class="rule">${eqLine.join(", ")||'<span style="color:var(--muted)">Base equipment only.</span>'}</div>`;
+      if(lo.lore) html+=`<div class="rule"><b>Lore:</b> ${esc(lo.lore)}</div>`;
+      if(lo.spells.length) html+=`<div class="rule"><b>Spells:</b> ${esc(lo.spells.join(", "))}</div>`;
+    }
+    if(lo.magic.length){
+      html+=`<div class="lbl loadout">Magic items <span style="color:var(--muted);font-weight:400">— click to read</span></div>`;
+      html+=`<div class="rule">${loadoutHTML(lo.magic,"item")}</div>`;
+    }
+    if(!hasEq && !lo.magic.length)
+      html+=`<div class="lbl loadout">Loadout</div><div class="rule" style="color:var(--muted)">No upgrades or items purchased yet.</div>`;
+  }
   const title = u.isCharacter && u.variants.length>1 ? u.name : (inf&&inf.profile?inf.profile[0][0]:u.name);
   openModal(title, html);
 }
@@ -1287,8 +1383,8 @@ function renderEntry(e){
   let nm = u.isCharacter ? u.variants[e.variant].name : u.name;
   const cv=document.createElement("button"); cv.className="cvbtn"; cv.textContent=e.collapsed?"▸":"▾"; cv.title=e.collapsed?"Expand":"Collapse";
   cv.onclick=()=>{ e.collapsed=!e.collapsed; render(); }; head.appendChild(cv);
-  const info=document.createElement("button"); info.className="info"; info.textContent="i"; info.title="Stats & special rules";
-  info.onclick=()=>openUnitDetail(e.cat,e.id,e.variant);
+  const info=document.createElement("button"); info.className="info"; info.textContent="i"; info.title="Stats, rules & this unit's loadout";
+  info.onclick=()=>openUnitDetail(e.cat,e.id,e.variant,e);
   head.appendChild(info);
   const t=document.createElement("span"); t.className="htitle";
   const cntTag = (!u.isCharacter && u.perModel) ? ` <span class="cnt">×${e.count}</span>` : "";
