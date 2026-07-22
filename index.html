@@ -233,6 +233,7 @@
 <script src="data/vampire-counts.js"></script>
 <script src="data/bretonnia.js"></script>
 <script src="data/wood-elves.js"></script>
+<script src="data/dwarfs.js"></script>
 <script>
 const APP_VERSION = "1.5.0";   // kept in sync with package.json by scripts/set-version.js
 const ARMY_BOOKS = window.ARMY_BOOKS || {};
@@ -255,7 +256,7 @@ function findUnit(cat, id){ return D.units[cat].find(u=>u.id===id); }
 /* ---------- create a roster entry with defaults ---------- */
 function addUnit(cat, id){
   const u = findUnit(cat,id);
-  const e = { uid: uidc++, cat, id, variant:0, count: defaultCount(u), opts:{}, magic:{}, magicStd:"", gifts:[], powers:[], virtue:"", spells:[], sigSpells:[], collapsed:false };
+  const e = { uid: uidc++, cat, id, variant:0, count: defaultCount(u), opts:{}, magic:{}, magicStd:"", gifts:[], powers:[], virtue:"", spells:[], sigSpells:[], runes:{}, collapsed:false };
   (u.options||[]).forEach(o=>{
     if(o.type==="choice") e.opts[o.id]=null;
     else if(o.type==="mustChoose") e.opts[o.id]=0;          // default first
@@ -351,6 +352,9 @@ function entryPoints(e){
   pts += powersCost(e);
   // Virtues (Bretonnia) — one per model; duplicate copies across the army cost ×rank
   pts += virtueCost(e);
+  // Runic Items (Dwarfs) — weapon/armour/talismanic/tattoo runes (in the magic
+  // budget), plus BSB/unit banner runes and war-machine engineering runes.
+  pts += runesCost(e);
   return pts;
 }
 function optCost(c,count){ return (c.per==="model") ? c.cost*count : c.cost; }
@@ -390,6 +394,72 @@ function findItem(name){ for(const p of allPools()){ for(const cat in p){ const 
 function itemCost(name){ const it=findItem(name); return it?it.cost:0; }
 function itemCommon(name){ const it=findItem(name); return it?!!it.common:false; }
 
+/* ======================= RUNIC ITEMS (Dwarfs) =======================
+   A data-driven "build your own magic item" system. D.runes maps a slot
+   category ("Weapon Runes", "Armour Runes", "Talismanic Runes", "Banner
+   Runes", "Engineering Runes", "Runic Tattoos") to a list of runes. A model's
+   picks live in e.runes[cat] as a FLAT list of rune names (repeats allowed for
+   cumulative runes). Rules of the Runes are enforced in the picker + validation:
+   max 3 runes/item; one master rune/item and once per army; a `solo` rune can't
+   combine; non-master runes repeat only up to their cumulative tiers; no two
+   items may share the exact same combination. Costs: Weapon/Armour/Talismanic/
+   Tattoo runes eat the character's magic-item budget; Banner runes use the BSB's
+   unlimited allowance or a unit standard's banner budget; Engineering runes use
+   a war machine's own budget. */
+function hasRunes(){ return !!(D.runes); }
+function runeList(cat){ return (D.runes && D.runes[cat]) || []; }
+function runeDef(cat,name){ return runeList(cat).find(r=>r.name===name) || null; }
+function runeIsMaster(cat,name){ const r=runeDef(cat,name); return !!(r&&r.master); }
+function runeMaxCopies(r){ return Array.isArray(r&&r.cost) ? r.cost.length : 1; }
+/* cost of k copies of a rune: cumulative INCREMENTAL array, or single ×k */
+function runeCopyCost(r,k){ if(!r||k<=0) return 0; const c=r.cost;
+  if(Array.isArray(c)){ let s=0; for(let i=0;i<k && i<c.length;i++) s+=c[i]; return s; }
+  return c*k; }
+function runeGroup(list){ const g={}; (list||[]).forEach(n=>g[n]=(g[n]||0)+1); return g; }
+/* cost of one item (one category's flat list of rune names) */
+function runeCatCost(cat,list){ const g=runeGroup(list); let s=0;
+  for(const n in g) s+=runeCopyCost(runeDef(cat,n), g[n]); return s; }
+/* total rune cost over some/all of an entry's categories */
+function runesCost(e,cats){ const R=e&&e.runes; if(!R) return 0; let s=0;
+  for(const cat in R){ if(cats && !cats.includes(cat)) continue; s+=runeCatCost(cat,R[cat]); } return s; }
+const MAGIC_BUDGET_RUNE_CATS=["Weapon Runes","Armour Runes","Talismanic Runes","Runic Tattoos"];
+/* rune spend that eats a character's magic-item budget (not banner/engineering) */
+function magicRunesCost(e){ return runesCost(e, MAGIC_BUDGET_RUNE_CATS); }
+/* master runes in use elsewhere in the army (enforces once-per-army in the picker) */
+function usedMasterRunes(exceptUid,exceptCat){ const s=new Set();
+  state.forEach(x=>{ const R=x.runes; if(!R) return;
+    for(const cat in R){ if(x.uid===exceptUid && cat===exceptCat) continue;
+      (R[cat]||[]).forEach(n=>{ if(runeIsMaster(cat,n)) s.add(n); }); } });
+  return s; }
+function selectedMountKey(e,u){ const o=(u.options||[]).find(x=>x.type==="mount");
+  if(!o||e.opts.mount==null) return null; const c=o.choices[e.opts.mount]; return c?c.key:null; }
+function charHasArmourAccess(u){ return (u.access||[]).some(a=>/armour/.test(a)); }
+/* is a rune legal on this model/machine (character-type or machine-type gate)? */
+function runeAllowed(r,e,u,cat){
+  if(!r.only) return true;
+  const only=r.only;
+  if(cat==="Engineering Runes"){ const arr=Array.isArray(only)?only:[only]; return arr.includes(u.machineType); }
+  if(only==="great-weapon") return true;              // enabling rune — always shown
+  if(only==="runesmith") return !!u.runesmith;
+  if(only==="king") return !!(u.isCharacter && u.variants[e.variant] && u.variants[e.variant].name==="King");
+  if(only==="bsb") return isBSB(e,u);
+  if(only==="slayer-banner") return !!u.slayerTattoos;
+  if(only==="no-oath"){ const mk=selectedMountKey(e,u); return mk!=="oath" && mk!=="shieldbearers"; }
+  return true;
+}
+/* which rune categories a character shows (budget/eligibility driven) */
+function runeCatsForChar(e,u){
+  if(!u.isCharacter || !hasRunes()) return [];
+  const cats=[]; const b=magicBudget(e,u);
+  if(b>0){
+    if(runeList("Weapon Runes").length) cats.push("Weapon Runes");
+    if(charHasArmourAccess(u) && runeList("Armour Runes").length) cats.push("Armour Runes");
+    if(runeList("Talismanic Runes").length) cats.push("Talismanic Runes");
+    if(u.slayerTattoos && runeList("Runic Tattoos").length) cats.push("Runic Tattoos");
+  }
+  return cats;
+}
+
 /* ---------- Vampiric Powers (VC) & Virtues (Bretonnia) ----------
    Both are bought from the SAME points pool as a character's magic items.
    Powers: a separate catalog (D.vampiricPowers), multi-pick, no duplicates per
@@ -406,7 +476,7 @@ function virtueCost(e){ return virtueBase(e)*virtueRank(e); }
 /* points a model has committed from its magic-item budget: items + standard-in-budget
    + gifts + powers + the Virtue's *base* cost (the duplicate surcharge is added to the
    army total via virtueCost, but does not eat the model's own item budget). */
-function spentMagic(e){ return Object.values(e.magic).reduce((s,nm)=>s+(nm?itemCost(nm):0),0)+giftsCost(e)+powersCost(e)+virtueBase(e); }
+function spentMagic(e){ return Object.values(e.magic).reduce((s,nm)=>s+(nm?itemCost(nm):0),0)+giftsCost(e)+powersCost(e)+virtueBase(e)+magicRunesCost(e); }
 
 /* ---------- Arcane Item sub-types (Relic / Charm / Staff) ----------
    In the source books every arcane item's description opens with its type
@@ -609,6 +679,89 @@ function pickBtn(text, empty, onClick){
 }
 function pickInfoBtn(title, onClick){
   const b=document.createElement("button"); b.className="info"; b.textContent="i"; b.title=title; b.onclick=onClick; return b;
+}
+
+/* ---------- Runic-item builder ----------
+   An entry-side row (pickBtn "Inscribe…") that opens the rune picker for ONE
+   slot category and stores the chosen flat rune list in e.runes[cat].
+   `budgetAvail` = the most this single item may cost (Infinity for the BSB). */
+function runeSlotRow(e,u,cat,budgetAvail,label){
+  e.runes=e.runes||{}; const list=e.runes[cat]||[];
+  const r=mkRow(label||cat);
+  const cost=runeCatCost(cat,list);
+  const g=runeGroup(list);
+  const summ=Object.keys(g).map(n=>g[n]>1?`${n} ×${g[n]}`:n).join(", ");
+  const open=()=>openRunePicker({ title:cat, cat, e, u, current:list.slice(),
+    budget:budgetAvail, onConfirm:(nl)=>{ e.runes[cat]=nl; render(); } });
+  r.appendChild(pickBtn(list.length?`${summ} (${cost})`:"Inscribe…", !list.length, open));
+  r.appendChild(pickInfoBtn("Inscribed runes", ()=>openChosenInfoRows(cat,
+    Object.keys(g).map(n=>{ const rd=runeDef(cat,n); return { name:g[n]>1?`${n} ×${g[n]}`:n, cost:runeCopyCost(rd,g[n]), desc:rd?rd.desc:"" }; }))));
+  return r;
+}
+/* The rune picker modal. Enforces the Rules of the Runes live (3-rune cap, one
+   master/item, master once/army, `solo`, cumulative tiers, budget). Cross-item
+   "unique combination" is enforced in validation. */
+let _rp=null;
+function openRunePicker(opts){
+  _rp={ cat:opts.cat, e:opts.e, u:opts.u, budget:(opts.budget==null?Infinity:opts.budget),
+        sel:(opts.current||[]).slice(), onConfirm:opts.onConfirm, title:opts.title||opts.cat };
+  document.getElementById("modalTitle").textContent=_rp.title;
+  _rpRender();
+  document.getElementById("modalBg").classList.add("open");
+}
+function _rpRender(){
+  const {cat,e,u,sel}=_rp;
+  const body=document.getElementById("modalBody"); body.innerHTML="";
+  const total=sel.length;
+  const cost=runeCatCost(cat,sel);
+  const lim=isFinite(_rp.budget);
+  const rem=_rp.budget-cost;
+  const usedMasters=usedMasterRunes(e.uid,cat);
+  const selHasMaster=sel.some(n=>runeIsMaster(cat,n));
+  const selHasSolo=sel.some(n=>{ const r=runeDef(cat,n); return r&&r.solo; });
+  const note=document.createElement("div"); note.className="rule"; note.style.color="var(--muted)";
+  note.innerHTML=`Inscribe up to <b>3</b> runes on this item. ${lim?`Budget <b>${_rp.budget}</b> pts.`:`No points limit.`} One master rune per item, once per army. Cumulative runes (★ shown as a/b/c) may be repeated at the listed extra cost.`;
+  body.appendChild(note);
+  runeList(cat).filter(r=>runeAllowed(r,e,u,cat)).forEach(r=>{
+    const k=sel.filter(n=>n===r.name).length;
+    const maxC=runeMaxCopies(r);
+    const nextCost=runeCopyCost(r,k+1)-runeCopyCost(r,k);
+    let canAdd=true, why="";
+    if(total>=3){ canAdd=false; why=k<maxC?"3-rune limit":""; }
+    else if(k>=maxC){ canAdd=false; }
+    else if(r.master && k===0 && selHasMaster){ canAdd=false; why="one master rune per item"; }
+    else if(r.master && usedMasters.has(r.name)){ canAdd=false; why="already used in the army"; }
+    else if(r.solo && total>0){ canAdd=false; why="cannot combine with other runes"; }
+    else if(selHasSolo && k===0){ canAdd=false; why="blocked by a solo rune"; }
+    else if(lim && nextCost>rem){ canAdd=false; why="over budget"; }
+    const row=document.createElement("div"); row.className="mirow"+(k>0?" sel":"");
+    const txt=document.createElement("div"); txt.style.flex="1";
+    const costLabel = Array.isArray(r.cost) ? r.cost.join("/") : (""+r.cost);
+    txt.innerHTML=`<div><span class="nm">${esc(r.name)}${r.master?' ★':''}</span> — <span class="cost">${costLabel} pts</span>${k>0?` <b>×${k}</b>`:''}${(why&&k<maxC&&k===0)?` <span style="color:var(--muted)">· ${esc(why)}</span>`:''}</div><div class="d">${esc(r.desc||'')}</div>`;
+    const ctrl=document.createElement("div"); ctrl.className="stepper";
+    if(maxC>1){
+      const m=document.createElement("button"); m.textContent="–"; m.disabled=k<=0;
+      m.onclick=()=>{ const i=sel.lastIndexOf(r.name); if(i>=0) sel.splice(i,1); _rpRender(); };
+      const cnt=document.createElement("input"); cnt.type="text"; cnt.value=k; cnt.readOnly=true; cnt.style.width="2.4em"; cnt.style.textAlign="center";
+      const p=document.createElement("button"); p.textContent="+"; p.disabled=!canAdd;
+      p.onclick=()=>{ sel.push(r.name); _rpRender(); };
+      ctrl.append(m,cnt,p);
+    } else {
+      const b=document.createElement("button"); b.className="btn"+(k>0?" primary":""); b.textContent=k>0?"Remove":"Add"; b.disabled=(k>0)?false:!canAdd;
+      b.onclick=()=>{ if(k>0){ const i=sel.lastIndexOf(r.name); if(i>=0) sel.splice(i,1);} else sel.push(r.name); _rpRender(); };
+      ctrl.appendChild(b);
+    }
+    row.appendChild(txt); row.appendChild(ctrl);
+    body.appendChild(row);
+  });
+  const foot=document.createElement("div"); foot.className="pkfoot";
+  const remEl=document.createElement("div"); remEl.className="rem"+((lim&&rem<0)?" over":"");
+  remEl.innerHTML = `<b>${total}</b>/3 runes · ${lim?`<b>${Math.max(0,rem)}</b> pts left`:`${cost} pts`}`;
+  const btns=document.createElement("div"); btns.style.display="flex"; btns.style.gap="8px";
+  const cancel=document.createElement("button"); cancel.className="btn"; cancel.textContent="Cancel"; cancel.onclick=()=>{ _rp=null; closeModal(); };
+  const ok=document.createElement("button"); ok.className="btn primary"; ok.textContent="OK";
+  ok.onclick=()=>{ const cb=_rp.onConfirm, s=_rp.sel.slice(); _rp=null; document.getElementById("modalBg").classList.remove("open"); if(cb)cb(s); };
+  btns.append(cancel,ok); foot.append(remEl,btns); body.appendChild(foot);
 }
 
 /* ---------- army summary ("bracket") ---------- */
@@ -1149,7 +1302,7 @@ function renderEntry(e){
     const r=mkRow("Profile");
     const s=document.createElement("select");
     u.variants.forEach((v,i)=>{ const o=document.createElement("option"); o.value=i; o.textContent=`${v.name} (${v.points})`; if(i===e.variant)o.selected=true; s.appendChild(o); });
-    s.onchange=()=>{ e.variant=+s.value; e.magic={}; render(); }; r.appendChild(s); body.appendChild(r);
+    s.onchange=()=>{ e.variant=+s.value; e.magic={}; e.runes={}; render(); }; r.appendChild(s); body.appendChild(r);
   }
 
   // unit size — clamp to the unit's allowed min/max (open-ended max stays unbounded)
@@ -1198,6 +1351,20 @@ function renderEntry(e){
   const budget = magicBudget(e,u);
   if(budget>0 || isBSB(e,u)){
     body.appendChild(renderMagic(e,u,budget));
+  }
+
+  // war-machine engineering runes (non-character units with a rune budget)
+  if(hasRunes() && !u.isCharacter && u.engineeringRunes){
+    e.runes=e.runes||{};
+    const list=e.runes["Engineering Runes"]||[];
+    const used=runeCatCost("Engineering Runes",list);
+    const box=document.createElement("div"); box.className="magic";
+    box.innerHTML=`<div class="mt">Engineering Runes</div>`;
+    const bd=document.createElement("div"); bd.className="budget"+(used>u.engineeringRunes?" over":"");
+    bd.innerHTML=`Spent <b>${used}</b> / ${u.engineeringRunes} pts <span class="note">· ${Math.max(0,u.engineeringRunes-used)} left</span>`;
+    box.appendChild(bd);
+    box.appendChild(runeSlotRow(e,u,"Engineering Runes",u.engineeringRunes,"Runes"));
+    body.appendChild(box);
   }
 
   if(u.notes){ const n=document.createElement("div"); n.className="note"; n.textContent="ⓘ "+u.notes; body.appendChild(n); }
@@ -1329,7 +1496,11 @@ function renderOption(e,o,u){
       r2.appendChild(pickBtn(cur?`${cur} (${itemCost(cur)})`:"Choose…", !cur, open));
       r2.appendChild(pickInfoBtn("Selected standard", ()=>openChosenInfoRows("Magic Standard", cur?[{name:cur,cost:itemCost(cur),desc:itemDescOf(cur)}]:[])));
       const bd=document.createElement("span"); bd.className="note"; bd.textContent=`up to ${banner} pts`;
-      r2.appendChild(bd); wrap.appendChild(r2); r.appendChild(wrap);
+      r2.appendChild(bd); wrap.appendChild(r2);
+      // Banner Runes: a runic standard within the same banner budget (mutually
+      // exclusive with a fixed Magic Standard — enforced in validation).
+      if(hasRunes() && D.runes["Banner Runes"]) wrap.appendChild(runeSlotRow(e,u,"Banner Runes",banner,"Banner Runes"));
+      r.appendChild(wrap);
     }
     return r;
   }
@@ -1675,6 +1846,16 @@ function renderMagic(e,u,budget){
     if(multiCats.includes(cat)){ box.appendChild(renderMultiItemCat(e,u,cat,budget)); continue; }
     addMagicSlot(box,e,u,cat,cat,cat,budget,null);
   }
+  // Runic Items (Dwarfs) — weapon/armour/talismanic/tattoo runes share the
+  // character's magic-item budget (banner runes for a BSB are added below).
+  if(hasRunes()){
+    e.runes=e.runes||{};
+    runeCatsForChar(e,u).forEach(cat=>{
+      const list=e.runes[cat]||[];
+      const avail = budget>0 ? budget - spentMagic(e) + runeCatCost(cat,list) : Infinity;
+      box.appendChild(runeSlotRow(e,u,cat,avail));
+    });
+  }
   // Vampiric Powers (VC) — vampire characters only, share the budget
   if(D.vampiricPowers && unitHasTag(u,"Vampire")) box.appendChild(renderPowers(e,u,budget));
   // Virtue of the Knight (Bretonnia) — one per eligible character, shares the budget
@@ -1693,6 +1874,8 @@ function renderMagic(e,u,budget){
     r.appendChild(pickInfoBtn("Selected standard", ()=>openChosenInfoRows("Magic Standard", cur?[{name:cur,cost:itemCost(cur),desc:itemDescOf(cur)}]:[])));
     const n=document.createElement("span"); n.className="note"; n.textContent="no points limit (BSB)";
     r.appendChild(n); box.appendChild(r);
+    // Banner Runes for the BSB — a runic magic standard (no points limit)
+    if(hasRunes() && D.runes["Banner Runes"]) box.appendChild(runeSlotRow(e,u,"Banner Runes",Infinity,"Banner Runes"));
   }
   return box;
 }
@@ -1782,6 +1965,45 @@ function renderValidation(){
   const seen={};
   itemNames.forEach(nm=>{ seen[nm]=(seen[nm]||0)+1; });
   for(const nm in seen){ if(seen[nm]>1 && !itemCommon(nm)) errs.push(`Magic item "${nm}" taken ${seen[nm]}× — unique items may be taken only once.`); }
+
+  // ---- Runic Items: Rules of the Runes ----
+  if(hasRunes()){
+    const masterUse={}, combos={};
+    state.forEach(e=>{ const u=findUnit(e.cat,e.id); const R=e.runes||{};
+      const who=u.isCharacter?u.variants[e.variant].name:u.name;
+      for(const cat in R){ const list=R[cat]||[]; if(!list.length) continue;
+        if(list.length>3) errs.push(`${who}: a runic item has ${list.length} runes — max 3 per item.`);
+        const masters=list.filter(n=>runeIsMaster(cat,n));
+        if(masters.length>1) errs.push(`${who}: a runic item has ${masters.length} master runes — only one per item.`);
+        masters.forEach(n=>{ masterUse[n]=(masterUse[n]||0)+1; });
+        const solo=list.find(n=>{ const r=runeDef(cat,n); return r&&r.solo; });
+        if(solo && list.length>1) errs.push(`${who}: ${solo} cannot be combined with other runes.`);
+        const g=runeGroup(list);
+        for(const n in g){ const r=runeDef(cat,n); if(r && g[n]>runeMaxCopies(r)) errs.push(`${who}: ${n} inscribed ×${g[n]} — max ${runeMaxCopies(r)}.`); }
+        const sig=cat+"|"+Object.keys(g).sort().map(n=>n+"*"+g[n]).join("+");
+        combos[sig]=(combos[sig]||0)+1;
+      }
+    });
+    for(const n in masterUse){ if(masterUse[n]>1) errs.push(`Master rune "${n}" is used ${masterUse[n]}× — a master rune may be used only once per army.`); }
+    for(const sig in combos){ if(combos[sig]>1){ const nm=sig.split("|")[1].replace(/\*/g,"×").replace(/\+/g,", "); errs.push(`Two runic items share the same rune combination (${nm}) — each combination must be unique.`); } }
+    // per-slot budgets + fixed-item mutual exclusion
+    state.forEach(e=>{ const u=findUnit(e.cat,e.id); const R=e.runes||{};
+      const who=u.isCharacter?u.variants[e.variant].name:u.name;
+      if(u.engineeringRunes){ const c=runeCatCost("Engineering Runes",R["Engineering Runes"]||[]);
+        if(c>u.engineeringRunes) errs.push(`${u.name}: engineering runes cost ${c} — over the ${u.engineeringRunes} pt limit.`); }
+      if(!u.isCharacter){ const bopt=(u.options||[]).find(o=>o.type==="command" && o.magicStandard);
+        if(bopt){ const bc=runeCatCost("Banner Runes",R["Banner Runes"]||[]);
+          if(bc>bopt.magicStandard) errs.push(`${u.name}: banner runes cost ${bc} — over the ${bopt.magicStandard} pt banner budget.`);
+          if(bc>0 && e.magicStd) errs.push(`${u.name}: a unit may carry either a Magic Standard or Banner Runes, not both.`); } }
+      if(u.isCharacter){
+        [["Weapon Runes","Magic Weapons","Magic Weapon"],["Armour Runes","Magic Armour","Magic Armour"],["Talismanic Runes","Talismans","Talisman"],["Banner Runes","Magic Standards","Magic Standard"]].forEach(([rc,mc,lbl])=>{
+          const hasRune=(R[rc]||[]).length>0;
+          const hasItem = (mc==="Magic Standards") ? !!e.magicStd : !!(e.magic && e.magic[mc]);
+          if(hasRune && hasItem) errs.push(`${who}: cannot carry both a ${lbl} and ${rc}.`);
+        });
+      }
+    });
+  }
 
   // per-entry size/budget
   state.forEach(e=>{ entryErrors(e,findUnit(e.cat,e.id)).forEach(m=>errs.push(m)); });
@@ -1875,6 +2097,9 @@ function describe(e,u){
   (e.powers||[]).forEach(nm=>d.push("Power: "+nm));
   if(e.virtue) d.push("Virtue: "+e.virtue);
   if(e.magicStd) d.push("Standard: "+e.magicStd);
+  if(e.runes){ for(const cat in e.runes){ const list=e.runes[cat]; if(list && list.length){
+    const g=runeGroup(list); const parts=Object.keys(g).map(n=>g[n]>1?`${n} ×${g[n]}`:n);
+    d.push(`${cat}: ${parts.join(", ")}`); } } }
   return d;
 }
 
@@ -1964,6 +2189,7 @@ function migrateEntry(e){
   if(e.powers==null) e.powers=[];
   if(e.sigSpells==null) e.sigSpells=[];
   if(e.virtue==null) e.virtue="";
+  if(e.runes==null) e.runes={};
   if(e.magic && e.magic["Arcane Items"]){
     const nm=e.magic["Arcane Items"];
     if(nm) e.magic["Arcane Items:"+arcaneType(nm)]=nm;

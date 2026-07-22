@@ -44,7 +44,8 @@ function load(f){ return fs.readFileSync(path.join(DIR,f),"utf8"); }
 [ "data/lores-common.js","data/rules-common.js","data/special-rules-common.js","data/common-items.js",
   "data/chaos-dwarfs.js","data/grand-cathay.js","data/daemons-of-chaos.js","data/beastmen.js",
   "data/ogre-kingdoms.js","data/orcs-and-goblins.js","data/skaven.js","data/high-elves.js","data/dark-elves.js",
-  "data/tomb-kings.js","data/vampire-counts.js","data/bretonnia.js" ].forEach(f=>{ (0,eval)(load(f)); });
+  "data/tomb-kings.js","data/vampire-counts.js","data/bretonnia.js","data/wood-elves.js",
+  "data/dwarfs.js" ].forEach(f=>{ (0,eval)(load(f)); });
 
 const html=load("index.html");
 const scripts=[...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)].map(m=>m[1]);
@@ -67,7 +68,10 @@ const engine=scripts.sort((a,b)=>b.length-a.length)[0];   // the big inline engi
   __mountChoiceBlocked:mountChoiceBlocked, __renderOption:renderOption,
   __perNCount:perNCount, __perNMax:perNMax, __optChoiceBlocked:optChoiceBlocked,
   __availableLores:availableLores, __loreNames:loreNames, __itemAllowed:itemAllowed,
-  __modelAccess:modelAccess, __hasAccess:hasAccess, __findItem:findItem, __pickerGroups:pickerGroups
+  __modelAccess:modelAccess, __hasAccess:hasAccess, __findItem:findItem, __pickerGroups:pickerGroups,
+  __runeCatCost:runeCatCost, __runesCost:runesCost, __magicRunesCost:magicRunesCost,
+  __runeCatsForChar:runeCatsForChar, __runeAllowed:runeAllowed, __runeDef:runeDef,
+  __runeCopyCost:runeCopyCost, __runeMaxCopies:runeMaxCopies, __isBSB:isBSB
 });`);
 
 /* ---------- helpers ---------- */
@@ -642,6 +646,83 @@ console.log("Armour tier: a heavy-armour model may take a light/medium magic arm
   __addUnit("characters","daemonsmith"); const de=__getState()[0];
   ok(!__hasAccess(de,dsmith,"heavy armour"), "tier: medium-armour Daemonsmith cannot meet a heavy-armour requirement");
   ok(__hasAccess(de,dsmith,"light armour"), "tier: medium-armour model still meets a light-armour requirement");
+}
+
+/* =================== Dwarfs: Runic Items =================== */
+console.log("Dwarfs: Runic Items — cumulative pricing, budget, Rules of the Runes…");
+__setState([]); __setGen(null); __switch("dwarfs",false);
+{
+  const D=__D();
+  ok(!!D.runes, "Dwarfs: rune catalog present");
+  // cumulative pricing: Rune of Fire 5/35/55 → 1=5, 2=40, 3=95
+  const fire=__runeDef("Weapon Runes","Rune of Fire");
+  ok(Array.isArray(fire.cost), "Dwarfs: Rune of Fire is cumulative");
+  ok(__runeCopyCost(fire,1)===5 && __runeCopyCost(fire,2)===40 && __runeCopyCost(fire,3)===95,
+     "Dwarfs: cumulative cost 5/35/55 → 5/40/95");
+  ok(__runeCatCost("Weapon Runes",["Rune of Fire","Rune of Fire"])===40, "Dwarfs: two Runes of Fire cost 40");
+
+  // King: weapon/armour/talismanic runes offered; runes share magic budget
+  __addUnit("characters","lords"); let king=__getState()[0]; king.variant=0; __setGen(king.uid); __render();
+  const kU=__findUnit("characters","lords");
+  const cats=__runeCatsForChar(king,kU);
+  ok(cats.includes("Weapon Runes")&&cats.includes("Armour Runes")&&cats.includes("Talismanic Runes"),
+     "Dwarfs: King sees Weapon/Armour/Talismanic runes");
+  const base=__entryPoints(king);
+  king.runes={"Weapon Runes":["Rune of Fire","Rune of Fire"]};
+  ok(approx(__entryPoints(king), base+40), "Dwarfs: rune cost added to entry points (+40)");
+  ok(approx(__magicRunesCost(king),40), "Dwarfs: rune cost counted against the magic budget");
+
+  // Slayer of Legend: NO armour runes (wears no armour), but Tattoos offered
+  __setState([]); __setGen(null);
+  __addUnit("characters","slayerlegend"); let sl=__getState()[0]; sl.variant=0; __setGen(sl.uid);
+  const slU=__findUnit("characters","slayerlegend");
+  const scats=__runeCatsForChar(sl,slU);
+  ok(!scats.includes("Armour Runes"), "Dwarfs: Slayer has no Armour Runes (no armour)");
+  ok(scats.includes("Runic Tattoos"), "Dwarfs: Slayer may take Runic Tattoos");
+
+  // Talismanic 'Runesmith only' rune gating
+  const balance=__runeDef("Talismanic Runes","Master Rune of Balance");
+  ok(balance.only==="runesmith", "Dwarfs: Master Rune of Balance is Runesmith-only");
+  ok(!__runeAllowed(balance,sl,slU,"Talismanic Runes"), "Dwarfs: Slayer cannot take Master Rune of Balance");
+  __setState([]); __addUnit("characters","runesmiths"); let rl=__getState()[0]; rl.variant=0;
+  ok(__runeAllowed(balance,rl,__findUnit("characters","runesmiths"),"Talismanic Runes"),
+     "Dwarfs: Runelord may take Master Rune of Balance");
+
+  // Validation: master rune once per army + 3-rune cap + unique combination
+  __setState([]); __setGen(null);
+  __addUnit("characters","lords"); const a=__getState()[0]; a.variant=0; __setGen(a.uid);
+  __addUnit("characters","lords"); const b=__getState()[1]; b.variant=0;
+  a.runes={"Weapon Runes":["Master Rune of Smiting"]};
+  b.runes={"Weapon Runes":["Master Rune of Smiting"]};
+  let errs=validationErrors();
+  ok(errs.some(m=>/only once per army/i.test(m)), "Dwarfs: master rune twice → army-uniqueness error");
+  a.runes={"Weapon Runes":["Rune of Fire","Rune of Striking","Rune of Cleaving","Rune of Speed"]};
+  b.runes={};
+  errs=validationErrors();
+  ok(errs.some(m=>/max 3 per item/i.test(m)), "Dwarfs: 4 runes on one item → 3-rune error");
+  a.runes={"Weapon Runes":["Rune of Parrying"]};
+  b.runes={"Weapon Runes":["Rune of Parrying"]};
+  errs=validationErrors();
+  ok(errs.some(m=>/same rune combination/i.test(m)), "Dwarfs: identical single-rune combo → uniqueness error");
+
+  // Two master runes on one item
+  a.runes={"Weapon Runes":["Master Rune of Smiting","Master Rune of Death"]}; b.runes={};
+  errs=validationErrors();
+  ok(errs.some(m=>/only one per item/i.test(m)), "Dwarfs: two master runes on one item → error");
+
+  // War machine engineering runes: separate budget, machine-type gating
+  __setState([]); __setGen(null);
+  __addUnit("characters","lords"); const gen=__getState()[0]; __setGen(gen.uid);
+  __addUnit("special","boltthrower"); const bt=__getState()[1];
+  const btU=__findUnit("special","boltthrower");
+  ok(btU.engineeringRunes===50, "Dwarfs: Bolt Thrower has a 50 pt engineering budget");
+  const skewer=__runeDef("Engineering Runes","Master Rune of Skewering");
+  ok(__runeAllowed(skewer,bt,btU,"Engineering Runes"), "Dwarfs: Bolt Thrower may take Master Rune of Skewering");
+  __addUnit("special","cannon"); const cn=__getState()[2]; const cnU=__findUnit("special","cannon");
+  ok(!__runeAllowed(skewer,cn,cnU,"Engineering Runes"), "Dwarfs: Cannon cannot take a Bolt-Thrower-only rune");
+  bt.runes={"Engineering Runes":["Rune of Penetrating","Rune of Penetrating"]};   // 30+50 = 80 > 50
+  errs=validationErrors();
+  ok(errs.some(m=>/engineering runes cost .* over/i.test(m)), "Dwarfs: engineering runes over budget → error");
 }
 
 console.log(`\n${fails? "FAIL":"PASS"}: ${checks-fails}/${checks} checks passed.`);
