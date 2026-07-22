@@ -131,6 +131,16 @@
   .modal .pkfoot{display:flex;gap:10px;justify-content:space-between;align-items:center;position:sticky;bottom:0;
     background:var(--panel);padding:12px 0 2px;margin-top:10px;border-top:1px solid var(--line)}
   .modal .pkfoot .rem{font-size:12px;color:var(--muted)} .modal .pkfoot .rem b{color:var(--ink)} .modal .pkfoot .rem.over b{color:var(--err)}
+  /* rune-picker rows: keep the +/- stepper or the Add/Remove button in its own
+     column so its text can't overflow (the .stepper button 26px rule must not
+     apply to the Add/Remove button). */
+  .modal .rrow{display:flex;gap:10px;align-items:center;padding:7px 6px;border-bottom:1px dashed var(--line);border-radius:6px}
+  .modal .rrow.sel{background:var(--panel2)}
+  .modal .rrow .rtxt{flex:1;min-width:0}
+  .modal .rrow .rctrl{flex:none;display:flex;align-items:center}
+  .modal .rbtn{background:var(--panel2);border:1px solid var(--line);color:var(--ink);padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px;min-width:82px;white-space:nowrap}
+  .modal .rbtn.on{background:var(--fire);border-color:var(--fire);color:#1a1109;font-weight:600}
+  .modal .rbtn:disabled{opacity:.4;cursor:not-allowed}
   .pickbtn{background:#0f0b08;border:1px solid var(--line);color:var(--ink);padding:5px 9px;border-radius:5px;
     font-size:13px;cursor:pointer;text-align:left;max-width:230px}
   .pickbtn:hover{border-color:var(--fire)}
@@ -411,9 +421,12 @@ function runeList(cat){ return (D.runes && D.runes[cat]) || []; }
 function runeDef(cat,name){ return runeList(cat).find(r=>r.name===name) || null; }
 function runeIsMaster(cat,name){ const r=runeDef(cat,name); return !!(r&&r.master); }
 function runeMaxCopies(r){ return Array.isArray(r&&r.cost) ? r.cost.length : 1; }
-/* cost of k copies of a rune: cumulative INCREMENTAL array, or single ×k */
+/* cost of k copies of a rune. For a cumulative rune the cost array holds the
+   TOTAL cost for 1/2/3 copies (per Rules of the Runes rule 4: "5/10/20 … the
+   higher numbers are the cost for the second and/or third cumulative rune"), so
+   k copies cost c[k-1] outright — NOT the sum. Single-cost runes are ×1 only. */
 function runeCopyCost(r,k){ if(!r||k<=0) return 0; const c=r.cost;
-  if(Array.isArray(c)){ let s=0; for(let i=0;i<k && i<c.length;i++) s+=c[i]; return s; }
+  if(Array.isArray(c)){ return c[Math.min(k,c.length)-1]; }
   return c*k; }
 function runeGroup(list){ const g={}; (list||[]).forEach(n=>g[n]=(g[n]||0)+1); return g; }
 /* cost of one item (one category's flat list of rune names) */
@@ -720,34 +733,39 @@ function _rpRender(){
   const selHasMaster=sel.some(n=>runeIsMaster(cat,n));
   const selHasSolo=sel.some(n=>{ const r=runeDef(cat,n); return r&&r.solo; });
   const note=document.createElement("div"); note.className="rule"; note.style.color="var(--muted)";
-  note.innerHTML=`Inscribe up to <b>3</b> runes on this item. ${lim?`Budget <b>${_rp.budget}</b> pts.`:`No points limit.`} One master rune per item, once per army. Cumulative runes (★ shown as a/b/c) may be repeated at the listed extra cost.`;
+  note.innerHTML=`Inscribe up to <b>3</b> runes on this item. ${lim?`Budget <b>${_rp.budget}</b> pts.`:`No points limit.`} One master rune per item, once per army. Cumulative runes (cost shown a/b/c) may be repeated — the listed numbers are the total cost for 1/2/3 copies.`;
   body.appendChild(note);
   runeList(cat).filter(r=>runeAllowed(r,e,u,cat)).forEach(r=>{
     const k=sel.filter(n=>n===r.name).length;
     const maxC=runeMaxCopies(r);
-    const nextCost=runeCopyCost(r,k+1)-runeCopyCost(r,k);
+    const nextCost=runeCopyCost(r,k+1)-runeCopyCost(r,k);   // incremental cost of the NEXT copy
     let canAdd=true, why="";
-    if(total>=3){ canAdd=false; why=k<maxC?"3-rune limit":""; }
+    if(total>=3){ canAdd=false; if(k<maxC) why="3-rune limit"; }
     else if(k>=maxC){ canAdd=false; }
     else if(r.master && k===0 && selHasMaster){ canAdd=false; why="one master rune per item"; }
     else if(r.master && usedMasters.has(r.name)){ canAdd=false; why="already used in the army"; }
     else if(r.solo && total>0){ canAdd=false; why="cannot combine with other runes"; }
     else if(selHasSolo && k===0){ canAdd=false; why="blocked by a solo rune"; }
     else if(lim && nextCost>rem){ canAdd=false; why="over budget"; }
-    const row=document.createElement("div"); row.className="mirow"+(k>0?" sel":"");
-    const txt=document.createElement("div"); txt.style.flex="1";
+    const row=document.createElement("div"); row.className="rrow"+(k>0?" sel":"");
+    const txt=document.createElement("div"); txt.className="rtxt";
     const costLabel = Array.isArray(r.cost) ? r.cost.join("/") : (""+r.cost);
-    txt.innerHTML=`<div><span class="nm">${esc(r.name)}${r.master?' ★':''}</span> — <span class="cost">${costLabel} pts</span>${k>0?` <b>×${k}</b>`:''}${(why&&k<maxC&&k===0)?` <span style="color:var(--muted)">· ${esc(why)}</span>`:''}</div><div class="d">${esc(r.desc||'')}</div>`;
-    const ctrl=document.createElement("div"); ctrl.className="stepper";
+    // running total for this rune (cumulative tiers summed): "×2 = 40 pts"
+    const accum = k>0 ? ` <b class="cost">×${k} = ${runeCopyCost(r,k)} pts</b>` : "";
+    const reason = (why && k===0) ? ` <span style="color:var(--muted)">· ${esc(why)}</span>` : "";
+    txt.innerHTML=`<div><span class="nm">${esc(r.name)}${r.master?' ★':''}</span> <span class="cost">${costLabel} pts</span>${accum}${reason}</div><div class="d">${esc(r.desc||'')}</div>`;
+    const ctrl=document.createElement("div"); ctrl.className="rctrl";
     if(maxC>1){
+      const box=document.createElement("div"); box.className="stepper";
       const m=document.createElement("button"); m.textContent="–"; m.disabled=k<=0;
       m.onclick=()=>{ const i=sel.lastIndexOf(r.name); if(i>=0) sel.splice(i,1); _rpRender(); };
-      const cnt=document.createElement("input"); cnt.type="text"; cnt.value=k; cnt.readOnly=true; cnt.style.width="2.4em"; cnt.style.textAlign="center";
-      const p=document.createElement("button"); p.textContent="+"; p.disabled=!canAdd;
+      const cnt=document.createElement("input"); cnt.type="text"; cnt.value=k; cnt.readOnly=true;
+      const p=document.createElement("button"); p.textContent="+"; p.disabled=!canAdd; p.title=canAdd?`Add another (+${nextCost} pts)`:(why||"");
       p.onclick=()=>{ sel.push(r.name); _rpRender(); };
-      ctrl.append(m,cnt,p);
+      box.append(m,cnt,p); ctrl.appendChild(box);
     } else {
-      const b=document.createElement("button"); b.className="btn"+(k>0?" primary":""); b.textContent=k>0?"Remove":"Add"; b.disabled=(k>0)?false:!canAdd;
+      const b=document.createElement("button"); b.className="rbtn"+(k>0?" on":""); b.textContent=k>0?"Remove":"Add"; b.disabled=(k>0)?false:!canAdd;
+      if(!canAdd && k===0 && why) b.title=why;
       b.onclick=()=>{ if(k>0){ const i=sel.lastIndexOf(r.name); if(i>=0) sel.splice(i,1);} else sel.push(r.name); _rpRender(); };
       ctrl.appendChild(b);
     }

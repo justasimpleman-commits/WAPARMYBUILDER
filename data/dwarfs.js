@@ -14,8 +14,8 @@
      • a master rune may be used only once per army, and only one master rune
        may be inscribed on any single item;
      • non-master runes may be repeated only when the rune states a cumulative
-       cost (e.g. 5/35/55 = 5 for the first, +35 for the second, +55 for the
-       third), up to the number of listed tiers.
+       cost (e.g. 5/35/55 = the TOTAL cost for one/two/three copies — 5, 35 or
+       55 pts, not summed), up to the number of listed tiers.
    Rune costs come out of the character's "Magic Items and/or Runic Items"
    budget (Weapon/Armour/Talismanic/Tattoo runes), the BSB's unlimited banner
    allowance or a unit standard's banner budget (Banner runes), or a war
@@ -86,10 +86,10 @@
   // Dwarfs use no rulebook common magic items.
 
   /* ---------------- RUNIC ITEMS — rune catalogs ----------------
-     cost: a number (single) or [c1,c2,c3] cumulative INCREMENTAL costs (the
-     cost of the 1st / 2nd / 3rd copy on the same item). master:true → master
-     rune. only: character/machine gate. solo:true → cannot combine with any
-     other rune on the same item. */
+     cost: a number (single) or [c1,c2,c3] cumulative TOTAL costs (the total
+     points for having 1 / 2 / 3 copies of the rune on the item — NOT summed).
+     master:true → master rune. only: character/machine gate. solo:true →
+     cannot combine with any other rune on the same item. */
   runes: {
     "Weapon Runes": [
       { name: "Master Rune of Smiting", cost: 35, master: true, desc: "The weapon has the Multiple Wounds (D6) special rule." },

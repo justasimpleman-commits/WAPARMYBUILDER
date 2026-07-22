@@ -657,9 +657,15 @@ __setState([]); __setGen(null); __switch("dwarfs",false);
   // cumulative pricing: Rune of Fire 5/35/55 → 1=5, 2=40, 3=95
   const fire=__runeDef("Weapon Runes","Rune of Fire");
   ok(Array.isArray(fire.cost), "Dwarfs: Rune of Fire is cumulative");
-  ok(__runeCopyCost(fire,1)===5 && __runeCopyCost(fire,2)===40 && __runeCopyCost(fire,3)===95,
-     "Dwarfs: cumulative cost 5/35/55 → 5/40/95");
-  ok(__runeCatCost("Weapon Runes",["Rune of Fire","Rune of Fire"])===40, "Dwarfs: two Runes of Fire cost 40");
+  // cumulative numbers are the TOTAL cost for 1/2/3 copies (not summed)
+  ok(__runeCopyCost(fire,1)===5 && __runeCopyCost(fire,2)===35 && __runeCopyCost(fire,3)===55,
+     "Dwarfs: cumulative cost 5/35/55 → total 5/35/55 for 1/2/3 copies");
+  ok(__runeCatCost("Weapon Runes",["Rune of Fire","Rune of Fire"])===35, "Dwarfs: two Runes of Fire cost 35 (total)");
+  ok(__runeCatCost("Weapon Runes",["Rune of Fire","Rune of Fire","Rune of Fire"])===55, "Dwarfs: three Runes of Fire cost 55 (total)");
+  // different runes on one item still sum together (only same-rune copies use the tier total)
+  ok(__runeCatCost("Weapon Runes",["Rune of Fire","Rune of Cleaving","Rune of Speed"])===15, "Dwarfs: Fire+Cleaving+Speed = 5+5+5 = 15");
+  // Striking 10/30/40 taken twice = 30 (total), plus Speed 5 = 35
+  ok(__runeCatCost("Weapon Runes",["Rune of Striking","Rune of Striking","Rune of Speed"])===35, "Dwarfs: Striking×2 (30 total) + Speed (5) = 35");
 
   // King: weapon/armour/talismanic runes offered; runes share magic budget
   __addUnit("characters","lords"); let king=__getState()[0]; king.variant=0; __setGen(king.uid); __render();
@@ -669,8 +675,8 @@ __setState([]); __setGen(null); __switch("dwarfs",false);
      "Dwarfs: King sees Weapon/Armour/Talismanic runes");
   const base=__entryPoints(king);
   king.runes={"Weapon Runes":["Rune of Fire","Rune of Fire"]};
-  ok(approx(__entryPoints(king), base+40), "Dwarfs: rune cost added to entry points (+40)");
-  ok(approx(__magicRunesCost(king),40), "Dwarfs: rune cost counted against the magic budget");
+  ok(approx(__entryPoints(king), base+35), "Dwarfs: rune cost added to entry points (+35)");
+  ok(approx(__magicRunesCost(king),35), "Dwarfs: rune cost counted against the magic budget");
 
   // Slayer of Legend: NO armour runes (wears no armour), but Tattoos offered
   __setState([]); __setGen(null);
@@ -720,7 +726,7 @@ __setState([]); __setGen(null); __switch("dwarfs",false);
   ok(__runeAllowed(skewer,bt,btU,"Engineering Runes"), "Dwarfs: Bolt Thrower may take Master Rune of Skewering");
   __addUnit("special","cannon"); const cn=__getState()[2]; const cnU=__findUnit("special","cannon");
   ok(!__runeAllowed(skewer,cn,cnU,"Engineering Runes"), "Dwarfs: Cannon cannot take a Bolt-Thrower-only rune");
-  bt.runes={"Engineering Runes":["Rune of Penetrating","Rune of Penetrating"]};   // 30+50 = 80 > 50
+  bt.runes={"Engineering Runes":["Rune of Forging","Rune of Accuracy","Rune of Reloading"]};   // 25+20+20 = 65 > 50
   errs=validationErrors();
   ok(errs.some(m=>/engineering runes cost .* over/i.test(m)), "Dwarfs: engineering runes over budget → error");
 }
