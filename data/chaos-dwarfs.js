@@ -256,6 +256,10 @@
     "The Granite Guard": `If Astragoth Ironhand is included in your army, you may upgrade one unit of Razers to the Granite Guard for a cost of +2 points per model. The unit must be equipped with blunderbusses. This unit always counts as fighting behind a defended obstacle in the first round of close combat, and do not suffer -1 To Hit when choosing Stand & Shoot as a charge reaction.`,
     "The Ironsworn": `If Drazhoath the Ashen is included in your army, you may upgrade one unit of Infernal Guard to the Ironsworn for a cost of +2 points per model. This unit has Weapon Skill 5, as well as the Armour Piercing (1) and Magical Attacks special rules. The unit must be equipped with hand weapons and shields.`,
 
+    "Altar of Hashut": `A Sorcerer-Prophet with an Altar of Hashut gains the Magical Ward (4+) and Unbreakable special rules. In addition, their troop type changes to War Machine and they count as being part of the crew. Randomise any missile hits between the Sorcerer-Prophet and the crew. The Sorcerer-Prophet can never choose to leave the Altar during the game. If the Sorcerer-Prophet is killed, the whole Altar is also removed as a casualty.`,
+    "Blessing of Hashut": `A Sorcerer-Prophet on an Altar of Hashut adds +12" to the range of their spells.`,
+    "Sacrifices to Hashut": `Once per Magic phase, the Sorcerer-Prophet may sacrifice one of the slaves chained to the Altar to Hashut before they attempt to cast a spell. Roll a D6 and add the result to the casting result of the spell. However, if a 1 is rolled, the Sorcerer-Prophet instead suffers a Wound with no saves of any kind possible.`,
+
     "Gore Blades": `When attacking the model in close combat, every enemy 'To Hit' roll of a natural 1 inflicts a Strength 3 hit on the attacking model(s).`,
     "Brazen Wings": `The model gains the Fly (7) special rule.`,
     "Dark Colossus": `The model gains +1 Wound.`,
@@ -294,7 +298,7 @@
     mount_greattaurus:{profile:[["Great Taurus",6,4,0,4,4,3,3,3,6]],eq:"—",rules:"Monstrous Beast. Blazing Body, Fly (8), Mighty Blow (1). May buy Flaming Breath / Bloodrage."},
     mount_baletaurus:{profile:[["Bale Taurus",6,5,0,6,6,5,3,4,6]],eq:"—",rules:"Monster. Blazing Body, Fly (8). May buy Flaming Breath / Bloodrage."},
     mount_palanquin:{profile:[["Palanquin",3,5,3,4,"-","-",2,4,"-"]],eq:"—",rules:"Infantry platform. Contempt, Inspiring Presence (6), Relentless, Resolute."},
-    mount_altarofhashut:{profile:[["Altar of Hashut","-","-","-","-",7,"-","-","-","-"],["Altar Guard",3,5,3,4,4,1,3,1,9]],eq:"—",rules:"War Machine."},
+    mount_altarofhashut:{profile:[["Altar of Hashut","-","-","-","-",7,"-","-","-","-"],["Altar Guard",3,5,3,4,4,1,3,1,9]],eq:"Great weapon, heavy armour",rules:"War Machine. Crew: 2 Altar Guards (Chaos Dwarf). Altar of Hashut, Blessing of Hashut, Sacrifices to Hashut."},
     sorcerers:{profile:[["Sorcerer-Prophet",3,5,3,3,4,3,3,2,9],["Sorcerer-Priest",3,4,3,3,4,2,2,1,9]],eq:"Hand weapon",rules:"Blackshard Armour, Contempt, Relentless, Resolute, Sorcerer's Curse. Wizard: Priest L1 / Prophet L3 — Death, Fire, Hashut, Metal."},
     despots:{profile:[["Overlord",3,7,4,4,5,3,5,4,10],["Overseer",3,6,4,4,5,2,4,3,9]],eq:"Hand weapon",rules:"Blackshard Armour, Contempt, Relentless, Resolute. Infernal Cohort."},
     daemonsmith:{profile:[["Daemonsmith",3,4,4,4,4,2,2,2,9]],eq:"Hand weapon",rules:"Blackshard Armour, Contempt, Relentless, Resolute, Sorcerer's Curse. Infernal Engineer; \"Stand Back Sir!\". Wizard (if upgraded) — Fire, Metal."},
