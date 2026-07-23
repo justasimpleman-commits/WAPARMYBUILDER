@@ -1995,7 +1995,7 @@ function renderMagic(e,u,budget){
 }
 function restrictOK(e,u,only){
   if(only==="Daemonsmith") return u.id==="daemonsmith";
-  if(only==="Hobgoblins") return false; // standards only; characters can't take in budget
+  if(only==="Hobgoblins") return u.keyword==="hobgoblin"; // Hobgoblin units only (as a magic standard); characters can't take it in their item budget
   // Variant-gated restriction: if `only` names one (or "A or B") of THIS unit's own
   // variants, enforce it (e.g. "Level 3 Wizard — Count only", "Baron or Paladin").
   // Otherwise we don't model the keyword, so don't hide it.
