@@ -1,0 +1,814 @@
+{
+ "_notes": [
+  "Daemons of Chaos 3.0 (Mathias Eliasson). Every Daemon has Daemonic: Magical Ward (5+), Unbreakable, Fear -> ward:5, hold:'daemonic'.",
+  "Khorne = Mighty Blow (1): +1 S in the FIRST round only (incl. Impact Hits and Stomps). Two builds where it matters.",
+  "Nurgle = Poisoned Attacks (+1 To Wound) and -1 WS to enemies in base contact (the WS debuff is NOT modelled).",
+  "Slaanesh = Armour Piercing (1) -> ap:1, plus one extra Attack per unsaved Wound -> bonus_attack_on_wound.",
+  "Cavalry/Monstrous Cavalry use the HIGHEST T and W of rider or mount (rulebook p.72).",
+  "Chariot troop-type armour save stacks with Natural Armour (rulebook: 'Natural Armour can be combined with other armour as normal').",
+  "Monsters Stomp (D6)=3.5; Monstrous Creatures Stomp (D3)=2 via stomp_hits.",
+  "Scope: Core, Special and Rare only - no characters, no special characters."
+ ],
+ "units": [
+  {
+   "name": "Chaos Furies",
+   "resilience": {
+    "cost": 14,
+    "T": 3,
+    "W": 1,
+    "save": null,
+    "ward": 5,
+    "Ld": 6,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 14,
+    "WS": 3,
+    "A": 2,
+    "S": 3
+   }
+  },
+  {
+   "name": "Imp Swarms",
+   "resilience": {
+    "cost": 35,
+    "T": 2,
+    "W": 6,
+    "save": null,
+    "ward": 5,
+    "Ld": 5,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 35,
+    "WS": 3,
+    "A": 6,
+    "S": 2
+   }
+  },
+  {
+   "name": "Bloodletters (GW, 1st rd)",
+   "resilience": {
+    "cost": 13,
+    "T": 3,
+    "W": 1,
+    "save": 6,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 15,
+    "WS": 5,
+    "A": 1,
+    "S": 7
+   }
+  },
+  {
+   "name": "Bloodletters (GW, sustained)",
+   "melee": {
+    "cost": 15,
+    "WS": 5,
+    "A": 1,
+    "S": 5
+   }
+  },
+  {
+   "name": "Bloodletters (hand wpn, 1st rd)",
+   "melee": {
+    "cost": 13,
+    "WS": 5,
+    "A": 1,
+    "S": 5
+   }
+  },
+  {
+   "name": "Flesh Hounds (1st rd)",
+   "resilience": {
+    "cost": 21,
+    "T": 4,
+    "W": 1,
+    "save": 6,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 21,
+    "WS": 4,
+    "A": 2,
+    "S": 5
+   }
+  },
+  {
+   "name": "Flesh Hounds (sustained)",
+   "melee": {
+    "cost": 21,
+    "WS": 4,
+    "A": 2,
+    "S": 4
+   }
+  },
+  {
+   "name": "Plaguebearers",
+   "resilience": {
+    "cost": 13,
+    "T": 4,
+    "W": 1,
+    "save": null,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 13,
+    "WS": 4,
+    "A": 1,
+    "S": 4,
+    "poison": true
+   }
+  },
+  {
+   "name": "Plague Toads (Core)",
+   "resilience": {
+    "cost": 31,
+    "T": 4,
+    "W": 3,
+    "save": null,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 31,
+    "WS": 3,
+    "A": 3,
+    "S": 4,
+    "poison": true
+   }
+  },
+  {
+   "name": "Nurglings",
+   "resilience": {
+    "cost": 50,
+    "T": 2,
+    "W": 6,
+    "save": null,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 50,
+    "WS": 2,
+    "A": 6,
+    "S": 2,
+    "poison": true
+   }
+  },
+  {
+   "name": "Daemonettes",
+   "resilience": {
+    "cost": 12,
+    "T": 3,
+    "W": 1,
+    "save": null,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 12,
+    "WS": 5,
+    "A": 2,
+    "S": 3,
+    "ap": 1,
+    "bonus_attack_on_wound": true
+   }
+  },
+  {
+   "name": "Seekers (rider+steed)",
+   "resilience": {
+    "cost": 20,
+    "T": 3,
+    "W": 1,
+    "save": null,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 20,
+    "WS": 5,
+    "A": 3,
+    "S": 3,
+    "ap": 1,
+    "bonus_attack_on_wound": true
+   }
+  },
+  {
+   "name": "Pink Horrors",
+   "resilience": {
+    "cost": 13,
+    "T": 3,
+    "W": 1,
+    "save": null,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 13,
+    "WS": 3,
+    "A": 1,
+    "S": 3
+   },
+   "ranged": {
+    "cost": 13,
+    "BS": 3,
+    "shots": 2,
+    "S": 3,
+    "mod": -1
+   }
+  },
+  {
+   "name": "Screamers",
+   "resilience": {
+    "cost": 32,
+    "T": 4,
+    "W": 2,
+    "save": null,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 32,
+    "WS": 3,
+    "A": 2,
+    "S": 4,
+    "mw": 2
+   }
+  },
+  {
+   "name": "Brimstone Horrors",
+   "resilience": {
+    "cost": 10,
+    "T": 2,
+    "W": 2,
+    "save": null,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 10,
+    "WS": 2,
+    "A": 2,
+    "S": 2
+   },
+   "ranged": {
+    "cost": 10,
+    "BS": 3,
+    "shots": 2,
+    "S": 3,
+    "mod": -1
+   }
+  },
+  {
+   "name": "Brutes (GW, 1st rd)",
+   "resilience": {
+    "cost": 40,
+    "T": 4,
+    "W": 3,
+    "save": null,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 46,
+    "WS": 4,
+    "A": 3,
+    "S": 7
+   }
+  },
+  {
+   "name": "Brutes (GW, sustained)",
+   "melee": {
+    "cost": 46,
+    "WS": 4,
+    "A": 3,
+    "S": 6
+   }
+  },
+  {
+   "name": "Brutes (add. hand weapons)",
+   "melee": {
+    "cost": 43,
+    "WS": 4,
+    "A": 4,
+    "S": 5
+   }
+  },
+  {
+   "name": "Bloodcrushers (1st rd)",
+   "resilience": {
+    "cost": 55,
+    "T": 4,
+    "W": 3,
+    "save": 5,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 55,
+    "WS": 4,
+    "A": 4,
+    "S": 5
+   }
+  },
+  {
+   "name": "Bloodcrushers (sustained)",
+   "melee": {
+    "cost": 55,
+    "WS": 4,
+    "A": 4,
+    "S": 4
+   }
+  },
+  {
+   "name": "Blood Chariot (charge, 1st rd)",
+   "resilience": {
+    "cost": 145,
+    "T": 5,
+    "W": 5,
+    "save": 2,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 145,
+    "WS": 4,
+    "A": 5,
+    "S": 5,
+    "impact": {
+     "hits": 4.5,
+     "S": 6
+    }
+   }
+  },
+  {
+   "name": "Blood Chariot (sustained)",
+   "melee": {
+    "cost": 145,
+    "WS": 4,
+    "A": 5,
+    "S": 4
+   }
+  },
+  {
+   "name": "Bloodbeasts (1st rd)",
+   "resilience": {
+    "cost": 55,
+    "T": 4,
+    "W": 3,
+    "save": 6,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 55,
+    "WS": 4,
+    "A": 4,
+    "S": 6
+   }
+  },
+  {
+   "name": "Bloodbeasts (sustained)",
+   "melee": {
+    "cost": 55,
+    "WS": 4,
+    "A": 4,
+    "S": 5
+   }
+  },
+  {
+   "name": "Pox Riders",
+   "resilience": {
+    "cost": 35,
+    "T": 4,
+    "W": 3,
+    "save": null,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 35,
+    "WS": 3,
+    "A": 4,
+    "S": 4,
+    "poison": true
+   }
+  },
+  {
+   "name": "Beasts of Nurgle",
+   "resilience": {
+    "cost": 55,
+    "T": 5,
+    "W": 3,
+    "save": null,
+    "ward": 5,
+    "regen": 6,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 55,
+    "WS": 3,
+    "A": 4.5,
+    "S": 4,
+    "poison": true
+   }
+  },
+  {
+   "name": "Plague Chariot (charge)",
+   "resilience": {
+    "cost": 130,
+    "T": 5,
+    "W": 5,
+    "save": 4,
+    "ward": 5,
+    "regen": 6,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 130,
+    "WS": 3,
+    "A": 6.5,
+    "S": 4,
+    "poison": true,
+    "impact": {
+     "hits": 3.5,
+     "S": 5
+    }
+   }
+  },
+  {
+   "name": "Pleasureseekers",
+   "resilience": {
+    "cost": 60,
+    "T": 4,
+    "W": 3,
+    "save": null,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 60,
+    "WS": 4,
+    "A": 5,
+    "S": 4,
+    "ap": 1,
+    "bonus_attack_on_wound": true
+   }
+  },
+  {
+   "name": "Seeker Chariot (charge)",
+   "resilience": {
+    "cost": 80,
+    "T": 4,
+    "W": 4,
+    "save": 6,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 80,
+    "WS": 5,
+    "A": 7,
+    "S": 3,
+    "ap": 1,
+    "bonus_attack_on_wound": true,
+    "impact": {
+     "hits": 4.5,
+     "S": 4
+    }
+   }
+  },
+  {
+   "name": "Fiends",
+   "resilience": {
+    "cost": 55,
+    "T": 4,
+    "W": 3,
+    "save": null,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 55,
+    "WS": 4,
+    "A": 3,
+    "S": 4,
+    "ap": 1,
+    "bonus_attack_on_wound": true
+   }
+  },
+  {
+   "name": "Flamers",
+   "resilience": {
+    "cost": 32,
+    "T": 4,
+    "W": 2,
+    "save": null,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 32,
+    "WS": 2,
+    "A": 2,
+    "S": 4
+   },
+   "ranged": {
+    "cost": 32,
+    "BS": 4,
+    "shots": 3.5,
+    "S": 4
+   }
+  },
+  {
+   "name": "Exalted Flamer",
+   "resilience": {
+    "cost": 70,
+    "T": 4,
+    "W": 3,
+    "save": null,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 70,
+    "WS": 4,
+    "A": 3,
+    "S": 4
+   },
+   "ranged": {
+    "cost": 70,
+    "BS": 4,
+    "shots": 8.5,
+    "S": 5
+   }
+  },
+  {
+   "name": "Firewyrms",
+   "resilience": {
+    "cost": 55,
+    "T": 4,
+    "W": 3,
+    "save": null,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 55,
+    "WS": 3,
+    "A": 3.5,
+    "S": 4
+   },
+   "ranged": {
+    "cost": 55,
+    "BS": 4,
+    "shots": 7,
+    "S": 4
+   }
+  },
+  {
+   "name": "Soul Grinder",
+   "resilience": {
+    "cost": 275,
+    "T": 7,
+    "W": 6,
+    "save": 4,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 275,
+    "WS": 4,
+    "A": 5,
+    "S": 6,
+    "stomp": 6
+   },
+   "ranged": {
+    "cost": 290,
+    "BS": 4,
+    "shots": 2,
+    "S": 7
+   }
+  },
+  {
+   "name": "Soul Grinder (Daemonbone Claw)",
+   "melee": {
+    "cost": 300,
+    "WS": 4,
+    "A": 1,
+    "S": 10,
+    "mw": 3.5,
+    "stomp": 6
+   }
+  },
+  {
+   "name": "Skull Cannon (melee, charge)",
+   "resilience": {
+    "cost": 240,
+    "T": 5,
+    "W": 4,
+    "save": 3,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 240,
+    "WS": 5,
+    "A": 5,
+    "S": 6,
+    "impact": {
+     "hits": 4.5,
+     "S": 6
+    }
+   },
+   "ranged": {
+    "cost": 240,
+    "template_hits": 1.5,
+    "S": 10,
+    "mw": 3.5
+   }
+  },
+  {
+   "name": "Plague Drones",
+   "resilience": {
+    "cost": 50,
+    "T": 5,
+    "W": 3,
+    "save": null,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 50,
+    "WS": 3,
+    "A": 4,
+    "S": 4,
+    "poison": true
+   },
+   "ranged": {
+    "cost": 55,
+    "BS": 3,
+    "shots": 1,
+    "S": 4,
+    "mw": 3.5
+   }
+  },
+  {
+   "name": "Exalted Seeker Chariot (charge)",
+   "resilience": {
+    "cost": 210,
+    "T": 4,
+    "W": 8,
+    "save": 6,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 210,
+    "WS": 5,
+    "A": 13,
+    "S": 3,
+    "ap": 1,
+    "bonus_attack_on_wound": true,
+    "impact": {
+     "hits": 10.5,
+     "S": 4
+    }
+   }
+  },
+  {
+   "name": "Hellflayer (charge)",
+   "resilience": {
+    "cost": 120,
+    "T": 4,
+    "W": 4,
+    "save": 6,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 120,
+    "WS": 5,
+    "A": 9,
+    "S": 3,
+    "ap": 1,
+    "bonus_attack_on_wound": true,
+    "impact": {
+     "hits": 7,
+     "S": 4
+    }
+   }
+  },
+  {
+   "name": "Contorted Epitome",
+   "resilience": {
+    "cost": 165,
+    "T": 4,
+    "W": 4,
+    "save": null,
+    "ward": 5,
+    "ward_by_S": {
+     "4": 4,
+     "5": 3,
+     "6": 2
+    },
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 165,
+    "WS": 5,
+    "A": 10,
+    "S": 4,
+    "ap": 1,
+    "bonus_attack_on_wound": true
+   }
+  },
+  {
+   "name": "Changebringers",
+   "resilience": {
+    "cost": 45,
+    "T": 4,
+    "W": 2,
+    "save": null,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 45,
+    "WS": 3,
+    "A": 4,
+    "S": 4
+   },
+   "ranged": {
+    "cost": 45,
+    "BS": 4,
+    "shots": 3.5,
+    "S": 4
+   }
+  },
+  {
+   "name": "Burning Chariot (charge)",
+   "resilience": {
+    "cost": 120,
+    "T": 4,
+    "W": 4,
+    "save": null,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 120,
+    "WS": 4,
+    "A": 7,
+    "S": 4,
+    "impact": {
+     "hits": 4.5,
+     "S": 4
+    }
+   },
+   "ranged": {
+    "cost": 120,
+    "BS": 4,
+    "shots": 8.5,
+    "S": 5
+   }
+  }
+ ]
+}

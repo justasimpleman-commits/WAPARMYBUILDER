@@ -1,0 +1,134 @@
+{
+  "army": "High Elves",
+  "note": "Core / Special / Rare only — characters and war machines (Eagle Claw Bolt Thrower, Skycutter's Eagle Eye upgrade) excluded. Great weapon in 9th Ed 3.0 = S+1 with Mighty Blow (1), so 1st-round S+2 / sustained S+1. Polearm = S+1 permanent. Light lance = Mighty Blow (1) on the charge, heavy lance = Mighty Blow (2) on the charge. Elven Grace (Dodge 6+) is NOT encoded as a ward — it is melee-only and fails vs Always Strikes First; every Elf model has it, so it multiplies melee resilience by ~1.2 uniformly. Multi-profile models (chariots, cavalry, ridden monsters) are split into component builds at the SAME cost so their damage columns can simply be added.",
+  "units": [
+
+    { "name": "Sentinels (spear, med+shield)",
+      "resilience": { "cost": 10, "T": 3, "W": 1, "save": 4, "Ld": 8, "hold": "plain" },
+      "melee": { "cost": 10, "WS": 4, "A": 1, "S": 3 } },
+
+    { "name": "Wardens (med+shield)",
+      "resilience": { "cost": 9, "T": 3, "W": 1, "save": 4, "Ld": 8, "hold": "plain" },
+      "melee": { "cost": 9, "WS": 4, "A": 1, "S": 3 } },
+
+    { "name": "Hawkeyes (longbow, med armour)",
+      "resilience": { "cost": 13.5, "T": 3, "W": 1, "save": 5, "Ld": 8, "hold": "plain" },
+      "melee": { "cost": 12, "WS": 4, "A": 1, "S": 3 },
+      "ranged": { "cost": 12, "BS": 4, "shots": 2, "S": 3, "ap": 1 } },
+
+    { "name": "Lothern Sea Guard (spear, shortbow, med+shield)",
+      "resilience": { "cost": 14, "T": 3, "W": 1, "save": 4, "Ld": 8, "hold": "plain" },
+      "melee": { "cost": 14, "WS": 4, "A": 1, "S": 3 },
+      "ranged": { "cost": 14, "BS": 4, "shots": 2, "S": 3, "ap": 1 } },
+
+    { "name": "Rangers (2HW, light)",
+      "resilience": { "cost": 8, "T": 3, "W": 1, "save": 6, "Ld": 8, "hold": "plain" },
+      "melee": { "cost": 8, "WS": 4, "A": 2, "S": 3 },
+      "ranged": { "cost": 12, "BS": 4, "shots": 2, "S": 3, "ap": 1 } },
+    { "name": "Rangers (GW, 1st round)",
+      "melee": { "cost": 10, "WS": 4, "A": 1, "S": 5 } },
+    { "name": "Rangers (GW, sustained)",
+      "melee": { "cost": 10, "WS": 4, "A": 1, "S": 4 } },
+
+    { "name": "Silver Helms (hvy+shield+barding)",
+      "resilience": { "cost": 23, "T": 3, "W": 1, "save": 2, "Ld": 8, "hold": "plain" },
+      "melee": { "cost": 18, "WS": 4, "A": 1, "S": 5 } },
+    { "name": "Silver Helms (rider, sustained)",
+      "melee": { "cost": 18, "WS": 4, "A": 1, "S": 3 } },
+    { "name": "Silver Helms (Elven Steed, add-on)",
+      "melee": { "cost": 18, "WS": 3, "A": 1, "S": 3 } },
+
+    { "name": "Ellyrian Reavers (med+shield+barding)",
+      "resilience": { "cost": 19.5, "T": 3, "W": 1, "save": 3, "Ld": 8, "hold": "plain" },
+      "melee": { "cost": 15, "WS": 4, "A": 1, "S": 4 },
+      "ranged": { "cost": 18, "BS": 4, "shots": 2, "S": 3, "ap": 1 } },
+    { "name": "Ellyrian Reavers (rider, sustained)",
+      "melee": { "cost": 15, "WS": 4, "A": 1, "S": 3 } },
+    { "name": "Ellyrian Reavers (Elven Steed, add-on)",
+      "melee": { "cost": 15, "WS": 3, "A": 1, "S": 3 } },
+
+    { "name": "Swordmasters (GW, hvy, 1st round)",
+      "resilience": { "cost": 16, "T": 3, "W": 1, "save": 4, "Ld": 8, "hold": "plain" },
+      "melee": { "cost": 16, "WS": 6, "A": 2, "S": 5 } },
+    { "name": "Swordmasters (GW, sustained)",
+      "melee": { "cost": 16, "WS": 6, "A": 2, "S": 4 } },
+
+    { "name": "White Lions (GW, med, 1st round)",
+      "resilience": { "cost": 16, "T": 3, "W": 1, "save": 5, "Ld": 8, "hold": "stubborn" },
+      "melee": { "cost": 16, "WS": 5, "A": 1, "S": 6, "mw": 2 } },
+    { "name": "White Lions (GW, sustained)",
+      "melee": { "cost": 16, "WS": 5, "A": 1, "S": 5, "mw": 2 } },
+
+    { "name": "Shadow Warriors (shortbow, light)",
+      "resilience": { "cost": 15, "T": 3, "W": 1, "save": 6, "Ld": 8, "hold": "plain" },
+      "melee": { "cost": 16, "WS": 5, "A": 2, "S": 3 },
+      "ranged": { "cost": 15, "BS": 5, "shots": 2, "S": 3, "ap": 1 } },
+
+    { "name": "Dragon Princes (dragon armour+shield+barding)",
+      "resilience": { "cost": 28, "T": 3, "W": 1, "save": 2, "Ld": 9, "hold": "plain" },
+      "melee": { "cost": 28, "WS": 5, "A": 1, "S": 5 } },
+    { "name": "Dragon Princes (rider, sustained)",
+      "melee": { "cost": 28, "WS": 5, "A": 1, "S": 3 } },
+    { "name": "Dragon Princes (Elven Steed, add-on)",
+      "melee": { "cost": 28, "WS": 3, "A": 1, "S": 3 } },
+
+    { "name": "Tiranoc Chariot (crew + impact, charge)",
+      "resilience": { "cost": 70, "T": 4, "W": 4, "save": 6, "Ld": 8, "hold": "plain" },
+      "melee": { "cost": 70, "WS": 4, "A": 2, "S": 4, "impact": { "hits": 3.5, "S": 5 } },
+      "ranged": { "cost": 70, "BS": 4, "shots": 4, "S": 3, "ap": 1 } },
+    { "name": "Tiranoc Chariot (2 steeds, add-on)",
+      "melee": { "cost": 70, "WS": 3, "A": 2, "S": 3 } },
+
+    { "name": "Lion Chariot (crew + impact, charge)",
+      "resilience": { "cost": 100, "T": 4, "W": 4, "save": 6, "Ld": 8, "hold": "stubborn" },
+      "melee": { "cost": 100, "WS": 5, "A": 2, "S": 6, "mw": 2, "impact": { "hits": 3.5, "S": 5 } } },
+    { "name": "Lion Chariot (2 War Lions, add-on, charge)",
+      "melee": { "cost": 100, "WS": 4, "A": 4, "S": 5 } },
+
+    { "name": "War Lions of Chrace (1st round)",
+      "resilience": { "cost": 24, "T": 4, "W": 2, "save": null, "Ld": 6, "hold": "plain" },
+      "melee": { "cost": 24, "WS": 4, "A": 2, "S": 5 } },
+    { "name": "War Lions of Chrace (sustained)",
+      "melee": { "cost": 24, "WS": 4, "A": 2, "S": 4 } },
+
+    { "name": "Phoenix Guard (polearm, hvy, 4+ ward)",
+      "resilience": { "cost": 18, "T": 3, "W": 1, "save": 4, "ward": 4, "Ld": 9, "hold": "plain" },
+      "melee": { "cost": 18, "WS": 5, "A": 2, "S": 4 } },
+
+    { "name": "Sisters of Avelorn (Bow of Avelorn)",
+      "resilience": { "cost": 19, "T": 3, "W": 1, "save": 6, "Ld": 8, "hold": "plain" },
+      "melee": { "cost": 19.5, "WS": 4, "A": 1, "S": 3 },
+      "ranged": { "cost": 19, "BS": 5, "shots": 2, "S": 4, "ap": 1 } },
+
+    { "name": "Lothern Skycutter (crew + impact, charge)",
+      "resilience": { "cost": 80, "T": 4, "W": 4, "save": 6, "Ld": 8, "hold": "plain" },
+      "melee": { "cost": 80, "WS": 4, "A": 3, "S": 4, "impact": { "hits": 3.5, "S": 5 } },
+      "ranged": { "cost": 80, "BS": 4, "shots": 6, "S": 3, "ap": 1 } },
+    { "name": "Lothern Skycutter (Swiftfeather Roc, add-on)",
+      "melee": { "cost": 80, "WS": 5, "A": 2, "S": 4 } },
+
+    { "name": "Great Eagle (Shredding Talons)",
+      "resilience": { "cost": 50, "T": 4, "W": 3, "save": null, "Ld": 8, "hold": "plain" },
+      "melee": { "cost": 55, "WS": 5, "A": 3, "S": 4, "ap": 1 } },
+
+    { "name": "Drakemaster (rider, charge)",
+      "resilience": { "cost": 200, "T": 5, "W": 5, "save": 2, "Ld": 9, "hold": "plain" },
+      "melee": { "cost": 200, "WS": 6, "A": 2, "S": 5 } },
+    { "name": "Drakemaster (Drake + Stomp, add-on)",
+      "melee": { "cost": 200, "WS": 4, "A": 4, "S": 5, "stomp": 5 } },
+
+    { "name": "Merwyrm (Regen 4+)",
+      "resilience": { "cost": 205, "T": 5, "W": 5, "save": 3, "regen": 4, "Ld": 7, "hold": "plain" },
+      "melee": { "cost": 205, "WS": 6, "A": 5, "S": 5, "stomp": 5 } },
+    { "name": "Merwyrm (Powerful Tail, add-on)",
+      "melee": { "cost": 205, "WS": 6, "A": 1, "S": 7 } },
+
+    { "name": "Flamespyre Phoenix",
+      "resilience": { "cost": 235, "T": 5, "W": 5, "save": null, "Ld": 8, "hold": "plain" },
+      "melee": { "cost": 235, "WS": 5, "A": 4, "S": 5, "stomp": 5 } },
+
+    { "name": "Frostheart Phoenix",
+      "resilience": { "cost": 240, "T": 6, "W": 5, "save": null, "Ld": 9, "hold": "plain" },
+      "melee": { "cost": 240, "WS": 6, "A": 3, "S": 5, "stomp": 5 } }
+  ]
+}

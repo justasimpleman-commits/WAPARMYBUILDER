@@ -15,7 +15,7 @@ order you should work, plus the extraction technique and verification steps.
    bug fabricated unit sizes — don't. If a value isn't in the book, leave it out.
 2. **Source PDFs live in** `reference/Army books/` (not shipped in the build).
    The core rulebook is `Warhammer - The Game of Fantasy Battles - 9th Edition 3.0.pdf`.
-   **No PDF, no data.** All twelve bundled books now have their PDF there (Tomb
+   **No PDF, no data.** All bundled books have their PDF there (Tomb
    Kings, Vampire Counts and Bretonnia were added and their unique upgrades / special
    rules audited against the source). A handful of tokens still have no source
    definition anywhere (e.g. the universal "Loner" rule, Bretonnia's "Aura of the
@@ -42,6 +42,16 @@ All data files live in **`data/`**; the test/dev scripts live in **`scripts/`**;
 
 To register a brand-new book: `(window.ARMY_BOOKS = window.ARMY_BOOKS || {})["<id>"] = { id:"<id>", … }`,
 then add `<script src="data/<id>.js"></script>` in `index.html` next to the others.
+
+**Four more places carry a hardcoded list of data files — add the new book to all of
+them or it is silently skipped:**
+
+| File | Why it matters |
+|---|---|
+| `index.html` (`<script src>` tags) | the app itself |
+| `mobile/sync-web.js` (`DATA_FILES`) | otherwise `www/` never gets the book and the phone app can't select it |
+| `scripts/test-engine.js` (the `eval` list) | otherwise the "render every book" smoke test never covers it |
+| `scripts/sweep.js` (the `eval` list) | otherwise `node scripts/sweep.js <id>` prints "no book" |
 
 After editing `index.html` or any `data/` file, **re-sync the mobile app** so the
 phone build matches: `node mobile/sync-web.js` (copies `index.html` + `data/` into

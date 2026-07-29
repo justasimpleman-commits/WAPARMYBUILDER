@@ -10,7 +10,8 @@ in-browser storage), but **the desktop app is the product** — keep it working.
 
 Multiple army books are bundled (Chaos Dwarfs, Grand Cathay, Daemons of Chaos,
 Beastmen, Ogre Kingdoms, Orcs & Goblins, Skaven, High Elves, Dark Elves, Tomb
-Kings, Vampire Counts, Bretonnia, Wood Elves) and chosen from the **Army** dropdown in the header;
+Kings, Vampire Counts, Bretonnia, Wood Elves, Dwarfs, Lizardmen, Estalia) and chosen
+from the **Army** dropdown in the header;
 switching armies clears the roster. Each army nominates exactly one character as its **Army General** (radio
 on each character entry; any character is eligible, exactly one required —
 enforced in validation, shown with ★ in the summary and `[General]` in export).
@@ -48,7 +49,8 @@ same page.
 - **`data/chaos-dwarfs.js`**, **`data/grand-cathay.js`**, **`data/daemons-of-chaos.js`**,
   **`data/beastmen.js`**, **`data/ogre-kingdoms.js`**, **`data/orcs-and-goblins.js`**,
   **`data/skaven.js`**, **`data/high-elves.js`**, **`data/dark-elves.js`**, **`data/tomb-kings.js`**,
-  **`data/vampire-counts.js`**, **`data/bretonnia.js`**, **`data/wood-elves.js`** — pure
+  **`data/vampire-counts.js`**, **`data/bretonnia.js`**, **`data/wood-elves.js`**,
+  **`data/dwarfs.js`**, **`data/lizardmen.js`**, **`data/estalia.js`** — pure
   data. Each does
   `(window.ARMY_BOOKS = window.ARMY_BOOKS || {})["<id>"] = {…}` with an `id` field.
   The three Undead/Bretonnia books exercise the engine's army-specific systems:
@@ -56,7 +58,12 @@ same page.
   (Bretonnia), and the `requireWizardLore` Undead validators (VC Necromancy /
   TK Nehekhara Hierophant). Wood Elves add **Forest Spites** (a `multiPickCategories`
   magic-item category) and the generic `magicCatsOnly` unit field (tree characters may
-  spend their budget on Spites only). See SCHEMA.md → "Army-specific systems".
+  spend their budget on Spites only). Lizardmen use the same pair of hooks twice:
+  **Blessed Spawnings** and **Disciplines of the Old Ones** are both
+  `multiPickCategories`, and `magicCatsOnly` keeps each model on exactly one of them
+  (the Slann sees Disciplines, everyone else sees Blessed Spawnings) — the engine
+  stores all multi-picks in the single `entry.gifts` array, so a model must never see
+  two multi-pick categories at once. See SCHEMA.md → "Army-specific systems".
 - **`rules-common.js`** — `window.COMMON_RULES`: rulebook equipment & command
   rules transcribed **verbatim** from the 9th Ed 3.0 rulebook (Close Combat
   Weapons / Missile Weapons / Armour pp.79-81; Command p.87) — hand/great/paired

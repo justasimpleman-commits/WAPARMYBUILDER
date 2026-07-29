@@ -1,0 +1,170 @@
+{
+ "_notes": [
+  "Chaos Dwarfs 3.0 (Mathias Eliasson). Scope: Core / Special / Rare only — no characters, no special characters. Source: data/chaos-dwarfs.js.",
+  "save = final armour save ROLL after combining armour + shield (7 - total modifier). Light +1, Medium +2, Heavy +3, Shield +1, Natural Armour(X+) = 7-X and STACKS with worn armour.",
+  "Great weapon in 9th Ed 3.0 = S+1 with Mighty Blow (1): so S+2 in the FIRST round and S+1 sustained — NOT a flat +2. Great-weapon units get two builds, (1st round) and (sustained).",
+  "Black Orcs have their own Mighty Blow (1); with a great weapon that stacks to Mighty Blow (2), so first round = base +1 (GW strength) +2 (both Mighty Blows) = +3, sustained = +1.",
+  "Fireglaive = +1 Strength in combat (two hands); shooting S5 9/18\" Ponderous.",
+  "Blackshard Armour (Infernal Guard, Immortals) grants Immunity (Flaming Attacks) — no effect on these benchmarks, not modelled.",
+  "Contempt / Relentless / Resolute: Resolute -> hold 'resolute' (counts a lost combat as 1 less). Immortals are Stubborn; K'daai / Iron Daemon / Juggernaut / Kolossus are Unbreakable (Kolossus via Animated Construct).",
+  "Daemonic (K'daai) = Magical Ward (5+) + Unbreakable -> ward:5, hold:'daemonic'. Hellbound (Kolossus) = Magical Ward (6+). Natural Armour is a real save; ward is unmodified by Strength.",
+  "Monsters get Stomp (D6)=3.5 auto-hits at their own Strength vs targets with Line of Sight <= 3 (K'daai Destroyer, Kolossus). Iron Daemon's Grind Attack is the same Stomp when it does not charge.",
+  "Multiple Wounds is counted uncapped (wounds inflicted, not models killed): D3 -> mw 2, D6 -> mw 3.5.",
+  "War-machine template hit-counts (Magma, Deathshrieker, Dreadquake, Hellcannon doomfire) and organ-gun/steam-cannonade shot-counts are STATED ESTIMATES — they swing with scatter and misfire.",
+  "Reliability (Hold/ADJ) columns are omitted here to match the other army files, but UNLIKE Daemons the CD hold factor genuinely varies (Ld 3-10, Stubborn, Unbreakable, Treacherous Gits). Run the skill with --reliability to separate anchors from chaff.",
+  "Warriors + Infernal Cohort: heavy armour upgrade (+1.5/model, one unit per Despot) -> heavy+shield = 3+ save at 9.5 pts; included because it is the cheapest 3+ body in the book, but note it requires a Despot in the list.",
+  "Deliberate omissions: Killing Blow (none core), Blunderbuss/Bolt Throwa exact profiles approximated, Siege Giant's random '*' attacks not modelled (resilience only), command/magic-standard and the other character-dependent host upgrades (Granite Guard, Ironsworn, Ravagers, Blazing Beards) excluded."
+ ],
+ "units": [
+
+  { "name": "Warriors (med+shield)",
+    "resilience": { "cost": 8, "T": 4, "W": 1, "save": 4, "Ld": 9, "hold": "resolute" },
+    "melee": { "cost": 10, "WS": 4, "A": 1, "S": 4 } },
+  { "name": "Warriors + Infernal Cohort (hvy+shield)",
+    "resilience": { "cost": 9.5, "T": 4, "W": 1, "save": 3, "Ld": 9, "hold": "resolute" } },
+  { "name": "Warriors (GW, 1st round)",
+    "melee": { "cost": 10, "WS": 4, "A": 1, "S": 5 } },
+
+  { "name": "Razers (blunderbuss, med armour)",
+    "resilience": { "cost": 12, "T": 4, "W": 1, "save": 5, "Ld": 9, "hold": "resolute" },
+    "melee": { "cost": 11, "WS": 4, "A": 1, "S": 3 },
+    "ranged": { "cost": 11, "BS": 3, "shots": 1, "S": 4 } },
+
+  { "name": "Cutthroats (shield+light)",
+    "resilience": { "cost": 4, "T": 3, "W": 1, "save": 5, "Ld": 6, "hold": "plain", "treacherous": true },
+    "melee": { "cost": 4, "WS": 3, "A": 1, "S": 3 },
+    "ranged": { "cost": 4.5, "BS": 3, "shots": 1, "S": 3 } },
+
+  { "name": "Archers (shortbow, light)",
+    "resilience": { "cost": 5, "T": 3, "W": 1, "save": 6, "Ld": 6, "hold": "plain", "treacherous": true },
+    "melee": { "cost": 4.5, "WS": 3, "A": 1, "S": 3 },
+    "ranged": { "cost": 4.5, "BS": 3, "shots": 1, "S": 3 } },
+
+  { "name": "Wolf Raiders (light lance charge)",
+    "resilience": { "cost": 10.5, "T": 3, "W": 1, "save": 5, "Ld": 6, "hold": "plain", "treacherous": true },
+    "melee": { "cost": 10, "WS": 3, "A": 2, "S": 4 },
+    "ranged": { "cost": 10, "BS": 3, "shots": 1, "S": 3 } },
+  { "name": "Wolf Raiders (sustained)",
+    "melee": { "cost": 10, "WS": 3, "A": 2, "S": 3 } },
+
+  { "name": "Orc Slaves (AHW)",
+    "resilience": { "cost": 7, "T": 4, "W": 1, "save": 6, "Ld": 4, "hold": "plain" },
+    "melee": { "cost": 7, "WS": 3, "A": 2, "S": 4 } },
+
+  { "name": "Goblin Slaves (shield)",
+    "resilience": { "cost": 3, "T": 3, "W": 1, "save": 6, "Ld": 3, "hold": "plain" },
+    "melee": { "cost": 2, "WS": 2, "A": 1, "S": 3 } },
+
+  { "name": "Infernal Guard (hvy+shield)",
+    "resilience": { "cost": 11, "T": 4, "W": 1, "save": 3, "Ld": 9, "hold": "resolute" },
+    "melee": { "cost": 13, "WS": 4, "A": 1, "S": 5 },
+    "ranged": { "cost": 14, "BS": 3, "shots": 1, "S": 5 } },
+  { "name": "Infernal Guard (GW, 1st round)",
+    "melee": { "cost": 13, "WS": 4, "A": 1, "S": 6 } },
+
+  { "name": "Zealot Berzerkers (2HW, charge)",
+    "resilience": { "cost": 12, "T": 4, "W": 1, "save": 6, "Ld": 9, "hold": "resolute" },
+    "melee": { "cost": 12, "WS": 5, "A": 3, "S": 4, "hatred": true } },
+  { "name": "Zealot Berzerkers (2HW, sustained)",
+    "melee": { "cost": 12, "WS": 5, "A": 3, "S": 4 } },
+
+  { "name": "Devastators (Bazuka)",
+    "resilience": { "cost": 25, "T": 4, "W": 2, "save": 5, "Ld": 9, "hold": "resolute" },
+    "ranged": { "cost": 25, "BS": 3, "shots": 1, "S": 7, "mw": 2 } },
+  { "name": "Devastators (Inferno Gun)",
+    "ranged": { "cost": 50, "BS": 3, "shots": 6, "S": 5 } },
+  { "name": "Devastators (Earthshaker Mortar)",
+    "ranged": { "cost": 65, "template_hits": 4, "S": 6, "mw": 2, "ap": 1 } },
+
+  { "name": "Bull Centaurs (med+shield / AHW)",
+    "resilience": { "cost": 22, "T": 4, "W": 1, "save": 3, "Ld": 8, "hold": "plain" },
+    "melee": { "cost": 20, "WS": 4, "A": 3, "S": 4 } },
+
+  { "name": "Whirlwind (Bull Centaur, charge)",
+    "resilience": { "cost": 100, "T": 5, "W": 4, "save": 5, "Ld": 8, "hold": "plain" },
+    "melee": { "cost": 100, "WS": 4, "A": 2, "S": 4, "impact": { "hits": 3.5, "S": 5 } } },
+  { "name": "Tenderizer (Bull Centaur, charge)",
+    "melee": { "cost": 100, "WS": 4, "A": 2, "S": 4, "impact": { "hits": 2, "S": 6, "mw": 2 } } },
+
+  { "name": "Sneaky Gits (2HW, poison)",
+    "resilience": { "cost": 5, "T": 3, "W": 1, "save": null, "Ld": 6, "hold": "plain", "treacherous": true },
+    "melee": { "cost": 5, "WS": 3, "A": 2, "S": 3, "poison": true },
+    "ranged": { "cost": 5, "BS": 3, "shots": 1, "S": 3, "poison": true } },
+
+  { "name": "Bolt Throwa (war machine)",
+    "resilience": { "cost": 35, "T": 7, "W": 3, "save": null, "Ld": 6, "hold": "warmachine" },
+    "ranged": { "cost": 35, "BS": 3, "shots": 1, "S": 6, "mw": 2 } },
+
+  { "name": "Black Orcs (hvy+shield)",
+    "resilience": { "cost": 13.5, "T": 4, "W": 1, "save": 3, "Ld": 8, "hold": "plain" },
+    "melee": { "cost": 13, "WS": 4, "A": 1, "S": 5 } },
+  { "name": "Black Orcs (GW, 1st round Mighty Blow x2)",
+    "melee": { "cost": 13, "WS": 4, "A": 1, "S": 7 } },
+
+  { "name": "Ogre Slaves (GW, 1st round)",
+    "resilience": { "cost": 27, "T": 4, "W": 3, "save": 6, "Ld": 4, "hold": "plain" },
+    "melee": { "cost": 30, "WS": 3, "A": 3, "S": 6, "impact": { "hits": 1, "S": 4 } } },
+  { "name": "Ogre Slaves (GW, sustained)",
+    "melee": { "cost": 30, "WS": 3, "A": 3, "S": 5 } },
+
+  { "name": "K'daai Fireborn",
+    "resilience": { "cost": 50, "T": 4, "W": 3, "save": 6, "ward": 5, "Ld": 7, "hold": "daemonic" },
+    "melee": { "cost": 50, "WS": 4, "A": 3, "S": 5, "blaze": 1 } },
+
+  { "name": "Iron Daemon (charge, impact)",
+    "resilience": { "cost": 190, "T": 6, "W": 6, "save": null, "Ld": 9, "hold": "unbreakable" },
+    "melee": { "cost": 190, "WS": 4, "A": 2, "S": 3, "impact": { "hits": 4.5, "S": 6 } },
+    "ranged": { "cost": 190, "BS": 3, "shots": 9, "S": 5 } },
+  { "name": "Iron Daemon (grind, stomp)",
+    "melee": { "cost": 190, "WS": 4, "A": 2, "S": 3, "stomp": 6 } },
+
+  { "name": "Magma Cannon (war machine)",
+    "resilience": { "cost": 100, "T": 7, "W": 3, "save": null, "Ld": 9, "hold": "warmachine" },
+    "ranged": { "cost": 100, "template_hits": 4, "S": 5, "mw": 2 } },
+
+  { "name": "Deathshrieker Rocket (war machine)",
+    "resilience": { "cost": 95, "T": 7, "W": 3, "save": null, "Ld": 9, "hold": "warmachine" },
+    "ranged": { "cost": 95, "template_hits": 4, "S": 8, "mw": 2 } },
+
+  { "name": "Immortals (GW, hvy, 1st round)",
+    "resilience": { "cost": 16, "T": 4, "W": 1, "save": 4, "Ld": 9, "hold": "stubborn" },
+    "melee": { "cost": 16, "WS": 5, "A": 2, "S": 6 } },
+  { "name": "Immortals (GW, sustained)",
+    "melee": { "cost": 16, "WS": 5, "A": 2, "S": 5 } },
+
+  { "name": "Bull Centaur Renders (med+shield)",
+    "resilience": { "cost": 56, "T": 5, "W": 3, "save": 2, "Ld": 8, "hold": "plain" },
+    "melee": { "cost": 50, "WS": 4, "A": 4, "S": 4 } },
+  { "name": "Bull Centaur Renders (GW, 1st round)",
+    "melee": { "cost": 56, "WS": 4, "A": 3, "S": 6 } },
+
+  { "name": "Lammasu",
+    "resilience": { "cost": 155, "T": 5, "W": 4, "save": null, "Ld": 8, "hold": "plain" },
+    "melee": { "cost": 155, "WS": 3, "A": 2, "S": 5 } },
+
+  { "name": "Dreadquake Mortar (war machine)",
+    "resilience": { "cost": 130, "T": 7, "W": 3, "save": null, "Ld": 9, "hold": "warmachine" },
+    "ranged": { "cost": 130, "template_hits": 6, "S": 8, "mw": 3.5, "ap": 1 } },
+
+  { "name": "Hellcannon",
+    "resilience": { "cost": 190, "T": 6, "W": 5, "save": 4, "ward": 5, "Ld": 4, "hold": "daemonic" },
+    "melee": { "cost": 190, "WS": 4, "A": 5, "S": 5 },
+    "ranged": { "cost": 190, "template_hits": 4, "S": 5, "mw": 3.5 } },
+
+  { "name": "Juggernaut Siege Tower",
+    "resilience": { "cost": 230, "T": 6, "W": 10, "save": null, "Ld": 9, "hold": "unbreakable" },
+    "ranged": { "cost": 230, "BS": 3, "shots": 4, "S": 7, "mw": 2 } },
+
+  { "name": "Kolossus (+Stomp, bane maces AP1)",
+    "resilience": { "cost": 250, "T": 7, "W": 6, "save": 4, "ward": 6, "Ld": 10, "hold": "unbreakable" },
+    "melee": { "cost": 250, "WS": 4, "A": 5, "S": 6, "ap": 1, "stomp": 6 } },
+
+  { "name": "K'daai Destroyer (+Stomp)",
+    "resilience": { "cost": 265, "T": 6, "W": 6, "save": 5, "ward": 5, "Ld": 7, "hold": "daemonic" },
+    "melee": { "cost": 265, "WS": 5, "A": 6, "S": 7, "stomp": 7, "blaze": 1 } },
+
+  { "name": "Siege Giant (random attacks not modelled)",
+    "resilience": { "cost": 200, "T": 6, "W": 6, "save": 6, "Ld": 10, "hold": "stubborn" } }
+
+ ]
+}

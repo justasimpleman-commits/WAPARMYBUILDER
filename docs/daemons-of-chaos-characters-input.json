@@ -1,0 +1,746 @@
+{
+ "_notes": [
+  "Daemons of Chaos 3.0 (Mathias Eliasson). Every Daemon has Daemonic: Magical Ward (5+), Unbreakable, Fear -> ward:5, hold:'daemonic'.",
+  "Khorne = Mighty Blow (1): +1 S in the FIRST round only (incl. Impact Hits and Stomps). Two builds where it matters.",
+  "Nurgle = Poisoned Attacks (+1 To Wound) and -1 WS to enemies in base contact (the WS debuff is NOT modelled).",
+  "Slaanesh = Armour Piercing (1) -> ap:1, plus one extra Attack per unsaved Wound -> bonus_attack_on_wound.",
+  "Cavalry/Monstrous Cavalry use the HIGHEST T and W of rider or mount (rulebook p.72).",
+  "Chariot troop-type armour save stacks with Natural Armour (rulebook: 'Natural Armour can be combined with other armour as normal').",
+  "Monsters Stomp (D6)=3.5; Monstrous Creatures Stomp (D3)=2 via stomp_hits.",
+  "Character builds are BARE (no magic items) unless the item is printed on the profile.",
+  "Scope: CHARACTERS ONLY (generic lords/heroes + special characters). Bare profiles - no magic items or Daemonic Gifts unless printed on the profile."
+ ],
+ "units": [
+  {
+   "name": "Daemon Prince (med armour)",
+   "resilience": {
+    "cost": 265,
+    "T": 5,
+    "W": 5,
+    "save": 5,
+    "ward": 5,
+    "Ld": 9,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 250,
+    "WS": 8,
+    "A": 5,
+    "S": 6,
+    "stomp": 6,
+    "stomp_hits": 2
+   }
+  },
+  {
+   "name": "Exalted Daemon (med armour)",
+   "resilience": {
+    "cost": 185,
+    "T": 5,
+    "W": 4,
+    "save": 5,
+    "ward": 5,
+    "Ld": 8,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 170,
+    "WS": 7,
+    "A": 4,
+    "S": 5
+   }
+  },
+  {
+   "name": "Bloodthirster (2HW, 1st rd)",
+   "resilience": {
+    "cost": 400,
+    "T": 6,
+    "W": 6,
+    "save": 5,
+    "ward": 5,
+    "Ld": 9,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 400,
+    "WS": 9,
+    "A": 7,
+    "S": 7,
+    "stomp": 7
+   }
+  },
+  {
+   "name": "Bloodthirster (GW, 1st rd)",
+   "melee": {
+    "cost": 400,
+    "WS": 9,
+    "A": 6,
+    "S": 9,
+    "stomp": 7
+   }
+  },
+  {
+   "name": "Bloodthirster (GW, sustained)",
+   "melee": {
+    "cost": 400,
+    "WS": 9,
+    "A": 6,
+    "S": 7,
+    "stomp": 6
+   }
+  },
+  {
+   "name": "Bloodmaster (GW+lt armour, 1st rd)",
+   "resilience": {
+    "cost": 113,
+    "T": 4,
+    "W": 2,
+    "save": 5,
+    "ward": 5,
+    "Ld": 8,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 115,
+    "WS": 7,
+    "A": 3,
+    "S": 8
+   }
+  },
+  {
+   "name": "Bloodmaster (GW, sustained)",
+   "melee": {
+    "cost": 115,
+    "WS": 7,
+    "A": 3,
+    "S": 6
+   }
+  },
+  {
+   "name": "Great Unclean One (AHW)",
+   "resilience": {
+    "cost": 400,
+    "T": 7,
+    "W": 7,
+    "save": null,
+    "ward": 5,
+    "Ld": 9,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 420,
+    "WS": 6,
+    "A": 6,
+    "S": 6,
+    "poison": true,
+    "stomp": 6
+   }
+  },
+  {
+   "name": "Poxbringer",
+   "resilience": {
+    "cost": 110,
+    "T": 5,
+    "W": 2,
+    "save": null,
+    "ward": 5,
+    "Ld": 8,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 110,
+    "WS": 6,
+    "A": 3,
+    "S": 5,
+    "poison": true
+   }
+  },
+  {
+   "name": "Sloppity Bilepiper",
+   "resilience": {
+    "cost": 95,
+    "T": 5,
+    "W": 2,
+    "save": null,
+    "ward": 5,
+    "Ld": 8,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 95,
+    "WS": 4,
+    "A": 2,
+    "S": 4,
+    "poison": true
+   }
+  },
+  {
+   "name": "Keeper of Secrets",
+   "resilience": {
+    "cost": 400,
+    "T": 6,
+    "W": 6,
+    "save": null,
+    "ward": 5,
+    "Ld": 9,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 400,
+    "WS": 8,
+    "A": 6,
+    "S": 6,
+    "ap": 1,
+    "bonus_attack_on_wound": true,
+    "stomp": 6
+   }
+  },
+  {
+   "name": "Viceleader",
+   "resilience": {
+    "cost": 95,
+    "T": 3,
+    "W": 2,
+    "save": null,
+    "ward": 5,
+    "Ld": 8,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 95,
+    "WS": 7,
+    "A": 4,
+    "S": 4,
+    "ap": 1,
+    "bonus_attack_on_wound": true
+   }
+  },
+  {
+   "name": "Infernal Enrapturess",
+   "resilience": {
+    "cost": 135,
+    "T": 3,
+    "W": 2,
+    "save": null,
+    "ward": 5,
+    "Ld": 8,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 135,
+    "WS": 6,
+    "A": 3,
+    "S": 4,
+    "ap": 1,
+    "bonus_attack_on_wound": true
+   }
+  },
+  {
+   "name": "Lord of Change",
+   "resilience": {
+    "cost": 400,
+    "T": 6,
+    "W": 6,
+    "save": null,
+    "ward": 5,
+    "Ld": 9,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 400,
+    "WS": 6,
+    "A": 5,
+    "S": 6,
+    "stomp": 6
+   }
+  },
+  {
+   "name": "Gaunt Summoner",
+   "resilience": {
+    "cost": 240,
+    "T": 4,
+    "W": 3,
+    "save": null,
+    "ward": 5,
+    "Ld": 8,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 240,
+    "WS": 3,
+    "A": 2,
+    "S": 4
+   }
+  },
+  {
+   "name": "Changecaster",
+   "resilience": {
+    "cost": 110,
+    "T": 4,
+    "W": 2,
+    "save": null,
+    "ward": 5,
+    "Ld": 8,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 110,
+    "WS": 3,
+    "A": 2,
+    "S": 4
+   }
+  },
+  {
+   "name": "Be'lakor",
+   "resilience": {
+    "cost": 515,
+    "T": 5,
+    "W": 5,
+    "save": null,
+    "ward": 5,
+    "Ld": 10,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 515,
+    "WS": 9,
+    "A": 5,
+    "S": 6,
+    "ap": 6,
+    "stomp": 6,
+    "stomp_hits": 2
+   }
+  },
+  {
+   "name": "Skarbrand (1st rd)",
+   "resilience": {
+    "cost": 480,
+    "T": 6,
+    "W": 6,
+    "save": 5,
+    "ward": 5,
+    "Ld": 9,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 480,
+    "WS": 10,
+    "A": 8,
+    "S": 7,
+    "ap": 6,
+    "hatred": true,
+    "stomp": 7
+   }
+  },
+  {
+   "name": "Skarbrand (sustained)",
+   "melee": {
+    "cost": 480,
+    "WS": 10,
+    "A": 8,
+    "S": 6,
+    "ap": 6,
+    "hatred": true,
+    "stomp": 6
+   }
+  },
+  {
+   "name": "Mazarall the Butcher (charge)",
+   "resilience": {
+    "cost": 430,
+    "T": 6,
+    "W": 6,
+    "save": 5,
+    "ward": 5,
+    "Ld": 9,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 430,
+    "WS": 8,
+    "A": 6,
+    "S": 8,
+    "stomp": 8,
+    "impact": {
+     "hits": 2,
+     "S": 8
+    }
+   }
+  },
+  {
+   "name": "U'Zhul the Skulltaker (1st rd)",
+   "resilience": {
+    "cost": 170,
+    "T": 4,
+    "W": 2,
+    "save": 2,
+    "ward": 5,
+    "Ld": 8,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 170,
+    "WS": 8,
+    "A": 4,
+    "S": 6
+   }
+  },
+  {
+   "name": "Karanak (1st rd)",
+   "resilience": {
+    "cost": 125,
+    "T": 5,
+    "W": 2,
+    "save": 6,
+    "ward": 5,
+    "Ld": 8,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 125,
+    "WS": 7,
+    "A": 4,
+    "S": 6,
+    "hatred": true
+   }
+  },
+  {
+   "name": "Skaarac the Bloodborn (1st rd)",
+   "resilience": {
+    "cost": 325,
+    "T": 6,
+    "W": 6,
+    "save": 4,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 325,
+    "WS": 5,
+    "A": 6,
+    "S": 7,
+    "stomp": 7
+   }
+  },
+  {
+   "name": "Ku'gath Plaguefather",
+   "resilience": {
+    "cost": 480,
+    "T": 7,
+    "W": 7,
+    "save": null,
+    "ward": 5,
+    "Ld": 9,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 480,
+    "WS": 6,
+    "A": 6,
+    "S": 6,
+    "poison": true,
+    "stomp": 6
+   },
+   "ranged": {
+    "cost": 480,
+    "template_hits": 4,
+    "S": 5,
+    "ap": 6
+   }
+  },
+  {
+   "name": "Rotigus",
+   "resilience": {
+    "cost": 570,
+    "T": 7,
+    "W": 7,
+    "save": null,
+    "ward": 5,
+    "Ld": 9,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 570,
+    "WS": 6,
+    "A": 5,
+    "S": 6,
+    "poison": true,
+    "stomp": 6
+   }
+  },
+  {
+   "name": "Epidemius (+Palanquin)",
+   "resilience": {
+    "cost": 190,
+    "T": 5,
+    "W": 2,
+    "save": null,
+    "ward": 5,
+    "Ld": 8,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 190,
+    "WS": 6,
+    "A": 11,
+    "S": 5,
+    "poison": true
+   }
+  },
+  {
+   "name": "Horticulous Slimux (GW, 1st rd)",
+   "resilience": {
+    "cost": 235,
+    "T": 5,
+    "W": 4,
+    "save": null,
+    "ward": 5,
+    "regen": 6,
+    "Ld": 8,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 235,
+    "WS": 6,
+    "A": 7,
+    "S": 7,
+    "poison": true
+   }
+  },
+  {
+   "name": "Horticulous Slimux (GW, sustained)",
+   "melee": {
+    "cost": 235,
+    "WS": 6,
+    "A": 7,
+    "S": 6,
+    "poison": true
+   }
+  },
+  {
+   "name": "N'Kari",
+   "resilience": {
+    "cost": 625,
+    "T": 6,
+    "W": 6,
+    "save": null,
+    "ward": 5,
+    "Ld": 9,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 625,
+    "WS": 8,
+    "A": 6,
+    "S": 6,
+    "ap": 1,
+    "bonus_attack_on_wound": true,
+    "stomp": 6
+   }
+  },
+  {
+   "name": "Shalaxi Helbane",
+   "resilience": {
+    "cost": 525,
+    "T": 6,
+    "W": 6,
+    "save": 6,
+    "ward": 5,
+    "Ld": 9,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 525,
+    "WS": 9,
+    "A": 6,
+    "S": 6,
+    "ap": 1,
+    "bonus_attack_on_wound": true,
+    "stomp": 6
+   }
+  },
+  {
+   "name": "Azazel",
+   "resilience": {
+    "cost": 425,
+    "T": 5,
+    "W": 5,
+    "save": null,
+    "ward": 5,
+    "Ld": 10,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 425,
+    "WS": 8,
+    "A": 5,
+    "S": 6,
+    "ap": 6,
+    "bonus_attack_on_wound": true,
+    "stomp": 6,
+    "stomp_hits": 2
+   }
+  },
+  {
+   "name": "Syll'Esske",
+   "resilience": {
+    "cost": 350,
+    "T": 5,
+    "W": 5,
+    "save": 6,
+    "ward": 5,
+    "Ld": 9,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 350,
+    "WS": 8,
+    "A": 5,
+    "S": 6,
+    "ap": 1,
+    "bonus_attack_on_wound": true,
+    "stomp": 6,
+    "stomp_hits": 2
+   }
+  },
+  {
+   "name": "Dexcessa",
+   "resilience": {
+    "cost": 390,
+    "T": 5,
+    "W": 5,
+    "save": null,
+    "ward": 5,
+    "Ld": 9,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 390,
+    "WS": 9,
+    "A": 5,
+    "S": 6,
+    "ap": 1,
+    "bonus_attack_on_wound": true,
+    "stomp": 6,
+    "stomp_hits": 2
+   }
+  },
+  {
+   "name": "Synessa",
+   "resilience": {
+    "cost": 480,
+    "T": 5,
+    "W": 5,
+    "save": null,
+    "ward": 5,
+    "Ld": 9,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 480,
+    "WS": 6,
+    "A": 3,
+    "S": 5,
+    "ap": 1,
+    "bonus_attack_on_wound": true,
+    "stomp": 5,
+    "stomp_hits": 2
+   }
+  },
+  {
+   "name": "The Masque of Slaanesh",
+   "resilience": {
+    "cost": 160,
+    "T": 3,
+    "W": 2,
+    "save": null,
+    "ward": 5,
+    "regen": null,
+    "Ld": 8,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 160,
+    "WS": 7,
+    "A": 5,
+    "S": 4,
+    "ap": 1,
+    "bonus_attack_on_wound": true
+   }
+  },
+  {
+   "name": "Kairos Fateweaver",
+   "resilience": {
+    "cost": 415,
+    "T": 5,
+    "W": 6,
+    "save": null,
+    "ward": 5,
+    "Ld": 9,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 415,
+    "WS": 1,
+    "A": 1,
+    "S": 5,
+    "stomp": 5
+   }
+  },
+  {
+   "name": "Amon 'Chakai",
+   "resilience": {
+    "cost": 570,
+    "T": 6,
+    "W": 6,
+    "save": null,
+    "ward": 5,
+    "Ld": 9,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 570,
+    "WS": 6,
+    "A": 5,
+    "S": 6,
+    "stomp": 6
+   }
+  },
+  {
+   "name": "The Changeling",
+   "resilience": {
+    "cost": 130,
+    "T": 3,
+    "W": 2,
+    "save": null,
+    "ward": 5,
+    "Ld": 8,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 130,
+    "WS": 3,
+    "A": 1,
+    "S": 3
+   }
+  },
+  {
+   "name": "The Blue Scribes",
+   "resilience": {
+    "cost": 80,
+    "T": 3,
+    "W": 2,
+    "save": null,
+    "ward": 5,
+    "Ld": 7,
+    "hold": "daemonic"
+   },
+   "melee": {
+    "cost": 80,
+    "WS": 3,
+    "A": 2,
+    "S": 3
+   }
+  }
+ ]
+}

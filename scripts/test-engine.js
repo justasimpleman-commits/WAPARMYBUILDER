@@ -45,7 +45,7 @@ function load(f){ return fs.readFileSync(path.join(DIR,f),"utf8"); }
   "data/chaos-dwarfs.js","data/grand-cathay.js","data/daemons-of-chaos.js","data/beastmen.js",
   "data/ogre-kingdoms.js","data/orcs-and-goblins.js","data/skaven.js","data/high-elves.js","data/dark-elves.js",
   "data/tomb-kings.js","data/vampire-counts.js","data/bretonnia.js","data/wood-elves.js",
-  "data/dwarfs.js" ].forEach(f=>{ (0,eval)(load(f)); });
+  "data/dwarfs.js","data/lizardmen.js","data/estalia.js" ].forEach(f=>{ (0,eval)(load(f)); });
 
 const html=load("index.html");
 const scripts=[...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)].map(m=>m[1]);

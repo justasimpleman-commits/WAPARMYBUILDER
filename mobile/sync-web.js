@@ -44,6 +44,8 @@ const DATA_FILES = [
   "bretonnia.js",
   "wood-elves.js",
   "dwarfs.js",
+  "lizardmen.js",
+  "estalia.js",
 ];
 
 fs.mkdirSync(path.join(DST, "data"), { recursive: true });

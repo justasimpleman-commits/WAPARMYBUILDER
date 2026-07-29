@@ -1,0 +1,42 @@
+{
+ "_notes": [
+  "Chaos Dwarfs 3.0 (Mathias Eliasson) — CHARACTERS ONLY. Generic characters, no special/named characters. Source: data/chaos-dwarfs.js units.characters.",
+  "Unlike rank units, a character buys ONE loadout, so each character is a single build and its resilience AND damage are computed at the SAME full cost (base points + wargear + magic items).",
+  "Typical loadout modelled: best mundane armour + shield where allowed, an additional hand weapon (+1 Attack, keeps the shield's save), and a representative defensive magic item — a ward — sized to the character's magic budget. Item costs are added to the point cost.",
+  "Wards used: Talisman of Preservation (40, Ward 4+) for the big fighters, Talisman of Endurance (25, Ward 5+) mid, Talisman of Protection (10, Ward 6+) for cheap/caster models. save = final armour save ROLL; ward = ward roll (unmodified by Strength).",
+  "Great weapon (S+1, Mighty Blow 1 = +2 charge/+1 sustained) is NOT the modelled loadout — the AHW+shield build keeps a save and +1 Attack; a great weapon is a valid alternative that trades the shield for more Strength (noted in Method).",
+  "Casters (Sorcerers, Daemonsmith): their real output is spells, which are NOT modelled — their melee rows are near-zero and shown only for completeness. Their arcane items (scrolls) are not defensive, so a modest ward is assumed.",
+  "Hold uses each character's own Leadership. In practice characters sit inside units and lend/borrow Leadership and take Look Out Sir rolls, so lone-model Hold is indicative only. Blackshard Armour (Immunity Flaming) has no effect on these benchmarks."
+ ],
+ "units": [
+
+  { "name": "Overlord (heavy+shield+AHW, Ward 4+)",
+    "resilience": { "cost": 193, "T": 5, "W": 3, "save": 3, "ward": 4, "Ld": 10, "hold": "resolute" },
+    "melee": { "cost": 193, "WS": 7, "A": 5, "S": 4 } },
+
+  { "name": "Overseer (heavy+shield+AHW, Ward 4+)",
+    "resilience": { "cost": 128, "T": 5, "W": 2, "save": 3, "ward": 4, "Ld": 9, "hold": "resolute" },
+    "melee": { "cost": 128, "WS": 6, "A": 4, "S": 4 } },
+
+  { "name": "Bull Centaur Taur'ruk (med+shield+AHW, Ward 4+)",
+    "resilience": { "cost": 198, "T": 5, "W": 4, "save": 2, "ward": 4, "Ld": 9, "hold": "plain" },
+    "melee": { "cost": 198, "WS": 5, "A": 5, "S": 5 } },
+
+  { "name": "Hobgoblin Chieftain (med+shield+AHW, Ward 5+)",
+    "resilience": { "cost": 84, "T": 4, "W": 2, "save": 4, "ward": 5, "Ld": 7, "hold": "plain" },
+    "melee": { "cost": 84, "WS": 5, "A": 4, "S": 4 } },
+
+  { "name": "Sorcerer-Prophet (heavy, Ward 5+)",
+    "resilience": { "cost": 238, "T": 4, "W": 3, "save": 4, "ward": 5, "Ld": 9, "hold": "resolute" },
+    "melee": { "cost": 238, "WS": 5, "A": 2, "S": 3 } },
+
+  { "name": "Sorcerer-Priest (heavy, Ward 6+)",
+    "resilience": { "cost": 108, "T": 4, "W": 2, "save": 4, "ward": 6, "Ld": 9, "hold": "resolute" },
+    "melee": { "cost": 108, "WS": 4, "A": 1, "S": 3 } },
+
+  { "name": "Daemonsmith (med, Ward 5+)",
+    "resilience": { "cost": 94, "T": 4, "W": 2, "save": 5, "ward": 5, "Ld": 9, "hold": "resolute" },
+    "melee": { "cost": 94, "WS": 4, "A": 2, "S": 4 } }
+
+ ]
+}
