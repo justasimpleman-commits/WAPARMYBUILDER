@@ -43,14 +43,10 @@ the engine lives in **`js/`** and `index.html` stays at the **root** (see CLAUDE
 To register a brand-new book: `(window.ARMY_BOOKS = window.ARMY_BOOKS || {})["<id>"] = { id:"<id>", … }`,
 then add **one line** to `data/books.js`: `{ id:"<id>", name:"<the book's name>", file:"data/<id>.js" }`.
 That registry is the only list of books: the Army dropdown, the lazy loader, the
-test harness, `scripts/sweep.js` and the mobile sync all read it (the harness fails
+test harness and `scripts/sweep.js` all read it (the harness fails
 if a `data/` book file is missing from it or its `name` doesn't match the book).
 Books are **not** `<script>`-tagged in `index.html` — the page loads a book's file
 the first time that army is chosen.
-
-After editing `index.html`, `js/`, `css/` or any `data/` file, **re-sync the mobile app** so the
-phone build matches: `node mobile/sync-web.js` (mirrors `index.html`, `css/`, `js/` and `data/` into
-`mobile/www/`). See CLAUDE.md → "Mobile app (Capacitor)".
 
 ## Source PDF → destination map
 
@@ -205,6 +201,3 @@ loads the common files + book, walks every `unitInfo.eq` / `.rules`, splits on
 like `Unit Strength 2`, lore names, and magic items already in `itemDesc`).
 Remaining hits are either a real gap to add to `glossary` or an intentional skip
 (magic item).
-
-Finally, after any `index.html`/`js/`/`css/`/`data/` change, run `node mobile/sync-web.js` so the
-mobile `www/` copy is not left stale.

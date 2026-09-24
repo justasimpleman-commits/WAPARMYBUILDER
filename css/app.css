@@ -199,7 +199,7 @@ h2.sec.cathead:hover{color:var(--fire2)}
 .toast .tbtn{margin-left:14px;background:none;border:1px solid var(--fire2);color:var(--fire2);border-radius:5px;padding:3px 10px;font-size:13px;font-weight:600;cursor:pointer}
 .toast .tbtn:hover{background:var(--fire2);color:#1a120c}
 /* ---- prevent sideways scroll on narrow screens (belt-and-suspenders;
-       the Capacitor build's mobile init script owns the drawer layout) ---- */
+       mobile-init.js owns the phone drawer layout) ---- */
 html,body{max-width:100%;overflow-x:hidden}
 .wrap,.col{min-width:0}
 .col select{max-width:100%}

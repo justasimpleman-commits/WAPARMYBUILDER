@@ -30,4 +30,4 @@ TARGETS.forEach(rel => {
   if (after !== before) { fs.writeFileSync(p, after); changed++; console.log(`  ✓ js/core.js APP_VERSION → ${v}`); }
   else console.log(`  · js/core.js APP_VERSION unchanged`);
 }
-console.log(`Set version to ${v} in ${changed} file(s). Now run: node mobile/sync-web.js`);
+console.log(`Set version to ${v} in ${changed} file(s).`);

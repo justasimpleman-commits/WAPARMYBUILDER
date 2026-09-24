@@ -4,9 +4,10 @@ A **static web app** for Warhammer 9th Edition 3.0 (Mathias Eliasson's unofficia
 ruleset), hosted on GitHub Pages. It lets a player assemble an army, calculates
 points, enforces the list-building rules, saves/loads armies (browser library or
 `.json` files), shares an army as a link, and exports the list. There is no build
-step: open `index.html` (works from `file://`) or serve the folder. The same page is
-wrapped as an Android app by Capacitor (`mobile/`). (It used to be an Electron
-desktop app; that layer was removed — there is no `main.js`/`preload.js` any more.)
+step: open `index.html` (works from `file://`) or serve the folder. On a phone the
+same page switches to a drawer layout (`mobile-init.js`). (It used to be an Electron
+desktop app with a Capacitor Android build; both were removed — there is no
+`main.js`/`preload.js`/`mobile/` any more.)
 
 Multiple army books are bundled (Chaos Dwarfs, Grand Cathay, Daemons of Chaos,
 Beastmen, Ogre Kingdoms, Orcs & Goblins, Skaven, High Elves, Dark Elves, Tomb
@@ -31,9 +32,7 @@ SCHEMA.md. Don't key engine logic on a book's option ids or unit ids.)
 Repository layout: `index.html`, `mobile-init.js` and `package.json` at the
 **root**; styles in **`css/`**, the engine in **`js/`**, the data layer in
 **`data/`**, docs in **`docs/`**, dev/test scripts in **`scripts/`**, release
-scripts in **`build/`**, and the Capacitor mobile build in **`mobile/`** (see
-"Mobile app (Capacitor)" below — it reuses the same page and must be re-synced
-after any change to it).
+script in **`build/`**.
 
 - **`index.html`** — markup only (header, three columns, the two modal shells),
   `css/app.css`, and plain `<script src>` tags (work from `file://`, no CORS, no
@@ -64,8 +63,8 @@ after any change to it).
   chosen, so a visitor downloads one book, not all sixteen. All books register into
   `window.ARMY_BOOKS` keyed by `id`; the engine selects the active one as `D`
   (default `chaos-dwarfs`) and `switchArmy(id)` swaps it (a promise; synchronous
-  when the book is already loaded). The test harness, `scripts/sweep.js` and the
-  mobile sync all read this registry.
+  when the book is already loaded). The test harness and `scripts/sweep.js` also
+  read this registry.
 - **`data/chaos-dwarfs.js`**, **`data/grand-cathay.js`**, **`data/daemons-of-chaos.js`**,
   **`data/beastmen.js`**, **`data/ogre-kingdoms.js`**, **`data/orcs-and-goblins.js`**,
   **`data/skaven.js`**, **`data/high-elves.js`**, **`data/dark-elves.js`**, **`data/tomb-kings.js`**,
@@ -140,9 +139,8 @@ after any change to it).
   rulebook PDFs (`reference/Army books/`) used to audit data, plus
   `reference/Chaos-Dwarfs-Stats-and-Logic.docx`, a printable stats + logic
   reference (title page, logic section, per-unit profiles, magic-item tables).
-- **`build/release.command`** — bumps the version, snapshots the source for the
-  changelog, syncs `mobile/www`, runs the tests and builds the Android `.apk`
-  (`build/build-android.command` does just the APK). The web app itself needs no
+- **`build/release.command`** — runs the tests, bumps the version and snapshots the
+  source for the changelog (see `docs/RELEASING.md`). The web app itself needs no
   build — pushing to GitHub publishes it via Pages.
 - **`gen-doc.js`** (in the scratch/outputs area, not the project folder) — the
   Node script that builds the .docx. It reads points/options/caps from
@@ -396,30 +394,15 @@ stats card, which would make rule-heavy units unreadable.
   machine; share from the hosted site. Start-up order: shared link (asks if an
   unsaved draft exists) → restored draft → default army.
 
-## Mobile app (Capacitor)
+## Phone layout
 
-The `mobile/` folder is a **Capacitor** wrapper that ships the **exact same app**
-as the web build — there is **one source of truth**: the root `index.html`,
-`mobile-init.js`, `css/`, `js/` and `data/`. `mobile-init.js` is the narrow-screen
-layout (drawers, ☰ menu, Android Back); it self-activates under Capacitor or on a
-narrow browser window, so the web app on a phone gets it too.
-
-**`mobile/www/` is generated, never hand-edited.** `mobile/sync-web.js` copies
-`../index.html` and `../mobile-init.js`, and mirrors every file in `../css/`,
-`../js/` and `../data/` (removing stale ones) into `mobile/www/`.
-
-**Always re-sync after touching `index.html`, `mobile-init.js`, `css/`, `js/` or
-`data/`.** Otherwise the phone app silently runs the old code. Run from the project
-root:
-
-```bash
-node mobile/sync-web.js        # mirrors index.html + css/ js/ data/ into mobile/www/
-```
-
-This is mandatory for *every* change to the shared web assets, not just feature
-work — treat it as part of finishing the edit. A full device build additionally
-needs Capacitor (`mobile/build-android.command`), but the `sync-web.js` step is
-what keeps the mobile sources in step and must never be skipped.
+`mobile-init.js` (root, loaded last by `index.html`) is the narrow-screen layout: it
+activates when the viewport is ≤ 820px and **moves** (not clones) `#catalog` into a
+left drawer, `.col.validation` into a right drawer and the `.actions` toolbar into a
+☰ menu, so `render()` keeps filling them by id. The header controls, the
+undo/redo buttons and the points total move into two compact header rows. Crossing
+back to a wide window reloads the page. Anything added to the header, the action bar
+or the validation panel must keep working after being moved.
 
 ## Verifying changes (no browser/GUI needed)
 
@@ -442,16 +425,13 @@ storage fallback by stubbing `localStorage` and leaving `indexedDB` undefined.
 ```bash
 node --check data/*.js js/*.js mobile-init.js
 node scripts/test-engine.js   # DOM-stub harness (the js/ engine is eval'd inside it)
-node mobile/sync-web.js       # re-sync mobile/www/ if you changed the page, css/, js/ or data/
 ```
 
 Always include point-math checks, validation checks, and the new feature's logic;
 a good smoke test is running `render()` once per bundled book without throwing.
 For UI changes, also load the page in the pre-installed Chromium (Playwright) and
-check for console errors. Render the .docx and view a page or two when changing the
-document. If you changed `index.html`, `css/`, `js/` or any `data/` file, run
-`node mobile/sync-web.js` before you're done
-so the mobile build isn't left stale (see "Mobile app (Capacitor)").
+check for console errors — at desktop width and at phone width (the drawer layout).
+Render the .docx and view a page or two when changing the document.
 
 ## Tone / working style for this project
 

@@ -6,8 +6,8 @@ the list-building rules enforced as you go, save/load armies, share a list as a
 link, and export a text list.
 
 There is no build step. Open `index.html` in a browser (it works straight from
-`file://`), or serve the folder. The hosted copy is published by GitHub Pages. The
-same page is also wrapped as an Android app with Capacitor (see `mobile/README.md`).
+`file://`), or serve the folder. The hosted copy is published by GitHub Pages. On a
+phone it switches to a drawer layout.
 
 Sixteen army books are bundled and chosen from the **Army** dropdown in the header:
 Chaos Dwarfs, Grand Cathay, Daemons of Chaos, Beastmen, Ogre Kingdoms, Orcs &
@@ -21,7 +21,7 @@ character entry); it is shown with ★ in the summary and `[General]` in the exp
 
 ```
 index.html           the page: markup + <script>/<link> tags (no inline code)
-mobile-init.js       phone layout (drawers, ☰ menu, Android Back) — self-activates on narrow screens
+mobile-init.js       phone layout (drawers, ☰ menu) — self-activates on narrow screens
 css/app.css          styles
 js/                  the engine, split by concern (loaded in this order)
   core.js              state, book loader, update()/undo/redo, dirty tracking
@@ -38,10 +38,9 @@ data/                all data (the engine reads these)
   special-rules-common.js  universal special-rules glossary
   common-items.js      descriptions of the common rulebook magic items
   <book>.js            one file per army book
-docs/                SCHEMA.md (field reference), DATA-MAPPING.md (extraction playbook)
+docs/                SCHEMA.md (field reference), DATA-MAPPING.md (extraction playbook), RELEASING.md
 scripts/             test-engine.js (test harness), sweep.js, release helpers
-build/               release.command (version bump + Android build), build-android.command
-mobile/              Capacitor Android build (wraps the same page) — see mobile/README.md
+build/               release.command (tests + version bump + source snapshot) — see docs/RELEASING.md
 reference/           source PDFs + a printable stats/logic .docx (not shipped)
 ```
 
@@ -104,7 +103,6 @@ a unit's standard bearer (within its banner budget).
 ```
 node --check data/*.js js/*.js mobile-init.js
 node scripts/test-engine.js     # or: npm test
-node mobile/sync-web.js         # keep the Android copy in step
 ```
 
 The engine is tested in Node with a small DOM stub. The harness loads every book,

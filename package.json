@@ -5,8 +5,7 @@
   "author": "András",
   "license": "MIT",
   "scripts": {
-    "test": "node scripts/test-engine.js",
-    "sync:mobile": "node mobile/sync-web.js"
+    "test": "node scripts/test-engine.js"
   },
   "devDependencies": {
     "docx": "^9.7.1"
