@@ -570,11 +570,11 @@
             { label: "Elven Steed", cost: 15, key: "steed" }, { label: "Pegasus", cost: 25, key: "pegasus" }, { label: "Great Eagle", cost: 40, key: "eagle" },
             { label: "Tiranoc Chariot", cost: 70, key: "tiranoc" }, { label: "Griffon", cost: 125, only: "Prince", key: "griffon" }, { label: "Moon Dragon", cost: 300, only: "Prince", key: "moondragon" },
             // Honour-granted mounts — only shown / charged when the matching Honour is taken
-            { label: "Flamespyre Phoenix", cost: 200, key: "flamespyre", requiresHonour: "Anointed of Asuryan" },
-            { label: "White Lion Chariot", cost: 95, key: "whitelion", requiresHonour: "Chracian Hunter" },
-            { label: "Lothern Skycutter", cost: 65, key: "skycutter", requiresHonour: "Lothern Sea Helm" },
-            { label: "Star Dragon", cost: 390, only: "Prince", key: "stardragon", requiresHonour: "Blood of Caledor" },
-            { label: "Sun Dragon", cost: 235, only: "Noble", key: "sundragon", requiresHonour: "Blood of Caledor" } ] },
+            { label: "Flamespyre Phoenix", cost: 200, key: "flamespyre", requiresChoice: { id: "honour", is: "Anointed of Asuryan" } },
+            { label: "White Lion Chariot", cost: 95, key: "whitelion", requiresChoice: { id: "honour", is: "Chracian Hunter" } },
+            { label: "Lothern Skycutter", cost: 65, key: "skycutter", requiresChoice: { id: "honour", is: "Lothern Sea Helm" } },
+            { label: "Star Dragon", cost: 390, only: "Prince", key: "stardragon", requiresChoice: { id: "honour", is: "Blood of Caledor" } },
+            { label: "Sun Dragon", cost: 235, only: "Noble", key: "sundragon", requiresChoice: { id: "honour", is: "Blood of Caledor" } } ] },
           { id: "honour", type: "choice", label: "Elven Honour (up to 50 pts)", choices: [
             { label: "Anointed of Asuryan", cost: 50, cond: { mounts: ["__foot__","flamespyre"] } },
             { label: "Blood of Caledor", cost: 35, cond: { mounts: ["steed","moondragon","stardragon","sundragon"] } },

@@ -13,7 +13,7 @@ cd "$(dirname "$0")"
 echo "==> 1/5  Installing npm deps (Capacitor)…"
 [ -d node_modules ] || npm install
 
-echo "==> 2/5  Syncing web assets from the desktop project…"
+echo "==> 2/5  Syncing web assets from the project root…"
 node sync-web.js
 
 echo "==> 3/5  Ensuring native android project exists…"

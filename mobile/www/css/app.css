@@ -12,7 +12,12 @@ header h1{font-size:18px;margin:0;letter-spacing:.5px}
 header h1 small{color:var(--fire2);font-weight:400;display:block;font-size:11px;letter-spacing:1px}
 .limit{display:flex;align-items:center;gap:8px}
 .limit input{width:90px;background:#0f0b08;border:1px solid var(--line);color:var(--ink);padding:6px 8px;border-radius:6px;font-size:14px}
-.total{margin-left:auto;text-align:right}
+.total{margin-left:auto;text-align:right;display:flex;align-items:center;gap:12px}
+.hist{display:flex;gap:4px}
+.histbtn{background:var(--panel2);border:1px solid var(--line);color:var(--ink);width:32px;height:30px;border-radius:6px;cursor:pointer;font-size:17px;line-height:1}
+.histbtn:hover:not(:disabled){border-color:var(--fire)}
+.histbtn:disabled{opacity:.35;cursor:default}
+.limit select.preset{background:#0f0b08;border:1px solid var(--line);color:var(--ink);padding:6px 4px;border-radius:6px;font-size:13px;max-width:92px}
 .total .big{font-size:24px;font-weight:700;color:var(--fire2)}
 .total .big.over{color:var(--err)}
 .bars{display:flex;gap:10px;flex-wrap:wrap;padding:8px 18px;background:#1b130d;border-bottom:1px solid var(--line)}
@@ -32,6 +37,14 @@ h2.sec{font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:var(--
 .catitem{display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border-radius:6px;cursor:pointer}
 .catitem:hover{background:var(--panel2)}
 .catitem .pts{color:var(--muted);font-size:12px}
+.catitem .cname{flex:1;min-width:0}
+.catitem.taken{opacity:.45}
+.catitem .add:disabled{opacity:.4;cursor:not-allowed}
+.cbadge{font-size:11px;font-weight:700;color:var(--fire2);margin:0 6px;white-space:nowrap}
+.cbadge:empty{display:none}
+.cbadge.full{color:var(--warn)} .cbadge.over{color:var(--err)}
+.catsearch{width:100%;background:#0f0b08;border:1px solid var(--line);color:var(--ink);padding:7px 9px;border-radius:6px;font-size:13px;margin:2px 0 4px}
+.catsearch:focus{outline:none;border-color:var(--fire)}
 .catitem .add{background:var(--fire);color:#1a120c;border:none;border-radius:5px;width:24px;height:24px;font-size:16px;
   font-weight:700;cursor:pointer;line-height:1}
 .entry{background:var(--panel);border:1px solid var(--line);border-radius:8px;margin-bottom:12px}
@@ -62,8 +75,10 @@ select{max-width:230px}
 .vmsg.err{background:#2a1410;border-color:var(--err)}
 .vmsg.warn{background:#262012;border-color:var(--warn)}
 .vmsg.ok{background:#16210f;border-color:var(--ok)}
+.vmsg.link{cursor:pointer}
+.vmsg.link:hover{filter:brightness(1.25)}
 .empty{color:var(--muted);text-align:center;padding:40px 10px;font-style:italic}
-.actions{display:flex;gap:8px;margin-top:6px}
+.actions{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
 .btn{background:var(--panel2);border:1px solid var(--line);color:var(--ink);padding:7px 12px;border-radius:6px;cursor:pointer;font-size:13px}
 .btn:hover{border-color:var(--fire)}
 .btn.primary{background:var(--fire);color:#1a120c;border:none;font-weight:600}
@@ -90,7 +105,7 @@ textarea{width:100%;height:200px;background:#0f0b08;border:1px solid var(--line)
   font-size:12px;line-height:1;cursor:pointer;flex:none;font-style:italic;font-weight:700}
 .info:hover{border-color:var(--fire);background:var(--panel2)}
 .ehead .info{margin-left:0}
-.catitem .info{margin-left:auto;margin-right:6px}
+.catitem .info{margin-right:6px}
 /* army summary */
 .summary .scat{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--fire2);margin:10px 0 3px;display:flex;justify-content:space-between}
 .summary .scat b{color:var(--ink)}
@@ -171,14 +186,18 @@ h2.sec.cathead:hover{color:var(--fire2)}
 .spellrow .slvl{display:inline-block;min-width:24px;text-align:center;background:var(--head,#2c1a10);color:var(--fire2);
   border-radius:4px;font-size:10px;padding:1px 4px;font-weight:700}
 .spellrow .scast{color:var(--fire2);font-weight:700}
-.saveStatus{font-size:12px;opacity:.65;margin:6px 2px 0}
+.saveStatus{font-size:12px;color:var(--muted);margin:6px 2px 0}
+.saveStatus .dirty{color:var(--warn)}
+.shareurl{width:100%;background:#0f0b08;border:1px solid var(--line);color:var(--ink);padding:8px 10px;border-radius:6px;font-size:12px;font-family:monospace}
 .liblist{display:flex;flex-direction:column;gap:8px}
 .librow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:rgba(255,255,255,.03)}
 .librow .libname{font-weight:700}
 .librow .libsub{font-size:12px;opacity:.6;margin-top:2px}
 .librow .libacts{display:flex;gap:6px;flex-shrink:0}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:#2a1f17;color:#fff;border:1px solid var(--fire2);padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:1000}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+.toast .tbtn{margin-left:14px;background:none;border:1px solid var(--fire2);color:var(--fire2);border-radius:5px;padding:3px 10px;font-size:13px;font-weight:600;cursor:pointer}
+.toast .tbtn:hover{background:var(--fire2);color:#1a120c}
 /* ---- prevent sideways scroll on narrow screens (belt-and-suspenders;
        the Capacitor build's mobile init script owns the drawer layout) ---- */
 html,body{max-width:100%;overflow-x:hidden}

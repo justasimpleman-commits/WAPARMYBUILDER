@@ -9,6 +9,7 @@ function closeModal(){ document.getElementById("modalBg").classList.remove("open
 function openModal2(title, html){ document.getElementById("modal2Title").textContent=title;
   document.getElementById("modal2Body").innerHTML=html; document.getElementById("modal2Bg").classList.add("open"); }
 function closeModal2(){ document.getElementById("modal2Bg").classList.remove("open"); }
+function modalOpen(){ return ["modalBg","modal2Bg"].some(id=>document.getElementById(id).classList.contains("open")); }
 
 /* In-app text prompt (styled to match the app; window.prompt() is unreliable in WebViews).
    Reuses the shared modal; resolves to the trimmed value, or null if cancelled. */
@@ -375,9 +376,9 @@ function openMountPicker(e,u,o){
   openItemPicker({
     title:o.label||"Mount", multi:false, groups:[{label:"", items}],
     selected:cur?[cur]:[], remaining:()=>Infinity,
-    onConfirm:(sel)=>{ const nm=sel[0]||null;
-      let idx = nm==null ? null : o.choices.findIndex(c=>c.label===nm);
-      e.opts.mount = (idx==null||idx<0) ? null : idx; render(); }
+    onConfirm:(sel)=>update(()=>{ const nm=sel[0]||null;
+      const idx = nm==null ? null : o.choices.findIndex(c=>c.label===nm);
+      e.opts.mount = (idx==null||idx<0) ? null : idx; })
   });
 }
 
@@ -390,11 +391,19 @@ function openVirtueInfo(){
   const lines=(D.virtues||[]).map(v=>`<b>${v.name}</b> (${v.cost})<br>${v.desc||""}`);
   openModal("Virtues of the Knight", lines.join("<br><br>")||"No virtues.");
 }
-function toast(msg){
+/* brief status message; with `action` ({label, fn}) it carries a button (e.g.
+   "Removed Lord — Undo") and stays up longer */
+function toast(msg, action){
   let t=document.getElementById("toast");
   if(!t){ t=document.createElement("div"); t.id="toast"; t.className="toast"; document.body.appendChild(t); }
-  t.textContent=msg; t.classList.add("show");
-  clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"),1800);
+  t.textContent=msg;
+  if(action){
+    const b=document.createElement("button"); b.className="tbtn"; b.textContent=action.label;
+    b.onclick=()=>{ t.classList.remove("show"); action.fn(); };
+    t.appendChild(b);
+  }
+  t.classList.add("show");
+  clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"), action?5000:1800);
 }
 /* open the shared modal without going through a unit-specific builder */
 function openModalRaw(){ document.getElementById("modalBg").classList.add("open"); }

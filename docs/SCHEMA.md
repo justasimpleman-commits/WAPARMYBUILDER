@@ -1,10 +1,11 @@
 # Army Builder — data schema
 
-The app is **engine + data**. `index.html` is the generic engine (UI, army chooser,
-point maths, validation, export). Each army book is a separate data file that
-registers itself into `window.ARMY_BOOKS` under its `id`. To add a new book, copy
-the structure below and add a `<script src>` tag in index.html — no engine changes
-needed. The header **Army** dropdown switches the active book; the engine also
+The app is **engine + data**. `js/` holds the generic engine (UI, army chooser,
+point maths, validation, export), loaded by `index.html`. Each army book is a separate
+data file that registers itself into `window.ARMY_BOOKS` under its `id`. To add a new
+book, copy the structure below and add one line to the registry `data/books.js`
+(`{id, name, file}`) — no engine changes needed; the page loads the file the first
+time that army is picked. The header **Army** dropdown switches the active book; the engine also
 requires exactly one character to be nominated as the **Army General**.
 
 > This file documents what each **field means**. For *how to extract a book from
@@ -103,9 +104,10 @@ Two extra restriction fields used by the Undead/Bretonnia books:
 
 `god:"Khorne"` (with the book-level `godSections:true` flag) → the item/gift is only
 offered to a model of that god; untagged items are "Undivided" and offered to all.
-A model's god comes from a unit-level `god:"…"` field or from a chosen
-`{id:"align", type:"choice", choices:[{label,cost,god}]}` option (Daemons of Chaos).
-Items are grouped into per-god optgroups in the dropdowns.
+A model's god comes from a unit-level `god:"…"` field or from the chosen choice of
+the `choice`/`mustChoose` option whose choices carry `god` (Daemons of Chaos use
+`{id:"align", type:"choice", choices:[{label,cost,god}]}`; the id is only a
+convention for `requiresChoice` references). Items are grouped by god in the picker.
 
 Book-level `multiPickCategories:["Daemonic Gifts"]` makes a magic-item category
 multi-select (take several, each once) sharing the model's magic-item budget; the
@@ -212,18 +214,19 @@ Give each `mount` choice a `key` and tag a mount's own upgrades with it, so e.g.
 the Great Taurus "Flaming Breath"/"Bloodrage" or the Royal Hippogryph talons only
 appear once that mount is selected (`selectedMount` / `optMountBlocked` in the engine).
 
-**Conditional choices shown-but-disabled (`cond`).** A `choice`/`mustChoose` whose
-`id` is `"honour"` (High Elf Elven Honours) may give each choice a
+**Conditional choices shown-but-disabled (`cond`).** Any `choice`/`mustChoose` (used
+by the High Elf Elven Honours) may give each choice a
 `cond:{mounts:[keys…]}` listing the mount `key`s it is compatible with (use the
 sentinel `"__foot__"` for "on foot, no mount"). Unlike `only` (which *hides* a
 choice), a failing `cond` leaves the option **visible but disabled** in the picker
 with a "Requires: …" reason, and flags a validation error if it is the current pick
 — so the player still sees every Honour but the UI helps keep the mount rule. A
 choice with no `cond` is always selectable. The reverse link is a **mount** choice
-carrying `requiresHonour:"Honour name"|[…]`: that mount stays hidden/uncharged until
-the matching Honour is the selected honour (e.g. the Flamespyre Phoenix only unlocks
+carrying the same generic `requiresChoice:{id,is}` as options (e.g.
+`requiresChoice:{id:"honour", is:"Anointed of Asuryan"}`): that mount stays
+hidden/uncharged until that sibling choice is picked (e.g. the Flamespyre Phoenix only unlocks
 under *Anointed of Asuryan*, the Star/Sun Dragon under *Blood of Caledor*). The
-engine drops an honour-gated mount automatically if its Honour is removed
+engine drops a choice-gated mount automatically if its choice is removed
 (`reconcileEntry`). Both fields are generic engine features — only High Elves use
 them today.
 
@@ -301,8 +304,6 @@ Nehekhara wizard is the Hierophant). `requireWizardLoreMsg` overrides the messag
 
 ## Running
 
-It's an Electron desktop app: `npm install` then `npm start`, or build an
-installer with `build-mac.command` / `build-win.bat` (output in `dist/`). See
-`README.md`. For quick data/dev work `index.html` also opens directly in a
-browser — keep all the data files (`lores-common.js` and each `*.js` book) in the
-same folder.
+It's a static web app: open `index.html` in a browser (works from `file://`) or
+serve the folder (GitHub Pages). Keep `index.html` next to `css/`, `js/` and
+`data/`. See `README.md`.

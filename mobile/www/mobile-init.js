@@ -220,12 +220,13 @@
       if (e.target.closest && e.target.closest('.btn')) setTimeout(closeAll, 50);
     });
 
-    // Tapping a unit row in the Army Summary closes the drawer and focuses that
+    // Tapping a unit row in the Army Summary (or a validation message about a
+    // unit) closes the drawer and focuses that
     // entry in the roster. The row's own inline onclick=scrollToEntry(uid) fires
     // first (bubbling), scrolling + highlighting the entry; we then close the
     // drawer so the always-visible roster column is revealed.
     right.addEventListener('click', function (e) {
-      if (e.target.closest && e.target.closest('.summary .srow')) closeAll();
+      if (e.target.closest && e.target.closest('.summary .srow, .vmsg.link')) closeAll();
     });
   }
 
