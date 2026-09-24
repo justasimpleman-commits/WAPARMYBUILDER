@@ -37,19 +37,23 @@ global.navigator={};
 global.URL={createObjectURL(){return "";}};
 global.Blob=function(){};
 global.setTimeout=(f)=>0; global.clearTimeout=()=>{};
+global.addEventListener=()=>{};
+global.location={hash:"",href:"http://localhost/index.html",pathname:"/index.html",search:"",protocol:"http:"};
+global.history={replaceState(){}};
 document.getElementById("limit").value="2000";
 
-/* ---------- load data, then the engine ---------- */
+/* ---------- load data, then the engine ----------
+   Everything index.html loads with <script src>, in page order: the data files are
+   eval'd one by one, the js/ engine files are concatenated and eval'd as ONE script
+   (they share globals exactly as classic <script> tags do in the browser). Army
+   books are lazy-loaded in the page; here every book in data/books.js is eval'd
+   up front, so switchArmy() finds them already registered and runs synchronously. */
 function load(f){ return fs.readFileSync(path.join(DIR,f),"utf8"); }
-[ "data/lores-common.js","data/rules-common.js","data/special-rules-common.js","data/common-items.js",
-  "data/chaos-dwarfs.js","data/grand-cathay.js","data/daemons-of-chaos.js","data/beastmen.js",
-  "data/ogre-kingdoms.js","data/orcs-and-goblins.js","data/skaven.js","data/high-elves.js","data/dark-elves.js",
-  "data/tomb-kings.js","data/vampire-counts.js","data/bretonnia.js","data/wood-elves.js",
-  "data/dwarfs.js","data/lizardmen.js","data/estalia.js" ].forEach(f=>{ (0,eval)(load(f)); });
-
 const html=load("index.html");
-const scripts=[...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)].map(m=>m[1]);
-const engine=scripts.sort((a,b)=>b.length-a.length)[0];   // the big inline engine
+const srcs=[...html.matchAll(/<script src="([^"]+)"><\/script>/g)].map(m=>m[1]).filter(s=>s!=="mobile-init.js");
+srcs.filter(s=>s.startsWith("data/")).forEach(f=>{ (0,eval)(load(f)); });
+window.BOOK_INDEX.forEach(b=>{ (0,eval)(load(b.file)); });
+const engine=srcs.filter(s=>s.startsWith("js/")).map(load).join("\n");
 (0,eval)(engine + `
 ;Object.assign(globalThis,{
   __render:render, __entryPoints:entryPoints, __grand:grandTotal, __cat:catTotal,
@@ -61,10 +65,14 @@ const engine=scripts.sort((a,b)=>b.length-a.length)[0];   // the big inline engi
   __getGen:()=>generalUid, __D:()=>D,
   __rulesToHTML:rulesToHTML, __ruleExact:ruleExact, __ruleDef:ruleDef,
   __openRuleInfo:openRuleInfo, __eqToHTML:eqToHTML, __equipDef:equipDef,
-  __openOptionRules:openOptionRules, __mountEntityHTML:mountEntityHTML,
+  __mountEntityHTML:mountEntityHTML,
   __openMountPicker:openMountPicker,
-  __mkAllInfoBtn:mkAllInfoBtn, __mkRuleInfoBtn:mkRuleInfoBtn, __pk:()=>_pk,
-  __honourCondOK:honourCondOK, __selectedHonour:selectedHonour,
+  __mkRuleInfoBtn:mkRuleInfoBtn, __pk:()=>_pk,
+  __honourCondOK:honourCondOK, __optionActive:optionActive, __collectIssues:collectIssues,
+  __undo:undo, __redo:redo, __update:update, __removeEntry:removeEntry, __isDirty:isDirty, __markSaved:markSaved,
+  __packEntry:packEntry, __unpackEntry:unpackEntry, __blankEntry:blankEntry, __entryGod:entryGod,
+  __historyLen:()=>[_undo.length,_redo.length], __catalogRows:()=>_catalogRows, __setQuery:(q)=>{catalogQuery=q;},
+  __renderCatalog:renderCatalog, __reconcile:reconcileEntry,
   __mountChoiceBlocked:mountChoiceBlocked, __renderOption:renderOption,
   __perNCount:perNCount, __perNMax:perNMax, __optChoiceBlocked:optChoiceBlocked,
   __availableLores:availableLores, __loreNames:loreNames, __itemAllowed:itemAllowed,
@@ -334,21 +342,9 @@ console.log("Spells: render via the modal picker (no inline checkbox list)…");
   e.sigSpells=[]; e.lore="Fire";
 }
 
-/* =================== dropdown 'all options' info window =================== */
-console.log("Dropdown info: shows every option's rule, marks selected, notes no-rule…");
+/* =================== mount entity + mount picker =================== */
+console.log("Mounts: compact entity HTML + shared single-select picker…");
 {
-  __setState([]); __setGen(null); __switch("chaos-dwarfs",false);
-  const body=document.getElementById("modal2Body");
-  // an equipment choice: two real weapons + a no-rule option, second selected
-  const choices=[{label:"Great weapon",cost:2},{label:"Halberd"},{label:"Extra crew",cost:5}];
-  __openOptionRules("Weapon", choices, choices[1]);
-  let h=body.innerHTML;
-  ok(/Great weapon/.test(h) && /Halberd/.test(h) && /Extra crew/.test(h), "lists every option");
-  ok(/A model with a great weapon suffers -2 Initiative/.test(h), "expands the rule text verbatim");
-  ok(/Halberd[\s\S]*?— selected/.test(h), "marks the selected option");
-  ok(/No separate rule text/.test(h), "no-rule option is listed with a note");
-  ok(document.getElementById("modal2Bg").classList.contains("open"), "opens in the stacked window");
-
   // mounts: each rendered as a COMPACT entity (profile + CLICKABLE rules, not expanded)
   __switch("chaos-dwarfs",false);
   const taurus={label:"Great Taurus",cost:235};
@@ -374,10 +370,7 @@ console.log("Dropdown info: shows every option's rule, marks selected, notes no-
   pk.onConfirm([]);
   ok(me.opts.mount===null, "nothing ticked ⇒ no mount");
 
-  // UI distinction: "all options" button vs single/chosen "i"
-  const allb=__mkAllInfoBtn("Rules for all options", ()=>{});
   const oneb=__mkRuleInfoBtn("Hand Weapon");
-  ok(allb.className==="info list" && allb.textContent==="≣", "all-options button: distinct list glyph/class");
   ok(oneb.className==="info" && oneb.textContent==="i", "single/chosen button: plain italic 'i'");
 }
 
@@ -765,6 +758,135 @@ __setState([]); __setGen(null); __switch("wood-elves",false);
   const wh=U("special","warhawkriders"); __addUnit("special","warhawkriders"); const e=__getState()[0]; e.count=3; e.opts.bow=true;
   ok(__entryPoints(e)===3*wh.basePoints, "WE: Warhawk Riders longbows are free");
   ok(__findItem("Wailing Arrows").common===true && __findItem("Silverwood Circlet").cost===30, "WE: Wailing Arrows common, Silverwood Circlet 30");
+}
+
+/* ====== web app: book registry, undo/redo, gating, issues, share links ====== */
+console.log("Registry: every data/books.js entry registers its id and name…");
+{
+  window.BOOK_INDEX.forEach(b=>{
+    const bk=ARMY_BOOKS[b.id];
+    ok(!!bk && bk.id===b.id, `registry: ${b.file} registers "${b.id}"`);
+    ok(bk && bk.name===b.name, `registry: ${b.id} name "${b.name}" matches the book (${bk&&bk.name})`);
+  });
+  const files=fs.readdirSync(path.join(DIR,"data")).filter(f=>f.endsWith(".js"));
+  const common=["books.js","lores-common.js","rules-common.js","special-rules-common.js","common-items.js"];
+  const books=files.filter(f=>!common.includes(f));
+  ok(books.every(f=>window.BOOK_INDEX.some(b=>b.file==="data/"+f)), "registry: every data/ book file is listed in books.js");
+}
+
+console.log("Undo/redo: every change is one step; view state is not recorded…");
+__setState([]); __setGen(null); __switch("chaos-dwarfs",false);
+{
+  ok(__historyLen()[0]===0, "switching armies starts a fresh history");
+  __addUnit("characters","sorcerers"); __addUnit("core","warriors");
+  ok(__getState().length===2 && __historyLen()[0]===2, "two adds = two undo steps");
+  const e=__getState()[0];
+  __update(()=>{ e.variant=1; });
+  const pts=__entryPoints(__getState()[0]);
+  __update(()=>{ e.collapsed=true; });
+  ok(__historyLen()[0]===3, "collapsing a card is not an undo step");
+  __undo();
+  ok(__getState()[0].variant===0 && __getState()[0].collapsed===true, "undo reverts the change but keeps the card folded");
+  __redo();
+  ok(__getState()[0].variant===1 && __entryPoints(__getState()[0])===pts, "redo re-applies it");
+  __setGen(__getState()[0].uid); __update(()=>{});
+  const uid=__getState()[0].uid;
+  __update(()=>{ __setGen(uid); });
+  __removeEntry(uid);
+  ok(__getState().length===1 && __getGen()===null, "removing the General clears the nomination");
+  __undo();
+  ok(__getState().length===2 && __getGen()===uid, "undo brings the unit back as General");
+  __update(()=>{ __getState()[1].count+=1; });
+  ok(__historyLen()[1]===0, "a new change clears the redo stack");
+}
+
+console.log("Dirty tracking: saved vs changed…");
+{
+  __markSaved(); ok(!__isDirty(), "just saved ⇒ clean");
+  __update(()=>{ __getState()[1].count+=1; }); ok(__isDirty(), "any roster change ⇒ unsaved");
+  __undo(); ok(!__isDirty(), "undoing back to the saved roster ⇒ clean again");
+}
+
+console.log("Option gating: one optionActive() drives points, card and export…");
+__setState([]); __setGen(null); __switch("daemons-of-chaos",false);
+{
+  const u=__findUnit("characters","daemonprince");
+  __addUnit("characters","daemonprince"); const e=__getState()[0];
+  const align=u.options.find(o=>o.id==="align"), wiz=u.options.find(o=>o.id==="wizlvl");
+  ok(__entryGod(e,u)===null, "no alignment ⇒ no god");
+  e.opts.wizlvl=1; e.lore="Fire"; __render();
+  const withWiz=__entryPoints(e);
+  e.opts.align=align.choices.findIndex(c=>c.god==="Khorne"); __render();
+  ok(__entryGod(e,u)==="Khorne", "god comes from the choice whose choices carry a god");
+  ok(!__optionActive(e,u,wiz), "Khorne ⇒ the Wizard option is inactive");
+  ok(__entryPoints(e)===withWiz-wiz.choices[1].cost+align.choices[e.opts.align].cost, "inactive Wizard level is not charged");
+  ok(!describe(e,u).some(s=>/Wizard/.test(s)), "inactive Wizard level is not exported");
+  ok(e.lore==="" && __knownSpells(e).length===0, "a model that stops being a wizard drops its lore and spells");
+}
+
+console.log("Validation issues carry the entry they are about…");
+__setState([]); __setGen(null); __switch("chaos-dwarfs",false);
+{
+  __addUnit("characters","sorcerers");
+  const sp=__D().units.special[0];
+  for(let i=0;i<5;i++) __addUnit("special",sp.id);
+  const {errs}=__collectIssues();
+  const dup=errs.find(x=>/^Too many/.test(x.msg));
+  ok(dup && dup.uid===__getState()[5].uid, "duplicate-cap error links to the last duplicate");
+  const gen=errs.find(x=>/Army General/.test(x.msg));
+  ok(gen && gen.uid===__getState()[0].uid, "missing-General error links to a character");
+  ok(errs.filter(x=>/over the .* pt limit|exceed/.test(x.msg)).every(x=>x.uid===null), "army-wide errors have no entry link");
+  __validate();
+  ok(/class="vmsg err link"/.test(document.getElementById("validation").innerHTML), "linked issues render as clickable rows");
+}
+
+console.log("Reconcile: render-time trims now live in reconcileEntry…");
+__setState([]); __setGen(null); __switch("chaos-dwarfs",false);
+{
+  __addUnit("characters","sorcerers"); const e=__getState()[0]; const u=__findUnit("characters","sorcerers");
+  e.lore="Fire"; const lore=window.COMMON_LORES.Fire;
+  e.spells=lore.spells.filter(s=>s.lvl>0).map(s=>s.name);          // too many, some too high
+  __reconcile(e);
+  const lvl=__wlevel(e,u);
+  ok(e.spells.length<=lvl && e.spells.every(n=>lore.spells.find(s=>s.name===n).lvl<=lvl), "reconcile trims spells to the wizard level and cap");
+  e.gifts=["No Such Gift"]; __reconcile(e);
+  ok(e.gifts.length===0, "reconcile drops unknown multi-pick items");
+}
+
+console.log("Share links: entries pack to their differences and unpack identically…");
+{
+  const books=["chaos-dwarfs","high-elves","dwarfs","vampire-counts","bretonnia"];
+  let mism=[];
+  books.forEach(id=>{
+    __setState([]); __setGen(null); __switch(id,false);
+    ["characters","core","special","rare"].forEach(cat=>(__D().units[cat]||[]).forEach(u=>__addUnit(cat,u.id)));
+    __getState().forEach(e=>{ const u=__findUnit(e.cat,e.id);
+      (u.options||[]).forEach(o=>{ if(o.type==="toggle") e.opts[o.id]=true; if(o.type==="choice") e.opts[o.id]=o.choices.length-1; });
+      if(u.perModel && u.unitSize) e.count=u.unitSize[0]+1; });
+    __render();
+    __getState().forEach((e,i)=>{
+      const packed=JSON.parse(JSON.stringify(__packEntry(e)));
+      const back=__unpackEntry(packed,e.uid); back.collapsed=e.collapsed;
+      if(JSON.stringify(back)!==JSON.stringify(e) && JSON.stringify(Object.keys(back).sort().map(k=>[k,back[k]]))!==JSON.stringify(Object.keys(e).sort().map(k=>[k,e[k]])))
+        mism.push(id+"/"+e.id);
+      if(__entryPoints(back)!==__entryPoints(e)) mism.push(id+"/"+e.id+" points");
+    });
+  });
+  ok(mism.length===0, "pack → unpack round-trips every entry"+(mism.length?" ("+mism.slice(0,5).join(", ")+")":""));
+  __setState([]); __setGen(null); __switch("chaos-dwarfs",false); __addUnit("core","warriors");
+  const pk=__packEntry(__getState()[0]);
+  ok(Object.keys(pk).join()==="c,i", "a default entry packs to just its unit (c,i)");
+}
+
+console.log("Catalogue: search filter and unique special characters…");
+__setState([]); __setGen(null); __switch("skaven",false);
+{
+  __setQuery("thanq"); __renderCatalog();
+  const rows=__catalogRows();
+  ok(rows.length===1 && /Thanquol/.test(rows[0].u.name), "search narrows the catalogue to matching units");
+  __addUnit("characters",rows[0].u.id);
+  ok(rows[0].add.disabled===true && rows[0].badge.textContent==="taken", "a special character already in the army is greyed out");
+  __setQuery(""); __renderCatalog();
 }
 
 console.log(`\n${fails? "FAIL":"PASS"}: ${checks-fails}/${checks} checks passed.`);

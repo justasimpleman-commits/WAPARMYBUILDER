@@ -1,51 +1,70 @@
 # CLAUDE.md — Warhammer Army Builder
 
-An **Electron desktop app** (Windows + macOS) for Warhammer 9th Edition 3.0
-(Mathias Eliasson's unofficial ruleset). It lets a player assemble an army,
-calculates points, enforces the list-building rules, saves/loads armies, and
-exports the list. Run with `npm start`; build installers with the `build-*`
-scripts or `npm run dist:*`. `index.html` still opens directly in a browser for
-quick dev work (it feature-detects the desktop bridge and falls back to
-in-browser storage), but **the desktop app is the product** — keep it working.
+A **static web app** for Warhammer 9th Edition 3.0 (Mathias Eliasson's unofficial
+ruleset), hosted on GitHub Pages. It lets a player assemble an army, calculates
+points, enforces the list-building rules, saves/loads armies (browser library or
+`.json` files), shares an army as a link, and exports the list. There is no build
+step: open `index.html` (works from `file://`) or serve the folder. On a phone the
+same page switches to a drawer layout (`mobile-init.js`). (It used to be an Electron
+desktop app with a Capacitor Android build; both were removed — there is no
+`main.js`/`preload.js`/`mobile/` any more.)
 
 Multiple army books are bundled (Chaos Dwarfs, Grand Cathay, Daemons of Chaos,
 Beastmen, Ogre Kingdoms, Orcs & Goblins, Skaven, High Elves, Dark Elves, Tomb
 Kings, Vampire Counts, Bretonnia, Wood Elves, Dwarfs, Lizardmen, Estalia) and chosen
 from the **Army** dropdown in the header;
-switching armies clears the roster. Each army nominates exactly one character as its **Army General** (radio
+switching armies clears the roster (after a confirm). Each army nominates exactly one character as its **Army General** (radio
 on each character entry; any character is eligible, exactly one required —
 enforced in validation, shown with ★ in the summary and `[General]` in export).
 
 ## Architecture: engine + data
 
 The app is a generic **engine** driven by **data files**. Adding another army
-book means writing a new data file and adding a `<script src>` tag; for books that
+book means writing a new data file and adding one line to `data/books.js`; for books that
 fit the existing systems the engine never needs to change. (Genuinely new mechanics
 get a *generic, data-driven* hook rather than per-book logic — e.g. Vampiric
 Powers, Virtues, the Undead `requireWizardLore` validator, and the High Elf
-Elven-Honour `cond`/`requiresHonour` system (an honour shown-but-disabled when the
-chosen mount forbids it; a mount that only unlocks under its honour) are engine
-features toggled by data fields, see SCHEMA.md.) Two thin Electron files wrap the
-same page.
+Elven-Honour `cond` system (an honour shown-but-disabled when the chosen mount
+forbids it) plus choice-gated mounts (`requiresChoice` on a mount choice — a mount
+that only unlocks under its honour) are engine features toggled by data fields, see
+SCHEMA.md. Don't key engine logic on a book's option ids or unit ids.)
 
-- **`main.js`** — Electron main process: creates the window, builds the menu, and
-  provides the IPC API for the on-disk army **library** (in the OS user-data dir),
-  Save As / Open `.json` dialogs, and Export-text dialogs. No business logic.
-- **`preload.js`** — context-isolated bridge exposing `window.armyAPI` to the
-  page. The renderer feature-detects it: present ⇒ native dialogs + on-disk
-  library; absent (plain browser) ⇒ IndexedDB library + file download/upload.
-  Repository layout: runtime entry points (`index.html`, `main.js`, `preload.js`,
-  `package.json`) stay at the **root**; the data layer lives in **`data/`**, docs
-  in **`docs/`**, dev/test scripts in **`scripts/`**, installer scripts in
-  **`build/`**, and the Capacitor mobile build in **`mobile/`** (see "Mobile app
-  (Capacitor)" below — it reuses the same `index.html` + `data/` and must be
-  re-synced after any change to them).
-- **`index.html`** — the whole app: UI, army chooser, point maths, validation,
-  summary, modals, export. Loads each data file via a plain `<script src="data/…">`
-  tag (works from `file://`, no CORS). All books register into
+Repository layout: `index.html`, `mobile-init.js` and `package.json` at the
+**root**; styles in **`css/`**, the engine in **`js/`**, the data layer in
+**`data/`**, docs in **`docs/`**, dev/test scripts in **`scripts/`**, release
+script in **`build/`**.
+
+- **`index.html`** — markup only (header, three columns, the two modal shells),
+  `css/app.css`, and plain `<script src>` tags (work from `file://`, no CORS, no
+  bundler): the common data files, `data/books.js`, then the engine files in order.
+- **`js/`** — the engine, split by concern. Classic scripts share one global scope,
+  so the files see each other's top-level functions/`let`s exactly like the old
+  single inline script did; only start-up code (in `app.js`, loaded last) runs at
+  load time.
+  - `core.js` — the book registry handles + `loadBook`, global state (`state`,
+    `generalUid`, `uidc`, `D`), `blankEntry`/`addUnit`/`removeEntry`, and the
+    mutation path `update()` with undo/redo and dirty tracking (see "Mutations,
+    undo & rendering").
+  - `engine.js` — pure rules, no DOM: points, budgets, wizard levels, items, runes,
+    option gating (`optionActive`), `reconcileEntry`, validation (`entryErrors`,
+    `collectIssues`), `describe`/`entryLoadout`, `migrateEntry`.
+  - `rules.js` — rule/equipment lookup (`ruleDef`, `ruleExact`, `equipDef`) and
+    `tokensToHTML`.
+  - `modals.js` — the modal shells, `openItemPicker`, the rune picker, unit/mount
+    detail popups, `toast`.
+  - `roster.js` — `render()`, catalogue, bars, entry cards, options, magic, spells,
+    summary, validation panel.
+  - `storage.js` — library (IndexedDB/localStorage), `.json` files, autosave draft,
+    share links, text export.
+  - `app.js` — `switchArmy`, header controls, event wiring, `start()`.
+- **`data/books.js`** — `window.BOOK_INDEX`, the **only list of books**
+  (`{id, name, file}`), in dropdown order. The page loads nothing but this up
+  front; `loadBook(id)` injects the book's `<script>` the first time that army is
+  chosen, so a visitor downloads one book, not all sixteen. All books register into
   `window.ARMY_BOOKS` keyed by `id`; the engine selects the active one as `D`
-  (default `chaos-dwarfs`) and `switchArmy(id)` swaps it. All state lives in the
-  `state` array (roster entries) plus `generalUid`; `render()` rebuilds the DOM.
+  (default `chaos-dwarfs`) and `switchArmy(id)` swaps it (a promise; synchronous
+  when the book is already loaded). The test harness and `scripts/sweep.js` also
+  read this registry.
 - **`data/chaos-dwarfs.js`**, **`data/grand-cathay.js`**, **`data/daemons-of-chaos.js`**,
   **`data/beastmen.js`**, **`data/ogre-kingdoms.js`**, **`data/orcs-and-goblins.js`**,
   **`data/skaven.js`**, **`data/high-elves.js`**, **`data/dark-elves.js`**, **`data/tomb-kings.js`**,
@@ -120,8 +139,9 @@ same page.
   rulebook PDFs (`reference/Army books/`) used to audit data, plus
   `reference/Chaos-Dwarfs-Stats-and-Logic.docx`, a printable stats + logic
   reference (title page, logic section, per-unit profiles, magic-item tables).
-- **`build/build-mac.command` / `build/build-win.bat`** — one-click installer
-  builds (`npm install` then `electron-builder`); output lands in `dist/`.
+- **`build/release.command`** — runs the tests, bumps the version and snapshots the
+  source for the changelog (see `docs/RELEASING.md`). The web app itself needs no
+  build — pushing to GitHub publishes it via Pages.
 - **`gen-doc.js`** (in the scratch/outputs area, not the project folder) — the
   Node script that builds the .docx. It reads points/options/caps from
   `chaos-dwarfs.js`; statlines and rule text are transcribed in the script.
@@ -162,6 +182,23 @@ size; special characters unique; army-wide magic-item uniqueness (common `*` ite
 exempt); one item per category per model; per-character magic-item budgets;
 Expendable Core needs a non-Expendable Core unit; slave units ≤ Hobgoblin
 Cutthroat/Archer units; exactly one Army General.
+
+**Validation is data, then view.** `collectIssues()` (engine) returns
+`{errs:[{msg,uid}], warns:[…]}`; `uid` names the roster entry an issue is about
+(null for army-wide ones — for a duplicate/uniqueness clash it is the last offending
+entry). `renderValidation()` renders an issue with a uid as a clickable row
+(`.vmsg.link`) that calls `scrollToEntry(uid)`, which unfolds that card/category
+and scrolls to it (and closes the mobile drawer).
+
+**One option gate.** `optionActive(e,u,o)` decides whether an option is live
+(`requires.unit`, `noGod`, `requiresMount`, `requiresChoice`, a variant-only
+`toggle`'s `only`). `entryPoints`, the entry card, `describe()` (export) and the
+loadout popup all use it, so a hidden option is never charged or exported.
+`reconcileEntry(e)` runs at the start of every `render()` and keeps each entry
+legal: drops illegal mounts, mount/choice-gated upgrades, illegal magic items/gifts/
+powers (`reconcileMagic`), a lore that is no longer offered and over-cap or
+too-high spells (`reconcileSpells` — a model that stops being a wizard loses its
+lore). Render functions do **not** mutate entries; put any such normalisation here.
 
 **Unit size is clamped, not just validated.** The model stepper/input in
 `renderEntry` cannot go below `unitSize[0]` or above `unitSize[1]` (open-ended max
@@ -298,42 +335,74 @@ stats card, which would make rule-heavy units unreadable.
   both apostrophes and `"` inch marks).
 - Paths in the workspace shell contain a space ("Army builder") — always quote.
 
+## Mutations, undo & rendering
+
+- **Every roster change goes through `update(fn)`** (core.js): it snapshots the
+  roster, runs `fn`, calls `render()`, and — if the roster actually changed — pushes
+  the old snapshot on the undo stack (cap 100) and clears redo. Event handlers are
+  written `onclick=()=>update(()=>{ e.count=… })`; don't mutate state and call
+  `render()` directly (that change can't be undone). View-only state (collapse
+  carets, catalogue search) just calls `render()`/`renderCatalog()`.
+- Snapshots are `{uidc, generalUid, state}` without each entry's `collapsed`; undo
+  keeps the current fold state. Undo/redo: the ↶ ↷ header buttons, Ctrl/⌘+Z and
+  Ctrl/⌘+Shift+Z / Ctrl+Y (ignored while typing in a field or with a modal open), and
+  the "Undo" button on the toast after removing a unit or clearing the army
+  (`removeEntry`, `clearArmy` — no confirm dialogs; undo is the safety net). Loading
+  an army or switching books resets the history (`resetHistory`).
+- **Dirty tracking:** `markSaved()` records the roster + points limit as saved
+  (after Save, Save to file, or any load); `isDirty()` compares. The status line shows
+  "● unsaved changes", the tab title gets a "●", `beforeunload` warns, and loading
+  a file / library army / shared link over unsaved work asks first
+  (`confirmDiscard`).
+- **`render()` is incremental.** It reconciles entries, then: the catalogue DOM is
+  rebuilt only when the book, search text or collapse state changes (otherwise
+  `refreshCatalog` just updates each row's badge); roster cards are cached per entry
+  object with a signature (entry JSON + General flag + points) and only changed
+  cards are rebuilt, then `patchChildren` moves/inserts the minimum. The cache is
+  dropped when the army's make-up changes (an entry's options can depend on other
+  units via `requires.unit`). Summary, bars and validation are small and redrawn.
+- **Catalogue:** a search box filters units (name or character profile names, all
+  categories expanded while searching). Each row's badge shows how many are in the
+  army (`×2`), Special/Rare duplicates against the game-size cap (`2/3`, amber at the
+  cap, red over it), and a special character already taken is greyed out with its
+  **+** disabled.
+- **Points limit:** free input plus a presets dropdown (1000–4000; "Custom" when the
+  value isn't a preset).
+
 ## Save / load
 
-- Desktop: `window.armyAPI` (preload) → `main.js` IPC writes the named library to
-  the OS user-data `armies/` dir and drives native Save As / Open dialogs.
-- Browser: the library lives in **IndexedDB** (`cd-army-builder` db, `armies`
+- The library lives in **IndexedDB** (`cd-army-builder` db, `armies`
   store) via `libSave/libAll/libGet/libDelete`, with a localStorage fallback and
   legacy-localStorage read (Safari blocks localStorage on `file://`, which is why
   the old localStorage-only library silently failed). `.json` save/open use
   Blob download / file input.
 - Army JSON: `{ app, version, army, name, savedAt, limit, points, uidc,
-  generalUid, state }`. `applyArmy()` runs `migrateEntry()` on load.
+  generalUid, state }`. `applyArmy()` (async — it may need to load the book first)
+  runs `migrateEntry()` on load. The storage keys keep their old `cd-`/
+  `chaos-dwarfs-` names so existing saves keep loading — don't rename them.
+- Autosave draft: the roster is mirrored to localStorage (debounced) and restored
+  on the next visit with a Discard/Dismiss notice; the draft records whether it was
+  dirty.
+- **Share link** (`shareArmy`): the army is packed into the URL fragment
+  `#army=<code>` — nothing is uploaded. Each entry is stored as its difference from
+  `blankEntry(cat,id)` (`packEntry`/`unpackEntry`; a default entry is just
+  `{c,i}`), the payload `{v,a:army,l:limit,n:name,g:generalIndex,s:[…]}` is
+  deflate-raw compressed with `CompressionStream` and base64url-encoded (`z`
+  prefix; `j` = plain JSON fallback). Opening such a URL (at start-up, or via
+  `hashchange` in an open tab) loads the army unsaved, suggests its name for the
+  first Save, and strips the fragment. Links made from `file://` only work on that
+  machine; share from the hosted site. Start-up order: shared link (asks if an
+  unsaved draft exists) → restored draft → default army.
 
-## Mobile app (Capacitor)
+## Phone layout
 
-The `mobile/` folder is a **Capacitor** wrapper that ships the **exact same app**
-as the desktop/browser build — there is **one source of truth**: the root
-`index.html` + the `data/` files. `mobile/www/` holds *copies*, plus one
-mobile-only file (`mobile-init.js`) that is **not** derived from desktop.
-
-**`mobile/www/` is generated, never hand-edited.** `mobile/sync-web.js` copies
-`../index.html` (injecting the `<script src="mobile-init.js">` tag) and every
-`../data/*.js` into `mobile/www/`. The page feature-detects `window.armyAPI`, so
-`main.js`/`preload.js` are intentionally **not** copied (the WebView falls back to
-IndexedDB).
-
-**Always re-sync after touching `index.html` or anything in `data/`.** Otherwise
-the phone app silently runs the old code. Run from the project root:
-
-```bash
-node mobile/sync-web.js        # copies index.html + data/ into mobile/www/
-```
-
-This is mandatory for *every* change to the shared web assets, not just feature
-work — treat it as part of finishing the edit. A full device build additionally
-needs Capacitor (`mobile/build-android.command`), but the `sync-web.js` step is
-what keeps the mobile sources in step and must never be skipped.
+`mobile-init.js` (root, loaded last by `index.html`) is the narrow-screen layout: it
+activates when the viewport is ≤ 820px and **moves** (not clones) `#catalog` into a
+left drawer, `.col.validation` into a right drawer and the `.actions` toolbar into a
+☰ menu, so `render()` keeps filling them by id. The header controls, the
+undo/redo buttons and the points total move into two compact header rows. Crossing
+back to a wide window reloads the page. Anything added to the header, the action bar
+or the validation panel must keep working after being moved.
 
 ## Verifying changes (no browser/GUI needed)
 
@@ -342,26 +411,27 @@ Syntax-check, then run the engine under a minimal DOM stub in Node. **`scripts/t
 a stub `document` (`getElementById`, `createElement`, `createTextNode`,
 `createComment`, `addEventListener`) with elements exposing `innerHTML`,
 `classList`, `appendChild`, `value`, `onclick/onchange`; it `eval`s the common
-files + every army data file (they assign into `window.ARMY_BOOKS`), extracts the
-inline engine `<script>` from `index.html`, and `eval`s it with an appended
-`Object.assign(globalThis,{…})` exposing internals (`entryPoints`, `render`,
-`spentMagic`, `powersCost`, `virtueCost`, `addUnit`, `renderValidation`, a `state`
-getter, …). It smoke-renders every book and asserts the Vampiric-Powers/Virtue
-budget sharing, Virtue duplicate escalation, and the Undead validators. Add new
-cases here when you touch the engine. IndexedDB isn't available in Node — test the
+files named in `index.html` + every book in `data/books.js` (they assign into
+`window.ARMY_BOOKS`), concatenates the `js/*.js` files in `index.html`'s order and
+`eval`s them as one script with an appended `Object.assign(globalThis,{…})` exposing
+internals (`entryPoints`, `render`, `spentMagic`, `update`, `undo`, `collectIssues`,
+`packEntry`, a `state` getter, …). `location`/`history`/`addEventListener` are
+stubbed so `start()` runs. It smoke-renders every book and asserts point maths,
+validation, the army-specific systems, the book registry, undo/redo, dirty tracking,
+option gating, share-link round-trips and catalogue search. Add new cases here when
+you touch the engine. IndexedDB isn't available in Node — test the
 storage fallback by stubbing `localStorage` and leaving `indexedDB` undefined.
 
 ```bash
-node --check data/*.js main.js preload.js
-node scripts/test-engine.js   # DOM-stub harness (index.html's engine is eval'd inside it)
-node mobile/sync-web.js       # re-sync mobile/www/ if you changed index.html or data/
+node --check data/*.js js/*.js mobile-init.js
+node scripts/test-engine.js   # DOM-stub harness (the js/ engine is eval'd inside it)
 ```
 
 Always include point-math checks, validation checks, and the new feature's logic;
 a good smoke test is running `render()` once per bundled book without throwing.
-Render the .docx and view a page or two when changing the document. If you changed
-`index.html` or any `data/` file, run `node mobile/sync-web.js` before you're done
-so the mobile build isn't left stale (see "Mobile app (Capacitor)").
+For UI changes, also load the page in the pre-installed Chromium (Playwright) and
+check for console errors — at desktop width and at phone width (the drawer layout).
+Render the .docx and view a page or two when changing the document.
 
 ## Tone / working style for this project
 

@@ -1,13 +1,7 @@
 /*
- * mobile-init.js — mobile UI enhancements, shared by the web app (GitHub Pages)
- * and the Capacitor Android build. ONE source of truth.
- *
- * Desktop index.html references this file with a plain <script src>; sync-web.js
- * copies it into mobile/www/ for the phone build. It is self-gating:
- *
- *   - Under Capacitor (the phone app) it ALWAYS activates.
- *   - In a browser it activates only when the viewport is narrow
- *     (<= MOBILE_BP px), so the desktop three-column layout is untouched.
+ * mobile-init.js — the phone layout for the web app. index.html loads it with a
+ * plain <script src>; it is self-gating: it activates only when the viewport is
+ * narrow (<= MOBILE_BP px), so the desktop three-column layout is untouched.
  *
  * When active it adds, for the phone form factor:
  *   1. Safe-area / notch handling (viewport-fit=cover + env() insets).
@@ -15,9 +9,7 @@
  *      Army summary + Validation (.col.validation) slides in from the RIGHT,
  *      leaving the Roster as the always-visible center column.
  *   3. A hamburger (☰) menu holding the army actions (Save / Library / Save to
- *      file / Open file / Export / Clear).
- *   4. Android hardware Back: closes the top modal, then any open drawer/menu,
- *      and only exits the app when nothing is open.
+ *      file / Open file / Share / Export / Clear).
  *
  * Implementation note: #catalog, .col.validation and the .actions toolbar are
  * MOVED (not cloned) into new shells. Their ids/handlers are preserved, so the
@@ -27,11 +19,10 @@
  * clean desktop layout (a real phone never crosses that boundary).
  */
 (function () {
-  // ---- 0. Activation gate (web = narrow only, Capacitor = always) ---------
+  // ---- 0. Activation gate (narrow viewports only) ---------------------------
   var MOBILE_BP = 820; // px; below this a browser gets the mobile drawer UI
-  var isCap = !!(window.Capacitor);
   var mq = window.matchMedia('(max-width:' + MOBILE_BP + 'px)');
-  function mobileActive() { return isCap || mq.matches; }
+  function mobileActive() { return mq.matches; }
 
   function onMqChange(fn) {
     if (mq.addEventListener) mq.addEventListener('change', fn);
@@ -220,31 +211,13 @@
       if (e.target.closest && e.target.closest('.btn')) setTimeout(closeAll, 50);
     });
 
-    // Tapping a unit row in the Army Summary closes the drawer and focuses that
+    // Tapping a unit row in the Army Summary (or a validation message about a
+    // unit) closes the drawer and focuses that
     // entry in the roster. The row's own inline onclick=scrollToEntry(uid) fires
     // first (bubbling), scrolling + highlighting the entry; we then close the
     // drawer so the always-visible roster column is revealed.
     right.addEventListener('click', function (e) {
-      if (e.target.closest && e.target.closest('.summary .srow')) closeAll();
-    });
-  }
-
-  // ---- 4. Hardware Back button -------------------------------------------
-  function app() {
-    return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) || null;
-  }
-  function isOpen(id) {
-    var e = document.getElementById(id);
-    return !!(e && e.classList && e.classList.contains('open'));
-  }
-  function wireBack() {
-    var App = app();
-    if (!App || !App.addListener) return; // not under Capacitor (e.g. plain browser)
-    App.addListener('backButton', function () {
-      if (isOpen('modal2Bg')) { if (typeof closeModal2 === 'function') closeModal2(); return; }
-      if (isOpen('modalBg'))  { if (typeof closeModal  === 'function') closeModal();  return; }
-      if (window.__mobileUI && window.__mobileUI.anyOpen()) { window.__mobileUI.closeAll(); return; }
-      App.exitApp();
+      if (e.target.closest && e.target.closest('.summary .srow, .vmsg.link')) closeAll();
     });
   }
 
@@ -255,7 +228,6 @@
     built = true;
     injectStyles();
     buildShell();
-    wireBack();
   }
 
   function init() {
@@ -265,7 +237,7 @@
     // mobile after building => reload to restore the clean desktop layout.
     onMqChange(function (e) {
       if (e.matches) activate();
-      else if (built && !isCap) location.reload();
+      else if (built) location.reload();
     });
   }
 

@@ -3,9 +3,9 @@
    COMMON_RULES). Run: node scripts/sweep.js <book-id>  (cwd = project root) */
 const fs=require("fs");
 global.window=global;
-["data/lores-common.js","data/rules-common.js","data/special-rules-common.js","data/common-items.js",
- "data/chaos-dwarfs.js","data/tomb-kings.js","data/vampire-counts.js","data/bretonnia.js","data/wood-elves.js",
- "data/dwarfs.js","data/lizardmen.js","data/estalia.js"].forEach(f=>eval(fs.readFileSync(f,"utf8")));
+["data/lores-common.js","data/rules-common.js","data/special-rules-common.js","data/common-items.js","data/books.js"]
+  .forEach(f=>eval(fs.readFileSync(f,"utf8")));
+window.BOOK_INDEX.forEach(b=>eval(fs.readFileSync(b.file,"utf8")));   // every bundled book
 
 const COMMON_SR=window.COMMON_SPECIAL_RULES||{}, COMMON_R=window.COMMON_RULES||{};
 function baseName(t){ return t.replace(/\s*\([^)]*\)\s*$/,"").trim(); }

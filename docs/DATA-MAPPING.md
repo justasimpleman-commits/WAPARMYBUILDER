@@ -29,33 +29,24 @@ order you should work, plus the extraction technique and verification steps.
 ## The data files
 
 All data files live in **`data/`**; the test/dev scripts live in **`scripts/`**;
-`index.html`, `main.js`, `preload.js` stay at the **root** (see CLAUDE.md → repo layout).
+the engine lives in **`js/`** and `index.html` stays at the **root** (see CLAUDE.md → repo layout).
 
 | File | Holds | You edit it when… |
 |---|---|---|
 | `data/<id>.js` (e.g. `data/chaos-dwarfs.js`) | the whole book: composition, magic items, units, `unitInfo`, `itemDesc`, `glossary`, `spellLores` | adding/auditing a book |
-| `index.html` | the generic engine **and** the `<script src="data/…">` tags | adding a *new* book (one `<script>` line + default id) |
+| `data/books.js` | the book registry (`BOOK_INDEX`: id, name, file) | adding a *new* book (one line) |
 | `data/lores-common.js` | the 8 standard Lores (`COMMON_LORES`) | a wizard uses a standard lore — reference it, don't recopy |
 | `data/rules-common.js` | weapon/armour/command rules (`COMMON_RULES`) | almost never (rulebook kit) |
 | `data/special-rules-common.js` | universal special rules (`COMMON_SPECIAL_RULES`) | a **core** rule (Fear, Strider, Ignores Armour…) is missing app-wide |
 | `data/common-items.js` | descriptions of rulebook common magic items (`COMMON_ITEM_DESC`) | a shared common item lacks a description |
 
 To register a brand-new book: `(window.ARMY_BOOKS = window.ARMY_BOOKS || {})["<id>"] = { id:"<id>", … }`,
-then add `<script src="data/<id>.js"></script>` in `index.html` next to the others.
-
-**Four more places carry a hardcoded list of data files — add the new book to all of
-them or it is silently skipped:**
-
-| File | Why it matters |
-|---|---|
-| `index.html` (`<script src>` tags) | the app itself |
-| `mobile/sync-web.js` (`DATA_FILES`) | otherwise `www/` never gets the book and the phone app can't select it |
-| `scripts/test-engine.js` (the `eval` list) | otherwise the "render every book" smoke test never covers it |
-| `scripts/sweep.js` (the `eval` list) | otherwise `node scripts/sweep.js <id>` prints "no book" |
-
-After editing `index.html` or any `data/` file, **re-sync the mobile app** so the
-phone build matches: `node mobile/sync-web.js` (copies `index.html` + `data/` into
-`mobile/www/`). See CLAUDE.md → "Mobile app (Capacitor)".
+then add **one line** to `data/books.js`: `{ id:"<id>", name:"<the book's name>", file:"data/<id>.js" }`.
+That registry is the only list of books: the Army dropdown, the lazy loader, the
+test harness and `scripts/sweep.js` all read it (the harness fails
+if a `data/` book file is missing from it or its `name` doesn't match the book).
+Books are **not** `<script>`-tagged in `index.html` — the page loads a book's file
+the first time that army is chosen.
 
 ## Source PDF → destination map
 
@@ -197,7 +188,7 @@ that bleeds into the next entry.
 ## Verification (no GUI needed)
 
 ```bash
-node --check data/*.js main.js preload.js
+node --check data/*.js js/*.js
 node scripts/test-engine.js   # DOM-stub harness: smoke-renders every book + asserts
 node scripts/sweep.js         # unmapped-token sweep (see below)
 ```
@@ -210,6 +201,3 @@ loads the common files + book, walks every `unitInfo.eq` / `.rules`, splits on
 like `Unit Strength 2`, lore names, and magic items already in `itemDesc`).
 Remaining hits are either a real gap to add to `glossary` or an intentional skip
 (magic item).
-
-Finally, after any `index.html`/`data/` change, run `node mobile/sync-web.js` so the
-mobile `www/` copy is not left stale.
