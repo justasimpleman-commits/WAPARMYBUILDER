@@ -67,6 +67,10 @@ from its normally-allowed spells (raises the spell cap; the Spell Familiar uses
 `extraSpells:1`). The engine sums this over every item the model holds
 (`bonusSpells`).
 
+`exclusive:true` → the bearer may take **no other magic items** (e.g. the Chaos
+Dwarf Talisman of Obsidian). Enforced in validation across `magic`, `gifts` and
+`magicStd`.
+
 `extraSignatures:N` → a wizard carrying this item may also know **N signature
 spells chosen from any of the eight Winds of Magic** (a *separate* picker/pool
 from its own lore, not counted against the wizard-level cap; the Arcane Familiar

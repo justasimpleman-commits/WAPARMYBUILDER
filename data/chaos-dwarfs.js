@@ -1,5 +1,5 @@
 /* ============================================================================
-   CHAOS DWARFS — army data (Warhammer Armies, Mathias Eliasson v3.0,
+   CHAOS DWARFS — army data (Warhammer Armies, Mathias Eliasson v3.1,
    9th Edition 3.0 ruleset). Encoded for the Army Builder engine.
 
    This file is pure DATA. Adding a new army book = copy this structure and
@@ -19,7 +19,7 @@
 (window.ARMY_BOOKS = window.ARMY_BOOKS || {})["chaos-dwarfs"] = {
   id: "chaos-dwarfs",
   name: "Chaos Dwarfs",
-  author: "Mathias Eliasson v3.0 (unofficial) — 9th Edition 3.0",
+  author: "Mathias Eliasson v3.1 (unofficial) — 9th Edition 3.0",
   // Army composition as fractions of the agreed total points.
   composition: {
     charactersMax: 0.35,   // includes character mounts
@@ -54,7 +54,7 @@
       { name: "Zzharg Madeye's Blunderbuss", cost: 25, only: "Daemonsmith" },
       { name: "Lash of Shurzzhak", cost: 20 },
       { name: "Obsidian Blade", cost: 20 },
-      { name: "Inferno Glaive of Hashut", cost: 15, requiresAccess: "fireglaive" }
+      { name: "Inferno Glaive of Hashut", cost: 20, requiresAccess: "fireglaive" }
     ],
     "Magic Armour": [
       { name: "Armour of the Forge", cost: 60, requiresAccess: "heavy armour" },
@@ -67,7 +67,7 @@
     ],
     "Talismans": [
       { name: "Infernal Charm", cost: 40 },
-      { name: "Talisman of Obsidian", cost: 35 },
+      { name: "Talisman of Obsidian", cost: 35, exclusive: true },
       { name: "Hellforged Amulet", cost: 25 },
       { name: "Crown of the K'daai", cost: 15 },
       { name: "Gift of Hashut", cost: 15, common: true }
@@ -79,7 +79,7 @@
       { name: "Vial of Lammasu Blood", cost: 35 },
       { name: "Scroll of Binding", cost: 30 },
       { name: "Blood of Hashut", cost: 20 },
-      { name: "Scroll of Petrification", cost: 20 }
+      { name: "Scroll of Petrification", cost: 30 }
     ],
     "Enchanted Items": [
       { name: "Daemon Flask of Ashak", cost: 100 },
@@ -213,47 +213,50 @@
     "Bazuka": `A bazuka is an artillery weapon with the following profile: Range 12/24", Strength 7, Special Rules: Cumbersome, Flaming Attacks, Multiple Wounds (D3), Ponderous.`,
     "Bloodrage": `The model gains the Frenzy and Hatred special rules.`,
     "Earthshaker Mortar": `An earthshaker mortar is a mortar that uses the small round template, with the following profile: Range 12-36", Strength 3(6), Special Rules: Armour Piercing (1), Cumbersome, Multiple Wounds (D3).`,
-    "Magma Cannon": `A magma cannon is a fire thrower with the following profile: Range 6", Strength 5, Special Rules: Flaming Attacks, Multiple Wounds (D3).`,
-    "Steam Cannonade": `A steam cannonade is an organ gun with the following profile: Range 12/24", Strength 5, Special Rules: Multiple Shots (Artillery Dice + D6), Rapid Fire. If a Destroyed! result is rolled on the Black Powder Misfire chart, the Steam Cannonade is destroyed and may not be used again, and the Iron Daemon it is mounted on suffers D6 wounds with no saves allowed.`,
-    "Doomfire": `Doomfire is a stone thrower with the following profile: Range 12-60", Strength 5(10), Special Rules: Cumbersome, Flaming Attacks, Move or Fire, Multiple Wounds (D6). Any unit that suffers one or more casualties from this weapon must take a Panic test.`,
-    "Dreadquake Mortar": `A dreadquake mortar is a mortar that uses the large round template, with the following profile: Range 12-72", Strength 4(8), Special Rules: Armour Piercing (1), Multiple Wounds (D6). All models in a unit suffering casualties from a Dreadquake Mortar in the previous turn must pass a test exactly as if they were moving through dangerous terrain if they wish to move (including charging, reforming, characters leaving the unit, etc) and suffer -1 To Hit with missile weapons. War machines can only fire on a 4+ on a D6. If the Dreadquake Mortar rolls a misfire it suffers an additional -1 modifier to the result.`,
-    "Demolition Rocket": `Instead of firing normally, a Deathshrieker may fire a demolition rocket. Demolition rockets are rocket launchers that do not fire indirectly by default and use the small round template, with the following profile: Range 12-48", Strength 4(8), Special Rules: Flaming Attacks, Multiple Wounds (D3).`,
+    "Magma Cannon": `A magma cannon is a fire thrower with the following profile: Range 6", Strength 5, Special Rules: Cumbersome, Flaming Attacks, Multiple Wounds (D3).`,
+    "Steam Cannonade": `A steam cannonade is an organ gun with the following profile: Range 12/24", Strength 5, Special Rules: Cumbersome, Multiple Shots (Artillery Dice + 2D6), Rapid Fire. If a Destroyed! result is rolled on the Blackpowder Misfire chart, the Steam Cannonade is destroyed and may not be used again. In addition, the Iron Daemon it is mounted on suffers D6 wounds with no saves allowed.`,
+    "Doomfire": `Doomfire is a stone thrower with the following profile: Range 12-60", Strength 5(10), Special Rules: Cumbersome, Flaming Attacks, Move or Fire, Multiple Wounds (D6). Any unit that suffers one or more casualties from this weapon must take a Panic test. If the unit suffered Heavy Casualties, it takes the test at -1 Leadership. Should the artillery dice roll a misfire, roll a D6 on the following table: 1 - Free at last! Every unit within 6" takes D6 Strength 5 hits. Then remove the Hellcannon and its crew from play. 2 - Schlurp: Remove the Handlers from play. 3 - Thzzzz: All Wizards within 24" must immediately pass a Leadership test or roll 2D6 on the Miscast table. If the result would have no effect, treat it as if they had rolled for Detonation. 4 - Grrr: Remove D3 Handlers. 5 - Blooood! Move the Hellcannon 3D6" directly forward as if it was subject to the Random Movement special rule and it was the Compulsory Movement sub-phase. 6 - Boom! Resolve the Doomfire shot as if it were a direct hit, doubling the Strength of any hit. The Hellcannon cannot fire for the rest of the game.`,
+    "Dreadquake Mortar": `A dreadquake mortar is a mortar with the following profile: Range 12-72", Strength 4(8), Special Rules: Armour Piercing (1), Multiple Wounds (D6). All models in a unit suffering casualties from a Dreadquake Mortar counts as moving through Dangerous Terrain tests and suffer -1 To Hit with missile weapons until the start of your next turn. Artillery weapons that do not use Ballistic Skill can only fire on a 4+ on a D6. If the Dreadquake Mortar rolls a misfire it suffers an additional -1 modifier to the result.`,
+    "Demolition Rocket": `Instead of firing normally, a Rocket Launcher may fire a demolition rocket. Demolition rockets are rocket launchers that do not fire indirectly by default, and use the small template with the following profile: Range 12-48", Strength 4(8), Special Rules: Cumbersome, Flaming Attacks, Multiple Wounds (D3).`,
     "Mace Tail": `The Lammasu gains +1 Attack.`,
-    "Runes of Hate": `A Giant with Runes of Hate becomes subject to the Berserk Rage rule from Frenzy. In addition, whenever the Giant is called upon to roll for a random number of attacks, this may be re-rolled.`,
+    "Runes of Hate": `A Giant with Runes of Hate becomes subject to the Berserk Rage rule from Frenzy. In addition, whenever the Giant may re-roll the number of Hits or Attacks it inflicts above.`,
     "Sorcerous Exhalation": `This gives the Lammasu a Strength 3 Breath Weapon with the Magical Attacks special rule.`,
     "Tenderizer": `In addition to its normal Impact Hits, the Tenderizer causes D3 Impact Hits at Strength 6 with the Multiple Wounds (D3) special rule at the start of each round of close combat. Note that this only applies when fighting to the Tenderizer's front. The Bull Centaur may only attack when fighting to the Tenderizer's flank or rear.`,
     "Whirlwind": `In addition to its normal Impact Hits, the Whirlwind causes D6 Impact Hits at Strength 5 at the start of each round of close combat. Note that this only applies when fighting to the Whirlwind's front. The Bull Centaur may only attack when fighting to the Whirlwind's flank or rear.`,
 
-    "Lumbering & Unstoppable": `When charging, the Iron Daemon does not use the Swiftstride special rule. If a double 1 is rolled for its charge distance, the Iron Daemon does not move at all this turn. Iron Daemons cannot overrun or pursue in combat if they destroy or rout their foes.`,
+    "Lumbering": `If a double 1 is rolled for its charge distance, the Iron Daemon does not move at all this turn. Iron Daemons cannot overrun or pursue in combat if they destroy or rout their foes.`,
+    "Unstoppable": `Iron Daemons ignore terrain classified as Obstacles and ignores damage from Dangerous Terrain, except Rivers and Marshland, which are treated as Impassable terrain.`,
+    "Skullcracker": `The Iron Daemon gains the Impact Hits (2D6) special rule and its Grind Attack inflicts 2D6 hits instead of D6. In addition, its Stomp works against all models regardless of their Line of Sight value.`,
+    "Fuelled by Fire": `If a model with this special rule is the target of a non-physical Flaming Attack, it immediately regains 1 Wound lost earlier in the battle.`,
+    "Siege Armour": `Medium armour. Siege Armour gives the wearer +2 armour save against missile attacks to its front.`,
     "Blazing Beards of Bazherak": `If Zhatan the Black is included in your army, you may upgrade one unit of Warriors to The Blazing Beards of Bazherak for a cost of +1.5 points per model. This unit has the Flaming Attacks and Frenzy special rules.`,
 
     /* auto-mapped from army-book PDF (unit-profile special rules) */
     "Armed to da Teef": `If a model with this special rule has more than one weapon and/or a shield, they may choose which weapon combination they want to use at the start of each round of close combat.`,
     "Boundless Cruelty": `All enemy units within 6" of Zhatan suffer -1 to their Leadership. This has no effect on models with Immunity (Psychology).`,
-    "Burning Bright": `From the second game turn onwards, at the start of each of your turns a Toughness test must be made for each K'daai unit. If this is failed, it suffers D3 Wounds with no saves allowed.`,
+    "Burning Bright": `From the second game turn onwards, at the start of each of your turns a Toughness test must be made for each unit with this special rule. If this is failed, it suffers D3 Wounds with no saves allowed.`,
     "Caged Fury": `At the beginning of your turn, if the Hellcannon is not in combat, take a Leadership test. If the test is failed, the Hellcannon is then subject to the Random Movement (3D6) special rule until the beginning of the next turn, and must move towards the nearest enemy unit. If the Hellcannon would get destroyed as a result of Daemonic Instability, treat this as rolling a 1 on the table above.`,
     "Captain of the Immortals": `Rykarth must be accompanied by a unit of Immortals, and he may not leave this unit. As long as he remains in it, he and his unit are Unbreakable.`,
     "Dark Renown": `All friendly Chaos Dwarfs within 12" add +1 to their combat resolution result.`,
-    "Demolition": `Iron Daemons ignore terrain classified as Obstacles and ignores damage from Dangerous Terrain, except Rivers and Marshland, which are treated as Impassable terrain.`,
     "Fall Over": `A Giant must test to see whether it falls over if any of the following apply: - If it is beaten in close combat. Test once results are established but before taking a Break test. - If it is fleeing at the start of the Movement phase. - When it crosses an obstacle. Test when the obstacle is reached. - If the Giant decides to Jump Up and Down on an enemy. Test immediately beforehand.`,
     "Fear Elves": `Models with this special rule treat all Elves as causing Fear against them.`,
-    "Grind Attack": `The Iron Daemon has the Stomp (D6) special rule like a Monster in any turn it does not charge, but only against units to its front.`,
+    "Grind Attack": `The Iron Daemon has the Stomp (D6) special rule like a Monster, but only against units to its front.`,
     "Hashut's Dark Ravagers": `If Shar'tor the Executioner is included in your army, you may upgrade one unit of Bull Centaur Renders to Hashut's Dark Ravagers for a cost of +5 points per model. This unit has the Devastating Charge special rule. It must be equipped with additional hand weapons and also carries throwing axes.`,
-    "Hobgoblin Overseer": `The Hobgoblin Overseer follows the rules for normal Leaders; with the following exceptions: the Hobgoblin Overseer is always placed in the rear rank of the unit, and may be the only model in that rank. In addition, the unit must take a Leadership test at the start of each of their turns. If failed, the unit will suffer D6 Strength 3 Hits.`,
-    "Ignore Goblin Panic": `Orcs treat Goblins as Expendable.`,
+    "Overseer": `Each unit of Slaves must take a leadership test at the start of each of their turns. If failed, the unit will suffer D6 Strength 3 Hits for each Overseer in the unit.`,
+    "Ignore Goblin Panic": `Orcs treat Goblins as Expendable, despite being Expendable themselves.`,
     "Infernal Engineer": `One war machine or Hellcannon that is within 3" of a Daemonsmith can use their Ballistic Skill or re-roll one artillery dice or scatter dice during each Shooting phase. You must nominate which weapon, if any, will be using this special rule at the start of each Shooting phase, before any such weapons within 3" of the Daemonsmith are fired. • "Stand Back Sir!": A model with this special rule that is within 3" of a war machine is allowed to take a "Look Out Sir!" roll just as if he was within 3" of a unit of five or more models of the same troop type as himself. If the roll is successful, the hit is resolved instead against the nearest friendly war machine.`,
     "Lord of the Ba'hal": `All Bull Centaur units within 12" of Shar'tor may re-roll failed charge rolls.`,
-    "Mechanical Body": `Astragoth may never march or charge longer than his Movement value. He will still pursue and flee at a normal speed.`,
+    "Mechanical Body": `Astragoth may never March or Counter-Charge.`,
     "Ogre Charge": `Ogres have the Impact Hits (1) special rule. A unit of Ogres adds its current Rank Bonus to the Strength of any Impact Hits they inflict.`,
     "Overdrive": `If Astragoth successfully Hits with 3 or more Attacks in Close Combat, he can immediately make an additional 3 Attacks. These attacks may not generate any further additional attacks.`,
     "Prayers of Malice": `Bound Spell (Level 1, cast on 6+). Prayers of Malice is an augment spell with a range of 12". The target unit gains a Magical Ward (6+) until the start of your next Magic phase.`,
-    "Siege Cannons": `Siege Cannons are bolt throwers with the following profile: Range 24/48", Strength 7, Special Rules: Cumbersome, Multiple Shots (2), Multiple Wounds (D3), Rapid Fire. Siege Cannons do not suffer any penalty To Hit for moving and shooting; if you roll one or more natural 1s on the To Hit roll when firing them, the Juggernaut suffers a Wound with no saves allowed.`,
-    "Siege Tower": `The Juggernaut may never march. When charging, the Juggernaut can only do so in a straight line forward, with no wheeling allowed, and it does not use the Swiftstride special rule. Juggernauts cannot overrun or pursue in combat. The crew of the Juggernaut do not suffer penalties for moving and shooting.`,
+    "Siege Cannons": `Siege Cannons are bolt throwers with the following profile: Range 24/48", Strength 7, Special Rules: Cumbersome, Multiple Shots (2), Multiple Wounds (D3), Rapid Fire. Siege Cannons do not suffer any penalties To Hit for moving and shooting. If you roll one or more natural 1's on the Hit roll when firing them, the Juggernaut suffers a Wound with no saves allowed.`,
+    "Siege Tower": `The Juggernaut may never march. When charging, the Juggernaut can only do so in a straight line forward, with no wheeling allowed. Juggernauts cannot overrun or pursue in combat. The crew of the Juggernaut do not suffer penalties for moving and shooting.`,
     "Slave Tyrant": `Friendly units of Hobgoblins within 12" of Zhatan ignore the Treacherous Gits special rule. In addition, Zhatan causes Terror in all enemy units of Orcs, Goblins, Hobgoblins and Gnoblars.`,
     "Slipshod": `If the To Hit roll for a shooting attack made by a Bolt Throwa is a 1 (before any modifiers are applied), then it misfires. Roll on the Stone Thrower Misfire table in the Warhammer rulebook and apply the result to the Bolt Throwa.`,
     "Sorcerous Miasma": `Magic Weapons lose all of their magical properties and are treated as a mundane weapon of the same type while the models remain in base contact with the Lammasu (including the rider of the Lammasu itself).`,
     "Spew Ichor": `The Hellcannon has a Strength 5 Breath Weapon. Any unit that suffers one or more casualties from Spew Ichor must take a Panic test with a -1 penalty to their Leadership.`,
-    "The Granite Guard": `If Astragoth Ironhand is included in your army, you may upgrade one unit of Razers to the Granite Guard for a cost of +2 points per model. The unit must be equipped with blunderbusses. This unit always counts as fighting behind a defended obstacle in the first round of close combat, and do not suffer -1 To Hit when choosing Stand & Shoot as a charge reaction.`,
+    "The Granite Guard": `If Astragoth Ironhand is included in your army, you may upgrade one unit of Razers to the Granite Guard for a cost of +1 point per model. The unit must be equipped with blunderbusses. This unit always counts as fighting behind a defended obstacle in the first round of close combat.`,
     "The Ironsworn": `If Drazhoath the Ashen is included in your army, you may upgrade one unit of Infernal Guard to the Ironsworn for a cost of +2 points per model. This unit has Weapon Skill 5, as well as the Armour Piercing (1) and Magical Attacks special rules. The unit must be equipped with hand weapons and shields.`,
 
     "Altar of Hashut": `A Sorcerer-Prophet with an Altar of Hashut gains the Magical Ward (4+) and Unbreakable special rules. In addition, their troop type changes to War Machine and they count as being part of the crew. Randomise any missile hits between the Sorcerer-Prophet and the crew. The Sorcerer-Prophet can never choose to leave the Altar during the game. If the Sorcerer-Prophet is killed, the whole Altar is also removed as a casualty.`,
@@ -263,13 +266,13 @@
     "Ogre Slave": `An Ogre Slave has the Fear and Natural Armour (6+) special rules. In addition, it increases the Unit Strength of the war machine by 3 rather than 1 and gives it Line of Sight (2).`,
     "Slave Ogre": `An Ogre Slave has the Fear and Natural Armour (6+) special rules. In addition, it increases the Unit Strength of the war machine by 3 rather than 1 and gives it Line of Sight (2).`,
 
-    "Gore Blades": `When attacking the model in close combat, every enemy 'To Hit' roll of a natural 1 inflicts a Strength 3 hit on the attacking model(s).`,
+    "Gore Blades": `When attacking the model in close combat, all 'To Hit' rolls of 1 by the enemy inflicts a Strength 3 hit on the attacking model(s).`,
     "Brazen Wings": `The model gains the Fly (7) special rule.`,
     "Dark Colossus": `The model gains +1 Wound.`,
     "Flaming Breath": `The model gains a Strength 4 Breath Weapon with the Flaming Attacks special rule.`,
-    "Razor Horns": `The model gains the Impact Hits (D6) special rule.`,
-    "Inferno Gun": `An organ-gun variant. Range 12/24", Strength 5. Special Rules: Multiple Shots (Artillery Dice), Ponderous, Rapid Fire.`,
-    "Scaling Spikes": `If a Giant with this upgrade perishes and falls over an obstacle (moat, ditch, wall), the obstacle may thereafter be crossed as open terrain. If it dies at the foot of a building/fortification, models assaulting any garrison across its body gain +1 Combat Resolution.`,
+    "Razor Horns": `The model gains the Mighty Blow (1) special rule in any turn it charges.`,
+    "Inferno Gun": `An inferno gun is an organ gun with the following profile: Range 12/24", Strength 5, Special Rules: Multiple Shots (Artillery Dice), Ponderous, Rapid Fire.`,
+    "Scaling Spikes": `If a Giant with this upgrade perishes and falls over an obstacle such as a moat, ditch or wall, mark the obstacle, which now may be crossed as open terrain. Additionally, if the Giant dies at the foot of a building or fortification, models assaulting any garrison across the location of its body gain a +1 bonus to their Combat Resolution.`,
     "Backstabbers": `If the unit restrains from pursuit after breaking an enemy in combat, it causes D6 Strength 3 hits per complete rank (max 3) on the fleeing unit.`,
     "Blackshard Armour": `Models wearing light, medium or heavy armour gain Immunity (Flaming Attacks).`,
     "Blazing Body": `Flaming Attacks and Immunity (Flaming Attacks). Models in base contact at the start of close combat take an automatic non-physical Strength 3 Flaming hit; non-magical attacks against the model suffer -1 Strength.`,
@@ -288,27 +291,27 @@
     "Fireglaive": `Combat: +1 Strength, requires two hands. Shooting: 9/18", Strength 5, Ponderous.`,
     "Naptha Bombs": `6/9", Strength 4, Flaming & Magical Attacks, Ignores Armour Saves, March & Shoot, Quick Shot.`,
     "Flamehurler": `6/12", Strength 4, Armour Piercing (2), Flaming Attacks, Quick Shot.`,
-    "Immolation Cannons": `Immolation Cannons are fire throwers that may fire up to two times in the shooting phase. If a misfire is rolled, the Kolossus loses one Wound with no saves allowed.`,
-    "Bane maces": `Combat weapon. Strength: as user. Special Rules: Armour Piercing (1), Flaming Attacks.`,
+    "Immolation Cannons": `Immolation Cannons are fire throwers that may fire up to two times in the shooting phase. Every time a misfire is rolled, the Kolossus loses one Wound with no saves allowed.`,
+    "Bane maces": `Bane maces have the following profile: Range Combat, Strength As user, Special Rules: Armour Piercing (1), Flaming Attacks, Parry (6+).`,
     "Greed Pistons": `The Kolossus gains +1 Movement.`,
-    "Breath of Contempt": `The Kolossus gains a Strength 2 Breath Weapon with the Armour Piercing (2) special rule that can be used in close combat.`,
+    "Breath of Contempt": `The Kolossus gains a Strength 2 Breath Weapon with the Armour Piercing (2) special rule that can only be used in close combat.`,
     "Overdrive Switch": `The Kolossus may choose to add +D3 Attacks in each round of close combat when it is its turn to attack. However, if it does so, it suffers a Strength 6 Hit for every natural To Hit roll of 1 it makes.`
   },
 
   // Statlines, equipment & special-rule listings (for the detailed unit view).
   // Profile rows: [name, M, WS, BS, S, T, W, I, A, Ld].
   unitInfo: {
-    mount_greattaurus:{profile:[["Great Taurus",6,4,0,4,4,3,3,3,6]],eq:"—",rules:"Monstrous Beast. Blazing Body, Fly (8), Mighty Blow (1). May buy Flaming Breath / Bloodrage."},
-    mount_baletaurus:{profile:[["Bale Taurus",6,5,0,6,6,5,3,4,6]],eq:"—",rules:"Monster. Blazing Body, Fly (8). May buy Flaming Breath / Bloodrage."},
-    mount_palanquin:{profile:[["Palanquin",3,5,3,4,"-","-",2,4,"-"]],eq:"—",rules:"Infantry platform. Contempt, Inspiring Presence (6), Relentless, Resolute."},
+    mount_greattaurus:{profile:[["Great Taurus",6,4,0,4,4,3,3,3,6]],eq:"—",rules:"Monstrous Beast. Blazing Body, Fly (8), Mighty Blow (1); Fuelled by Fire. May buy Flaming Breath / Bloodrage."},
+    mount_baletaurus:{profile:[["Bale Taurus",6,5,0,6,6,5,3,4,6]],eq:"—",rules:"Monster. Blazing Body, Fly (8); Fuelled by Fire. May buy Flaming Breath / Bloodrage."},
+    mount_palanquin:{profile:[["Palanquin",3,5,3,4,"-","-",2,4,"-"]],eq:"—",rules:"Infantry platform. Contempt, Inspiring Presence (6), Relentless, Resolute. Adds +1 Line of Sight and +4 Unit Strength to the model mounted on it."},
     mount_altarofhashut:{profile:[["Altar of Hashut","-","-","-","-",7,"-","-","-","-"],["Altar Guard",3,5,3,4,4,1,3,1,9]],eq:"Great weapon, heavy armour",rules:"War Machine. Crew: 2 Altar Guards (Chaos Dwarf). Altar of Hashut, Blessing of Hashut, Sacrifices to Hashut."},
     sorcerers:{profile:[["Sorcerer-Prophet",3,5,3,3,4,3,3,2,9],["Sorcerer-Priest",3,4,3,3,4,2,2,1,9]],eq:"Hand weapon",rules:"Blackshard Armour, Contempt, Relentless, Resolute, Sorcerer's Curse. Wizard: Priest L1 / Prophet L3 — Death, Fire, Hashut, Metal."},
     despots:{profile:[["Overlord",3,7,4,4,5,3,5,4,10],["Overseer",3,6,4,4,5,2,4,3,9]],eq:"Hand weapon",rules:"Blackshard Armour, Contempt, Relentless, Resolute. Infernal Cohort."},
     daemonsmith:{profile:[["Daemonsmith",3,4,4,4,4,2,2,2,9]],eq:"Hand weapon",rules:"Blackshard Armour, Contempt, Relentless, Resolute, Sorcerer's Curse. Infernal Engineer; \"Stand Back Sir!\". Wizard (if upgraded) — Fire, Metal."},
     taurruk:{profile:[["Bull Centaur Taur'ruk",7,5,2,5,5,4,4,4,9]],eq:"Hand weapon",rules:"Contempt, Natural Armour (5+). May not be Army General."},
     hobchief:{profile:[["Hobgoblin Chieftain",4,5,5,4,4,2,4,3,7]],eq:"Hand weapon",rules:"Backstabbers, Cowardly Despoilers. May not be Army General."},
-    astragoth:{profile:[["Astragoth Ironhand",6,5,4,4,4,3,1,2,10]],eq:"Fixed items: Black Hammer of Hashut, Stone Mantle",rules:"Blackshard Armour, Contempt, Resolute, Sorcerer's Curse; Mechanical Body; Overdrive; The Granite Guard. Wizard L4 — Death, Fire, Hashut, Metal."},
-    drazhoath:{profile:[["Drazhoath the Ashen",3,5,4,3,4,3,3,2,9],["Cinderbreath (Bale Taurus)",6,5,0,6,6,5,3,4,6]],eq:"Heavy armour. Fixed: Graven Sceptre, Hellshard Amulet, Daemonspite Crucible",rules:"Blackshard Armour, Blazing Body, Contempt, Flaming Attacks, Fly (8), Relentless, Resolute; Dark Renown; The Ironsworn; Master of the Legion of Azgorh. Wizard L4 — Hashut."},
+    astragoth:{profile:[["Astragoth Ironhand",6,5,4,4,4,3,1,3,10]],eq:"Fixed items: Black Hammer of Hashut, Stone Mantle",rules:"Blackshard Armour, Contempt, Resolute, Sorcerer's Curse; Mechanical Body; Overdrive; The Granite Guard. Wizard L4 — Death, Fire, Hashut, Metal."},
+    drazhoath:{profile:[["Drazhoath the Ashen",3,5,4,3,4,3,3,2,9],["Cinderbreath (Bale Taurus)",6,5,0,6,6,5,3,4,6]],eq:"Heavy armour. Fixed: Graven Sceptre, Hellshard Amulet, Daemonspite Crucible",rules:"Blackshard Armour, Blazing Body, Contempt, Flaming Attacks, Flaming Breath, Fly (8), Fuelled by Fire, Immunity (Flaming Attacks), Relentless, Resolute, Sorcerer's Curse; Dark Renown; The Ironsworn; Master of the Legion of Azgorh. Wizard L4 — Hashut."},
     zhatan:{profile:[["Zhatan the Black",3,8,4,4,5,3,4,4,10]],eq:"Fixed: Obsidian Axe, Armour of Gazrakh, Chaos Runeshield",rules:"Blackshard Armour, Contempt, Infernal Cohort, Relentless, Resolute; Blazing Beards of Bazherak; Boundless Cruelty; Slave Tyrant."},
     rykarth:{profile:[["Rykarth the Unbreakable",3,6,4,4,5,2,4,3,10]],eq:"Great weapon, heavy armour",rules:"Blackshard Armour, Contempt, Hold Your Ground (6), Relentless; Captain of the Immortals. May not be Army General."},
     shartor:{profile:[["Shar'tor the Executioner",7,6,2,5,5,5,3,5,9]],eq:"Light armour. Fixed: Darktide Axe, Mask of the Executioner",rules:"Contempt, Impact Hits (D3), Natural Armour (4+); Hashut's Dark Ravagers; Lord of the Ba'hal; Prayers of Malice. May not be Army General."},
@@ -318,19 +321,19 @@
     cutthroats:{profile:[["Cutthroat",4,3,3,3,3,1,2,1,6]],eq:"Hand weapon, shield",rules:"Backstabbers, Cowardly Despoilers, Treacherous Gits"},
     archers:{profile:[["Archer",4,3,3,3,3,1,2,1,6]],eq:"Hand weapon, shortbow",rules:"Backstabbers, Cowardly Despoilers, Treacherous Gits"},
     wolfraiders:{profile:[["Wolf Raider",4,3,3,3,3,1,2,1,6],["Giant Wolf",9,3,0,3,3,1,3,1,3]],eq:"Hand weapon",rules:"Backstabbers, Cowardly Despoilers, Fast Cavalry, Treacherous Gits"},
-    orcslaves:{profile:[["Orc Slave",4,3,3,4,4,1,2,1,4],["Overseer",4,3,3,4,3,1,2,2,6]],eq:"Hand weapon",rules:"Animosity, Expendable, Independent, Mixed Unit; Hobgoblin Overseer; Ignore Goblin Panic"},
-    goblinslaves:{profile:[["Goblin Slave",4,2,2,3,3,1,2,1,3],["Overseer",4,3,3,3,3,1,2,2,6]],eq:"Hand weapon",rules:"Animosity, Expendable, Independent, Mixed Unit; Fear Elves; Hobgoblin Overseer"},
+    orcslaves:{profile:[["Orc Slave",4,3,3,4,4,1,2,1,4],["Overseer",4,3,3,3,3,1,2,2,6]],eq:"Hand weapon",rules:"Animosity, Expendable, Independent, Mixed Unit; Ignore Goblin Panic; Overseer"},
+    goblinslaves:{profile:[["Goblin Slave",4,2,2,3,3,1,2,1,3],["Overseer",4,3,3,3,3,1,2,2,6]],eq:"Hand weapon",rules:"Animosity, Expendable, Independent, Mixed Unit; Fear Elves; Overseer"},
     infernalguard:{profile:[["Infernal Guard",3,4,3,4,4,1,2,1,9]],eq:"Hand weapon, heavy armour, shields",rules:"Blackshard Armour, Contempt, Relentless, Resolute"},
     zealots:{profile:[["Zealot Berzerker",3,5,3,4,4,1,3,1,9]],eq:"Two hand weapons, light armour",rules:"Contempt, Frenzy, Hatred, Relentless, Resolute, Vanguard"},
     devastators:{profile:[["Devastator",3,4,3,3,4,2,2,2,9]],eq:"Hand weapon, medium armour; one weapon team",rules:"Contempt, Relentless, Resolute, Weapon Team; Unit Strength 2 each"},
     bullcentaurs:{profile:[["Bull Centaur",7,4,2,4,4,1,3,2,8]],eq:"Hand weapon, light armour",rules:"Contempt, Natural Armour (6+)"},
     whirlwind:{profile:[["Whirlwind/Tenderizer",6,"–","–",4,5,4,"–","–","–"],["Bull Centaur","–",4,2,4,"–","–",3,2,8]],eq:"Hand weapon, light armour",rules:"Contempt, Natural Armour (6+); Tenderizer or Whirlwind impact hits (choose in list)"},
     sneakygits:{profile:[["Sneaky Git",4,3,3,3,3,1,3,1,6]],eq:"Two hand weapons, throwing weapons",rules:"Backstabbers, Cowardly Despoilers, Poisoned Attacks, Treacherous Gits; Dirty, Rotten, Sneaky"},
-    boltthrowa:{profile:[["Bolt Throwa","–","–","–","–",7,3,"–","–","–"],["Crew",4,3,3,3,3,1,2,1,6]],eq:"Hand weapon, bolt thrower (crew of 3)",rules:"Slipshod. 1–2 Bolt Throwas = a single Special choice"},
+    boltthrowa:{profile:[["Bolt Throwa","–","–","–","–",7,3,"–","–","–"],["Crew",4,3,3,3,3,1,2,1,6]],eq:"Hand weapon, bolt thrower (crew of 3)",rules:"War Machine. Crew: 3 Hobgoblins. Slipshod"},
     blackorcs:{profile:[["Black Orc",4,4,3,4,4,1,2,1,8]],eq:"Hand weapon, medium armour",rules:"Immunity (Psychology), Independent, Mighty Blow (1); Armed to da Teef"},
-    ogreslaves:{profile:[["Ogre Slave",4,3,2,4,4,3,2,3,4],["Hobgoblin Overseer",4,3,3,3,3,1,2,2,6]],eq:"Hand weapon",rules:"Expendable, Independent, Mixed Unit; Hobgoblin Overseer; Ogre Charge"},
+    ogreslaves:{profile:[["Ogre Slave",4,3,2,4,4,3,2,3,4],["Hobgoblin Overseer",4,3,3,3,3,1,2,2,6]],eq:"Hand weapon",rules:"Expendable, Independent, Mixed Unit; Ogre Charge; Overseer"},
     kdaaifireborn:{profile:[["K'daai Fireborn",6,4,2,5,4,3,4,3,7]],eq:"Hand weapon, light armour",rules:"Blazing Body, Daemonic, Independent; Burning Bright"},
-    irondaemon:{profile:[["Iron Daemon",6,"–","–",6,6,6,"–","–","–"],["Crew","–",4,3,3,"–","–",2,1,9]],eq:"Hand weapon, steam cannonade, light armour (crew of 3)",rules:"Impact Hits (D6+1), Relentless, Terror, Unbreakable; Demolition; Grind Attack; Lumbering & Unstoppable"},
+    irondaemon:{profile:[["Iron Daemon",6,"–","–",6,6,6,"–","–","–"],["Crew","–",4,3,3,"–","–",2,1,9]],eq:"Hand weapon, steam cannonade, light armour, scythes (crew of 3)",rules:"Chariot (Armour save 4+). Relentless, Terror, Unbreakable; Grind Attack; Lumbering; Unstoppable"},
     magmacannon:{profile:[["Magma Cannon","–","–","–","–",7,"–","–","–","–"],["Crew",3,4,3,3,4,1,2,1,9]],eq:"Hand weapon, magma cannon, light armour (crew of 3)",rules:"Contempt, Resolute"},
     deathshrieker:{profile:[["Rocket Launcher","–","–","–","–",7,"–","–","–","–"],["Crew",3,4,3,3,4,1,2,1,9]],eq:"Hand weapon, rocket launcher, demolition rocket, light armour (crew of 3)",rules:"Contempt, Resolute"},
     immortals:{profile:[["Immortal",3,5,3,4,4,1,2,2,9]],eq:"Great weapon, heavy armour",rules:"Blackshard Armour, Contempt, Relentless, Stubborn"},
@@ -338,10 +341,10 @@
     lammasu:{profile:[["Lammasu",6,3,0,5,5,4,1,2,8]],eq:"—",rules:"Fly (8), Magic Resistance (3); Sorcerous Miasma. Level 1 Wizard — Death, Fire, Shadow"},
     dreadquake:{profile:[["Dreadquake Mortar","–","–","–","–",7,"–","–","–","–"],["Crew",3,4,3,3,4,1,2,1,9],["Ogre Slave",6,3,2,4,4,3,2,3,7]],eq:"Hand weapon, dreadquake mortar, light armour (crew of 3)",rules:"War Machine. Crew: 3 Crew (Chaos Dwarf). Contempt, Resolute. Ogre Slave."},
     hellcannon:{profile:[["Hellcannon",3,4,3,5,6,5,1,5,4],["Chaos Dwarf Handler",3,4,3,3,4,1,2,1,9]],eq:"Hand weapon, doomfire, light armour (Handlers)",rules:"Daemonic, Mixed Unit, Natural Armour (4+); Caged Fury; Spew Ichor"},
-    juggernaut:{profile:[["Juggernaut Siege Tower",6,"–","–",5,6,10,"–","–","–"],["Crew","–",4,3,3,"–","–",2,1,9]],eq:"Hand weapon, crossbow, medium armour (crew of 3)",rules:"Terror, Unbreakable; Siege Tower; Siege Cannons"},
+    juggernaut:{profile:[["Juggernaut Siege Tower",6,"–","–",5,6,10,"–","–","–"],["Crew","–",4,3,3,"–","–",2,1,9]],eq:"Hand weapon, crossbow, medium armour (crew of 3)",rules:"Chariot (Armour save 5+). Terror, Unbreakable; Siege Tower; Siege Cannons. Line of Sight value of 8"},
     kolossus:{profile:[["Kolossus",6,4,3,6,7,6,1,5,10]],eq:"Bane maces, heavy armour",rules:"Animated Construct, Hellbound"},
     kdaaidestroyer:{profile:[["K'daai Destroyer",6,5,3,7,6,6,5,5,7]],eq:"Hand weapon, medium armour",rules:"Blazing Body, Daemonic, Frenzy; Burning Bright"},
-    siegegiant:{profile:[["Siege Giant",6,3,3,6,6,6,3,"*",10]],eq:"Hand weapon, siege armour",rules:"Immunity (Psychology), Natural Armour (6+), Stubborn; Fall Over; Giant special attacks"}
+    siegegiant:{profile:[["Siege Giant",6,3,3,6,6,6,3,"*",10]],eq:"Hand weapon, Siege Armour",rules:"Immunity (Psychology), Natural Armour (6+), Stubborn; Fall Over; Giant special attacks"}
   },
 
   // Effect text for every magic item (army-book + common rulebook).
@@ -351,9 +354,9 @@
     "Life Bane Blade":`Wielder gains Multiple Wounds (D3). Whenever they cause one or more unsaved Wounds in close combat, they regain 1 Wound lost earlier.`,
     "Hashut's Blade of Greed":`Gains a bonus per different type of magic item in an enemy unit in base contact — Weapon: Parry (6+); Armour: Armour Piercing (1); Talisman: +1 To Wound; Arcane: Magic Resistance (1); Enchanted: +1 To Hit; Standard: +1 Combat Resolution.`,
     "Zzharg Madeye's Blunderbuss":`Daemonsmith only. Blunderbuss usable in the Shooting phase as a Breath Weapon: Strength 4, Armour Piercing (1), Cumbersome.`,
-    "Lash of Shurzzhak":`Instead of fighting normally, make a special attack: all models in one column in base contact are automatically hit.`,
+    "Lash of Shurzzhak":`Instead of fighting normally, make a special attack: if it hits, all models in one rank or file in base contact are automatically hit.`,
     "Obsidian Blade":`Wielder gains Ignores Armour Saves.`,
-    "Inferno Glaive of Hashut":`Fireglaive. Close combat attacks gain Armour Piercing (1); missile attacks are Strength 5.`,
+    "Inferno Glaive of Hashut":`Fireglaive. Close combat attacks gain Armour Piercing (1); missile attacks are Strength 6.`,
     "Armour of the Forge":`Heavy armour. Wearer gains a re-rollable Magical Ward (5+).`,
     "Armour of Bazherak the Cruel":`Heavy armour. +2 to armour save and Magic Resistance (2).`,
     "Magma Armour":`Heavy armour. For each failed To Wound roll against the bearer in close combat, inflicts a Strength 4 Flaming hit on the attacker.`,
@@ -362,7 +365,7 @@
     "Obsidian Vambraces":`6+ armour save, +1 Strength and Magic Resistance (1). If two or more natural 1s are rolled To Hit in close combat, the item can no longer be used this game.`,
     "Shield of Contempt":`Shield. For each natural 6 on an armour or Parry save, inflicts an automatic hit on the attacker with the same Strength and special rules as the attack.`,
     "Infernal Charm":`Magical Ward (5+). Once per game at the start of any of your turns, ignore all damage from magic, shooting and close combat for that turn.`,
-    "Talisman of Obsidian":`All magic items on models in base contact lose their magical properties and count as mundane versions.`,
+    "Talisman of Obsidian":`All magic items on models in base contact lose their magical properties and count as mundane versions. The bearer may take no other magic items.`,
     "Hellforged Amulet":`Magical Ward (6+); may re-roll failed armour saves of 1.`,
     "Crown of the K'daai":`Blazing Body and Magical Ward (6+). From turn 2 on, at the start of each of your turns pass a Toughness test or suffer a Wound (no saves).`,
     "Gift of Hashut":`Magic Resistance (1); the bearer's unit gains Magical Ward (4+) against non-physical Flaming Attacks. Common.`,
@@ -373,10 +376,10 @@
     "Scroll of Binding":`Charm, one use. When casting, add +1 Power Dice to every casting roll this Magic phase.`,
     "Blood of Hashut":`Charm, one use. In close combat target one model in base contact: works on 2+; if successful, D6 automatic hits wounding on the target's unmodified armour save. Ignores Armour Saves, Flaming & Magical Attacks.`,
     "Scroll of Petrification":`Charm, one use. At the start of a Magic phase, one friendly unit within 12" gains +1 Toughness until your next Magic phase.`,
-    "Daemon Flask of Ashak":`One use. At the start of your Movement phase before charges, all enemy units within 18" take a Panic test; buildings, chariots and war machines take D6 wounds.`,
+    "Daemon Flask of Ashak":`One use. At the start of your Movement phase before charges, all enemy units within 18" take a Panic test; Chariots and War Machines suffer D6 automatic wounds.`,
     "Malignant Totem":`Bound Spell — Breath of Hatred (Lore of Hashut). Enemy units in base contact suffer -1 Leadership.`,
     "Furnace Blast Gem":`Bound Spell — Hell Hammer (Lore of Hashut).`,
-    "Gauntlets of Punishment":`Bound Spell (Level 3, cast on 9+): magic missile, 12" range, D6 Strength 5 hits with Ignores Armour Saves.`,
+    "Gauntlets of Punishment":`Bound Spell (Level 2, cast on 6+): magic missile, 12" range, D6 Strength 5 hits with Ignores Armour Saves.`,
     "Black Gem of Gnar":`One use. At the start of either Close Combat phase, the bearer and one model in base contact may neither attack nor be attacked that phase.`,
     "Breath of Hashut":`One use. Breath Weapon attack: Strength 4, Flaming & Magical Attacks.`,
     "Crucible of Spite":`One use. At the start of any combat round, the bearer gains +D3 Weapon Skill, Strength, Initiative and Attacks for that round.`,
@@ -389,7 +392,7 @@
     "Hellbound Standard":`The unit gains the Hellbound special rule.`,
     "The Lammasu's Beard":`Friendly units within 6" gain Magical Ward (6+) against missiles and Magic Resistance (1).`,
     "Oath of Contempt":`Close combat attacks against the unit suffer -1 To Wound in the first round of combat.`,
-    "Banner of Slavery":`Friendly models with Animosity (and Spear Chukkas) within 12" gain Immunity (Panic).`,
+    "Banner of Slavery":`All friendly models with the Animosity special rule within 12" gain Immunity (Panic).`,
     "Ashen Banner":`Enemy models targeting the unit in the Shooting phase suffer an additional -1 To Hit.`,
     "Banner of the Khanate":`Hobgoblins only. The unit gains Frenzy.`,
     "Overseer's Sigil":`Friendly Orc and Goblin units within 12" treat it as Inspiring Presence (12).`,
@@ -616,7 +619,7 @@
         lores: ["Fire", "Metal"], wizardIfUpgraded: true,
         variants: [ { name: "Daemonsmith", points: 60, magicBudget: 50 } ],
         options: [
-          { id: "wiz", type: "toggle", label: "Upgrade to Level 1 Wizard", cost: 50, per: "flat" },
+          { id: "wiz", type: "toggle", label: "Upgrade to Level 1 Wizard", cost: 35, per: "flat" },
           { id: "ranged", type: "choice", label: "Ranged weapon", choices: [
             { label: "Pistol", cost: 5 }, { label: "Blunderbuss", cost: 6 }, { label: "Fireglaive", cost: 9 } ] },
           { id: "naptha", type: "toggle", label: "Naptha Bombs", cost: 10, per: "flat" },
@@ -630,7 +633,7 @@
         variants: [ { name: "Bull Centaur Taur'ruk", points: 140, magicBudget: 50 } ],
         options: [
           { id: "wep", type: "choice", label: "Weapon", choices: [
-            { label: "Additional hand weapon", cost: 4 }, { label: "Great weapon", cost: 12 } ] },
+            { label: "Additional hand weapon", cost: 5 }, { label: "Great weapon", cost: 10 } ] },
           { id: "armour", type: "choice", label: "Armour", choices: [
             { label: "Light armour", cost: 3 }, { label: "Medium armour", cost: 9 } ] },
           { id: "shield", type: "toggle", label: "Shield", cost: 5, per: "flat" }
@@ -652,7 +655,7 @@
       },
       /* Special characters */
       { id: "astragoth", name: "Astragoth Ironhand", isCharacter: true, isSpecialChar: true,
-        variants: [ { name: "Astragoth Ironhand", points: 290, wizardLevel: 4, magicBudget: 0 } ], lores: ["Death","Fire","Hashut","Metal"], options: [] },
+        variants: [ { name: "Astragoth Ironhand", points: 300, wizardLevel: 4, magicBudget: 0 } ], lores: ["Death","Fire","Hashut","Metal"], options: [] },
       { id: "drazhoath", name: "Drazhoath the Ashen", isCharacter: true, isSpecialChar: true,
         variants: [ { name: "Drazhoath the Ashen", points: 560, wizardLevel: 4, magicBudget: 0 } ], lores: ["Hashut"], options: [],
         notes: "If Army General: Infernal Guard may be taken as Core instead of Special." },
@@ -683,7 +686,7 @@
           { id: "wep", type: "choice", label: "Replace blunderbusses", choices: [
             { label: "Crossbows", cost: 0, per: "model" }, { label: "Flamehurlers", cost: 0, per: "model" } ] },
           { id: "armour", type: "toggle", label: "Medium armour", cost: 1, per: "model" },
-          { id: "graniteguard", type: "toggle", label: "The Granite Guard (Astragoth)", cost: 2, per: "model", requires: { unit: "astragoth" }, oncePerArmy: true },
+          { id: "graniteguard", type: "toggle", label: "The Granite Guard (Astragoth)", cost: 1, per: "model", requires: { unit: "astragoth" }, oncePerArmy: true },
           { id: "cmd", type: "command", magicStandard: 25 } ] },
       { id: "cutthroats", name: "Cutthroats", perModel: true, basePoints: 3.5, unitSize: [20,60], keyword: "hobgoblin",
         options: [
@@ -704,18 +707,18 @@
           { id: "ambush", type: "toggle", label: "Ambushers", cost: 1, per: "model" },
           { id: "cmd", type: "command", magicStandard: 25 } ] },
       { id: "orcslaves", name: "Orc Slaves", perModel: true, basePoints: 6, unitSize: [15,45], expendable: true,
+        attachedPerN: { every: 20, cost: 15, name: "Overseer" },
         options: [
           { id: "wep", type: "choice", label: "Weapon", choices: [
-            { label: "Spears", cost: 0.5, per: "model" }, { label: "Additional hand weapons", cost: 1, per: "model" }, { label: "Great weapons", cost: 3, per: "model" } ] },
-          { id: "shield", type: "toggle", label: "Shields (not with AHW/GW)", cost: 1, per: "model" },
-          { id: "overseer", type: "toggle", label: "Hobgoblin Overseer", cost: 20, per: "flat" } ],
-        notes: "Units may not exceed number of Cutthroat/Archer units." },
+            { label: "Spears", cost: 1, per: "model" }, { label: "Additional hand weapons", cost: 1, per: "model" }, { label: "Great weapons", cost: 3, per: "model" } ] },
+          { id: "shield", type: "toggle", label: "Shields (not with AHW/GW)", cost: 1, per: "model" } ],
+        notes: "One Overseer must be included for every 20 Orc Slaves (added automatically). Units may not exceed number of Cutthroat/Archer units." },
       { id: "goblinslaves", name: "Goblin Slaves", perModel: true, basePoints: 2, unitSize: [20,60], expendable: true,
+        attachedPerN: { every: 20, cost: 15, name: "Overseer" },
         options: [
           { id: "spears", type: "toggle", label: "Spears", cost: 0.5, per: "model" },
-          { id: "shield", type: "toggle", label: "Shields", cost: 1, per: "model" },
-          { id: "overseer", type: "toggle", label: "Hobgoblin Overseer", cost: 20, per: "flat" } ],
-        notes: "Units may not exceed number of Cutthroat/Archer units." }
+          { id: "shield", type: "toggle", label: "Shields", cost: 1, per: "model" } ],
+        notes: "One Overseer must be included for every 20 Goblin Slaves (added automatically). Units may not exceed number of Cutthroat/Archer units." }
     ],
 
     /* ------------------------------ SPECIAL ----------------------------- */
@@ -726,7 +729,7 @@
             { label: "Great weapons", cost: 2, per: "model" }, { label: "Fireglaives", cost: 3, per: "model" } ] },
           { id: "ironsworn", type: "toggle", label: "The Ironsworn (Drazhoath)", cost: 2, per: "model", requires: { unit: "drazhoath" }, oncePerArmy: true },
           { id: "cmd", type: "command", magicStandard: 50 } ] },
-      { id: "zealots", name: "Zealot Berzerkers", perModel: true, basePoints: 12, unitSize: [10,null],
+      { id: "zealots", name: "Zealot Berzerkers", perModel: true, basePoints: 12, unitSize: [10,30],
         options: [
           { id: "skirm", type: "toggle", label: "Skirmishers", cost: 1, per: "model" },
           { id: "cmd", type: "command", magicStandard: 50 } ] },
@@ -750,8 +753,7 @@
           { id: "scout", type: "toggle", label: "Scouts", cost: 1, per: "model" },
           { id: "skirm", type: "toggle", label: "Skirmishers", cost: 1, per: "model" },
           { id: "leader", type: "toggle", label: "Leader", cost: 5, per: "flat" } ] },
-      { id: "boltthrowa", name: "Bolt Throwa", perModel: true, basePoints: 35, unitSize: [1,2],
-        notes: "1-2 Bolt Throwas count as a single Special choice.", countsAsSingleChoice: true, options: [] },
+      { id: "boltthrowa", name: "Bolt Throwa", perModel: false, basePoints: 35, unitSize: [1,1], options: [] },
       { id: "blackorcs", name: "Black Orcs", perModel: true, basePoints: 12, unitSize: [10,30],
         options: [
           { id: "wepreq", type: "mustChoose", label: "Must take one", choices: [
@@ -761,10 +763,11 @@
           { id: "armour", type: "toggle", label: "Heavy armour", cost: 1.5, per: "model" },
           { id: "cmd", type: "command", magicStandard: 50 } ] },
       { id: "ogreslaves", name: "Ogre Slaves", perModel: true, basePoints: 24, unitSize: [3,9], expendable: true,
+        attachedPerN: { every: 3, cost: 15, name: "Hobgoblin Overseer" },
         options: [
           { id: "wep", type: "choice", label: "Weapon", choices: [
-            { label: "Bucklers", cost: 3, per: "model" }, { label: "Additional hand weapons", cost: 3, per: "model" }, { label: "Great weapons", cost: 6, per: "model" } ] },
-          { id: "overseer", type: "toggle", label: "Hobgoblin Overseer", cost: 20, per: "flat" } ] },
+            { label: "Bucklers", cost: 3, per: "model" }, { label: "Additional hand weapons", cost: 3, per: "model" }, { label: "Great weapons", cost: 9, per: "model" } ] } ],
+        notes: "One Overseer must be included for every 3 Ogre Slaves (added automatically)." },
       { id: "kdaaifireborn", name: "K'daai Fireborn", perModel: true, basePoints: 50, unitSize: [3,9],
         options: [ { id: "leader", type: "toggle", label: "Leader", cost: 5, per: "flat" } ] },
       { id: "irondaemon", name: "Iron Daemon", perModel: false, basePoints: 190, unitSize: [1,1],
@@ -815,7 +818,7 @@
           { id: "overdrive", type: "toggle", label: "Overdrive Switch", cost: 20, per: "flat" } ] },
       { id: "kdaaidestroyer", name: "K'daai Destroyer", perModel: false, basePoints: 265, unitSize: [1,1],
         options: [ { id: "upg", type: "multi", label: "Upgrades (up to two)", max: 2, choices: [
-          { label: "Gore Blades", cost: 10 }, { label: "Dark Colossus", cost: 20 }, { label: "Brazen Wings", cost: 30 }, { label: "Flaming Breath", cost: 30 }, { label: "Razor Horns", cost: 35 } ] } ] },
+          { label: "Gore Blades", cost: 10 }, { label: "Dark Colossus", cost: 20 }, { label: "Brazen Wings", cost: 30 }, { label: "Flaming Breath", cost: 30 }, { label: "Razor Horns", cost: 10 } ] } ] },
       { id: "siegegiant", name: "Siege Giant", perModel: false, basePoints: 200, unitSize: [1,1],
         options: [
           { id: "hate", type: "toggle", label: "Runes of Hate", cost: 25, per: "flat" },
