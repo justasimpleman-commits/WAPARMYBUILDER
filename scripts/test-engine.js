@@ -753,5 +753,19 @@ __setState([]); __setGen(null); __switch("chaos-dwarfs",false);
   ok(U("characters","daemonsmith").options.find(x=>x.id==="wiz").cost===35, "CD: Daemonsmith Wizard upgrade +35");
 }
 
+/* ====== Wood Elves v3.1: Spite access, new costs ====== */
+console.log("Wood Elves v3.1: Grove Guardian Spites, Durthu items, updated costs…");
+__setState([]); __setGen(null); __switch("wood-elves",false);
+{
+  const U=(c,id)=>__findUnit(c,id);
+  const gg=U("characters","groveguardian");
+  ok(gg.variants[0].magicBudget===100 && (gg.magicCatsOnly||[]).join()==="Forest Spites", "WE: Grove Guardian may take Spites up to 100 pts");
+  ok(!U("characters","durthu").magicCatsOnly, "WE: Durthu may take Spites and/or Magic Items");
+  ok(U("core","gladeriders").unitSize[1]===15, "WE: Glade Riders unit size 5-15");
+  const wh=U("special","warhawkriders"); __addUnit("special","warhawkriders"); const e=__getState()[0]; e.count=3; e.opts.bow=true;
+  ok(__entryPoints(e)===3*wh.basePoints, "WE: Warhawk Riders longbows are free");
+  ok(__findItem("Wailing Arrows").common===true && __findItem("Silverwood Circlet").cost===30, "WE: Wailing Arrows common, Silverwood Circlet 30");
+}
+
 console.log(`\n${fails? "FAIL":"PASS"}: ${checks-fails}/${checks} checks passed.`);
 process.exit(fails?1:0);

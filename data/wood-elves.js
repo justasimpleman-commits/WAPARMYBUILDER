@@ -1,5 +1,5 @@
 /* ============================================================================
-   WOOD ELVES — army data (Warhammer Armies, Mathias Eliasson v3.0,
+   WOOD ELVES — army data (Warhammer Armies, Mathias Eliasson v3.1,
    9th Edition 3.0 ruleset). Encoded for the Army Builder engine.
 
    Pure DATA file. See SCHEMA.md for the full field reference.
@@ -12,13 +12,13 @@
    ("Forest Spites") declared in `multiPickCategories`, so a character may
    take one or more Spites from the same budget as their Magic Items
    ("one Spite and/or Magic Items up to N points"). The Treelord Ancient,
-   Branchwraith and Drycha may take Spites but NOT Magic Items — they carry
+   Grove Guardian, Branchwraith and Drycha may take Spites but NOT Magic Items — they carry
    `magicCatsOnly:["Forest Spites"]`.
    ========================================================================== */
 (window.ARMY_BOOKS = window.ARMY_BOOKS || {})["wood-elves"] = {
   id: "wood-elves",
   name: "Wood Elves",
-  author: "Mathias Eliasson v3.0 (unofficial) — 9th Edition 3.0",
+  author: "Mathias Eliasson v3.1 (unofficial) — 9th Edition 3.0",
   // No army-specific composition section in the book — standard caps.
   composition: {
     charactersMax: 0.35,
@@ -98,7 +98,7 @@
       { name: "Viridescent Shawl", cost: 30 },
       { name: "Divination Orb", cost: 25 },
       { name: "Deepwood Sphere", cost: 20 },
-      { name: "Silverwood Circlet", cost: 20 },
+      { name: "Silverwood Circlet", cost: 30 },
       { name: "Elf Charm", cost: 20 },
       { name: "Calaingor's Stave", cost: 15 },
       { name: "Heartwood Pendant", cost: 10 },
@@ -116,13 +116,13 @@
       { name: "Waystalker's Cloak", cost: 25 },
       { name: "Wraithstone", cost: 25 },
       { name: "Elynett's Brooch", cost: 20 },
-      { name: "Wailing Arrows", cost: 15 },
-      { name: "Arrows of Potency", cost: 10 },
-      { name: "Blight-Tipped Arrows", cost: 10 },
+      { name: "Wailing Arrows", cost: 15, common: true },
+      { name: "Arrows of Potency", cost: 10, common: true },
+      { name: "Blight-Tipped Arrows", cost: 10, common: true },
       { name: "Crown of Antlers", cost: 10 },
-      { name: "Orion's Favour", cost: 10 },
+      { name: "Orion's Favour", cost: 10, common: true },
       { name: "Gwytherc's Horn", cost: 5 },
-      { name: "Dragontooth Arrows", cost: 5 }
+      { name: "Dragontooth Arrows", cost: 5, common: true }
     ],
     "Magic Standards": [
       { name: "Battle Standard of Athel Loren", cost: 75 },
@@ -252,15 +252,15 @@
 
   glossary: {
     /* ---- Army special rules (pp.3-4) ---- */
-    "Ambush from the Worldroots": `A Wood Elf army can always place an additional forest no more than 12" in diameter on the battlefield, during deployment before any units are deployed, wholly in your half of the battlefield.`,
+    "Ambush from the Worldroots": `A Wood Elf army can always place an additional forest no more than 12" in diameter on the battlefield. This is done during deployment, before any units are deployed, and must be placed wholly in your half of the battlefield. Declare which type of forest it is when you place it. If you cannot fit the forest on your half of the table, move other terrain features by the shortest distance necessary so that the forest can be placed. If you still cannot place the forest, or if the scenario means that the Wood Elf army does not have a table half in which to deploy, this additional forest is not used in this battle.`,
     "Asrai Archery": `Models with this rule do not suffer the normal -1 To Hit penalty for moving and shooting.`,
     "Blessings of the Ancients": `A Wizard that has this rule and is within 6" of a forest gains a +1 casting and dispel bonus.`,
     "Elven Grace": `Models with this rule have the Dodge (6+) special rule in close combat. However, this cannot be used against enemies that attack before the model with Elven Grace.`,
-    "Elven Shortbow": `16/24", Strength 3, Armour Piercing (1), Multiple Shots (2)*, Volley Fire. *Only applies in turns the model has not moved. Cannot be used as a charge reaction.`,
+    "Elven Shortbow": `16/24", Strength 3, Armour Piercing (1), March & Shoot, Multiple Shots (2)*, Volley Fire. *Only applies in turns the model has not marched. Cannot be used as a charge reaction.`,
     "Elven Longbow": `24/36", Strength 3, Armour Piercing (1), Multiple Shots (2)*, Volley Fire. *Only applies in turns the model has not moved. Cannot be used as a charge reaction.`,
     "Forest Spirit": `A model with this rule has the Fear, Forest Strider, Immunity (Psychology), Magical Attacks and Magical Ward (5+) special rules. However, units of Forest Spirits may only be joined by characters that are also Forest Spirits and vice versa.`,
-    "Forest Stalker": `While inside a wood, models with this special rule are at an additional -1 to be Hit with missile attacks. In addition, they may deploy within 12" of an enemy unit if they do so within a wood.`,
-    "Lethal Shot": `Models with this rule have the Killing Blow special rule with missile attacks from their Elven longbows.`,
+    "Forest Stalker": `While inside a wood, models with this special rule are at an additional -1 to be Hit with missile attacks. In addition, when using the Scouts special rule they may deploy within 12" of an enemy unit if they do so within a wood.`,
+    "Lethal Shot": `Models with this rule have the Killing Blow special rule with missile attacks from their Elven longbows or shortbows.`,
     "Martial Memories": `Models with this rule may re-roll 1's when rolling To Hit and To Wound in close combat.`,
     "Saearath": `Spear. Unless used with a shield in combat or when using the Mighty Blow (1) special rule from the weapon, a model armed with a saearath gains +1 Attack.`,
     "Shadow Dances of Loec": `At the start of each round of close combat (before Impact Hits), the model may choose one Shadow Dance; all models in the unit must choose the same one, lasting until the end of the turn. Whirling Death: Armour Piercing (1) and Killing Blow. Storm of Blades: +1 Attack. The Shadows Coil: all close combat attacks against the model suffer -1 To Hit. Woven Mist: Always Strikes First. Cannot choose the same Shadow Dance in two consecutive rounds.`,
@@ -271,7 +271,7 @@
     "Arcane Bodkins": `Shooting attacks made with Arcane Bodkins have the Armour Piercing (1) special rule.`,
     "Hagbane Tips": `Shooting attacks made with Hagbane Tips have the Poisoned Attacks special rule.`,
     "Moonfire Shot": `Shooting attacks made with Moonfire Shot have the Flaming Attacks and Magical Attacks special rules.`,
-    "Starfire Shafts": `Shooting attacks made with Starfire Shafts force enemies to re-roll successful Panic tests caused by Heavy Casualties.`,
+    "Starfire Shafts": `Shooting attacks made with Starfire Shafts have the Magical Attacks special rule and force enemies to re-roll successful Panic tests caused by Heavy Casualties.`,
     "Swiftshiver Shards": `Shooting attacks made with Swiftshiver Shards allow the model to fire Multiple Shots even when moving (longbows) or marching (shortbows) that turn.`,
     "Trueflight Arrows": `Shooting attacks made with Trueflight Arrows ignore all shooting modifiers that are not caused by magic items or spells.`,
 
@@ -291,13 +291,13 @@
     "Song of Athel Loren": `Friendly models within 12" of one or more Warsong Revenants gain +1 to their Leadership. Enemy models within 12" of one or more Warsong Revenants suffer -1 to their Leadership.`,
     "Regenesis": `All friendly units of Forest Spirits within 6" of a Grove Guardian gain the Regeneration (6+) special rule.`,
     "Soulshriek": `Each time a model with the Forest Spirit special rule is removed as a casualty in close combat within 12" of a Grove Guardian, roll a D6. On a 5+, the enemy model that struck the blow suffers one Wound which Ignores Armour Saves.`,
-    "Strangleroots": `A shooting attack. Treelord Ancient/Treeman: Range 6/12", Strength 5, Multiple Shots (D6+1), Quick to Fire, Rapid Fire. Treelord: Range 12", Strength 5, Multiple Shots (D6+1), Quick to Fire, Rapid Fire.`,
-    "Traps": `A Waywatcher unit within a forest automatically sets traps. Any enemy charging the unit through the forest activates the traps; roll a D6 for the type/effect (Spikes, Snares, Nets, Camouflaged Pit or Impaler).`,
+    "Strangleroots": `A shooting attack. Treelord Ancient: Range 6/12", Strength 5, Multiple Shots (D6+1), Quick Shot, Rapid Fire. Treelord: Range 12", Strength 5, Multiple Shots (D6+1), Quick Shot, Rapid Fire.`,
+    "Traps": `A Waywatcher unit that is within a forest is automatically assumed to set traps around its positions. Any enemy charging the unit through the forest will activate the traps as soon as the enemy unit touches the forest. If the chargers are already inside the forest when the charge is declared the traps are activated as soon as the charge is declared. Roll a D6 to determine the type and effect of the trap: 1-2 Spikes: The enemy unit suffers D6 Strength 3 hits. 3 Snares: The enemy unit deducts D3" from the charge distance. 4 Nets: D3 models in the enemy unit suffer -1 Attacks. 5 Camouflaged Pit: The enemy unit counts as moving through Dangerous Terrain. If the unit would already treat the forest as Dangerous Terrain, they instead fail the test on a 1-2. 6 Impaler: Treat the unit as being hit by a bolt thrower in the front rank. The file it hits is determined by the Wood Elf player.`,
     "Swiftsense": `The model gains the Always Strikes First special rule in any turn that they charge.`,
     "Shredding Talons": `The model gains the Armour Piercing (1) special rule.`,
-    "Impale": `Unicorns gain +1 Strength to their Impact Hits.`,
-    "Elven shortbow": `16/24", Strength 3, Armour Piercing (1), Multiple Shots (2)*, Volley Fire. *Only in turns the model has not moved.`,
-    "Elven longbow": `24/36", Strength 3, Armour Piercing (1), Multiple Shots (2)*, Volley Fire. *Only in turns the model has not moved.`,
+    "Impale": `A Unicorn gains the Mighty Blow (1) special rule in any turn that it charges.`,
+    "Elven shortbow": `16/24", Strength 3, Armour Piercing (1), March & Shoot, Multiple Shots (2)*, Volley Fire. *Only applies in turns the model has not marched. Cannot be used as a charge reaction.`,
+    "Elven longbow": `24/36", Strength 3, Armour Piercing (1), Multiple Shots (2)*, Volley Fire. *Only applies in turns the model has not moved. Cannot be used as a charge reaction.`,
 
     /* ---- Special-character rules ---- */
     "The Wild Hunt": `Orion must be the Army General. In addition, Wild Riders count as Core Units instead of Special Units. An army led by Orion must include at least one unit of Wild Riders.`,
@@ -305,7 +305,7 @@
     "Aura of the Fey Queen": `All friendly units within 6" of Ariel have the Immunity (Panic) special rule.`,
     "Earthbind": `Any units declaring a charge on Ariel count as moving through Dangerous Terrain for the turn. If Ariel flees combat, pursuers roll an extra D6 and discard the highest.`,
     "Screech": `Ariel may use Screech when it would be her time to attack in close combat: it automatically Hits all enemy models in base contact at Strength 4 with the Ignores Armour special rule.`,
-    "Conjoined Destiny": `If Naestra and Arahan have been reduced to less than 4 Wounds at the end of any turn, they are restored to 4 Wounds.`,
+    "Conjoined Destiny": `Naestra and Arahan count as a single model for all purposes. If they have been reduced to less than 4 Wounds at the end of any turn, they are restored to 4 Wounds.`,
     "Impetuous": `If Ceithin-Har can declare a Charge during the Charge sub-phase, he must do so unless he passes a Leadership test.`,
     "Hunter's Mount": `When mounted on Gwindalor, Naestra and Arahan re-roll all failed To Hit rolls when making shooting attacks.`,
     "Sisters of Twilight": `Naestra's close combat attacks receive +1 To Wound against models from the Forces of Destruction. Arahan's receive +1 To Wound against models from the Forces of Order.`,
@@ -313,10 +313,10 @@
     "Guardians of Talsyn": `If Araloth is included, you may upgrade one unit of Eternal Guard to the Guardians of Talsyn for +1 point per model. This unit has +1 Attack.`,
     "Skaryn the Eye Thief": `Range 24", Strength 3, Sniper. Rather than rolling to Hit with Ballistic Skill, the target must pass a Weapon Skill test to avoid being Hit. If the Wound is unsaved and the To Wound roll was a 6, the model suffers -5 to Weapon Skill, Ballistic Skill and Initiative (min 1) for the rest of the game (once only).`,
     "Othu the Owl": `Othu may settle on any Wood Elf unit with a Standard Bearer at the start of the shooting phase; that unit may re-roll To Hit rolls of 1 with missile attacks this turn. Never settles on the same unit twice in succession. Othu cannot be harmed, but flies away if Naieth is removed.`,
-    "Choose Opponent": `In close combat, Wychwethyl can choose to attack any enemy model in the enemy unit, not just those in base contact with him.`,
+    "Choose Opponent": `In close combat, Wychwethyl can choose to attack any enemy model in the enemy unit (excluding Challenges), not just the models in base contact with him.`,
     "Dance of Doom": `Wychwethyl can use the Dance of Doom instead of his normal Shadow Dances. If he does, he gains +1 Attack for every enemy model in base contact with him.`,
-    "Falcons": `Range 24", Strength 3, Multiple Shots (3), Rapid Fire; the target must pass a Weapon Skill test to avoid being Hit. In close combat the falcons give Skaw 3 extra Attacks at Weapon Skill 4, Strength 3, Initiative 4 (no other rules/items apply).`,
-    "Beastmaster": `Fang and Claw are War Beasts (Canine) and Gruarth is their Handler; they may separate and reform as a Mixed Unit. More than 12" from Gruarth they are subject to Frenzy. If both are slain, Gruarth becomes subject to Hatred.`,
+    "Falcons": `Range 24", Strength 3, Multiple Shots (3); rather than rolling to Hit using Ballistic Skill, the target must pass a Weapon Skill test to avoid being Hit. In close combat the falcons give Skaw an additional 3 Attacks resolved at Weapon Skill 4, Strength 3 and Initiative 4; these do not benefit from any special rules or items Skaw might have.`,
+    "Beastmaster": `Fang and Claw are War Beasts (Canine) and Gruarth is their Handler. If Gruarth is slain, Fang and Claw become subject to Frenzy. If both Fang and Claw are slain, Gruarth becomes subject to Hatred.`,
     "Mixed Unit": `A unit made of models with differing profiles; allocate hits and Wounds according to the Mixed Unit rules.`,
     "Unburden of Thieflings": `A close combat attack used in addition to Durthu's other attacks: Combat range, Strength 2, Magical Attacks, Poisoned Attacks, Random Attacks (D6). Enemy units that suffer Wounds also suffer -1 To Hit and To Wound and -1 to armour saves until the start of your next turn.`,
     "Writhing Vines": `At the start of each round of close combat, the Lady of Vines chooses one: Protective Barrier (enemies targeting her or her unit suffer -1 To Hit this round) or Ensnare Foes (she and her unit gain +1 To Hit this round).`,
@@ -389,7 +389,7 @@
     naieth:{profile:[["Naieth",5,4,4,3,3,2,5,1,8]],eq:"Hand weapon; The Rod of Divination",rules:"Blessings of the Ancients, Elven Grace, Forest Strider, Othu the Owl. Level 2 Wizard — Heavens."},
     wychwethyl:{profile:[["Wychwethyl",5,8,6,4,3,2,8,4,8]],eq:"Hand weapon; The Drum of Orcskin",rules:"Elven Grace, Forest Strider, Magical Ward (6+), Magic Resistance (1), Shadow Dances of Loec, Choose Opponent, Dance of Doom."},
     skaw:{profile:[["Skaw",5,5,5,4,3,2,6,2,8]],eq:"Hand weapon; The Lash of Claws, The Cape of Feathers",rules:"Elven Grace, Forest Strider, Falcons."},
-    gruarth:{profile:[["Gruarth",8,5,5,4,3,2,6,2,8],["Fang",9,4,0,4,4,2,4,2,5],["Claw",9,4,0,4,4,2,4,2,5]],eq:"Hand weapon; The Binding Bolas",rules:"Animal Form, Elven Grace, Fear, Forest Strider, Mixed Unit, Natural Armour (6+), Skirmishers, Beastmaster."},
+    gruarth:{profile:[["Gruarth",8,5,5,4,3,2,6,2,8],["Fang",9,4,0,4,4,2,4,2,5],["Claw",9,4,0,4,4,2,4,2,5]],eq:"Hand weapon; The Binding Bolas",rules:"Animal Form (Gruarth only), Elven Grace (Gruarth only), Forest Strider, Mixed Unit, Natural Armour (6+), Skirmishers, Beastmaster."},
     durthu:{profile:[["Durthu",5,6,6,6,6,6,2,5,10]],eq:"Sword of Daith",rules:"Blessings of the Ancients, Flammable, Forest Spirit, Frenzy, Hatred, Natural Armour (3+), Strangleroots, Stubborn, Tree Whack, Unburden of Thieflings. Level 1 Wizard — Beasts. Monster."},
     belthanos:{profile:[["Belthanos",5,7,6,5,5,4,7,5,9],["Carnelian Greatspite",6,3,0,5,5,5,3,4,7]],eq:"Polearm; Mantle of Leaves, War-horn of Kurnous",rules:"Flammable, Fly (7), Forest Spirit, Natural Armour (3+). Monster."},
     ladyofvines:{profile:[["The Lady of Vines",5,7,6,5,5,5,7,5,9]],eq:"Kurnotheal's Wrath; Verdian Crown",rules:"Blessings of the Ancients, Flammable, Forest Spirit, Natural Armour (5+), Writhing Vines. Level 2 Wizard — Athel Loren. Monstrous Creature."},
@@ -398,26 +398,26 @@
 
   itemDesc: {
     // -- Magic Weapons --
-    "The Spirit Sword":`Armour saves cannot be taken against Wounds caused by the Spirit Sword. When an enemy single-model unit (not an Animated Construct) or Character suffers one or more unsaved Wounds, both they and the wielder roll 2D6 and add their Leadership. If the wounded model's total is lower, it suffers a Wound which Ignores Armour Saves for each point by which its total was exceeded.`,
+    "The Spirit Sword":`Armour saves cannot be taken against Wounds caused by the Spirit Sword. When an enemy single model unit or Character suffers one or more unsaved Wounds from the Spirit Sword, both they and the wielder roll 2D6 and add their Leadership. If the wounded model's total is higher or the same, nothing else happens. If it is lower, it suffers a Wound which Ignores Armour Saves for each point by which its total was exceeded.`,
     "Daith's Reaper":`All failed To Hit and To Wound rolls with Daith's Reaper must be re-rolled, as must all successful armour saves taken against Wounds caused by this weapon.`,
     "Dawnspear":`Light lance/spear. If the wielder causes an unsaved wound on an enemy, all enemy models in that unit that have not yet attacked suffer -1 To Hit this round of close combat.`,
     "Callach's Claw":`Any unit suffering one or more unsaved wounds from Callach's Claw suffers a -2 penalty to its Leadership for the remainder of the Combat phase.`,
     "The Hunter's Talon":`Elven longbow. The Hunter's Talon gives the wielder the Sniper special rule.`,
-    "Spear of Daith":`Light lance/spear. Gives the wielder the Parry (5+) special rule, even while mounted.`,
+    "Spear of Daith":`Light lance/spear. Gives the wielder the Parry (5+) special rule.`,
     "The Bow of Loren":`Elven longbow. All shots resolve at Strength 4 with Multiple Shots (A) — a number of shots equal to the wielder's Attacks. Cannot fire enchanted arrows.`,
     "Blades of Loec":`Shadowdancer only. Two hand weapons. Allow the wielder to re-roll failed rolls To Wound.`,
     "Greenwood Gladius":`The wielder gains +D3 Attacks, rolled at the start of each round of close combat.`,
     "Hunt Master's Pride":`Wild Hunter only. Light lance. All attacks with this weapon have the Multiple Wounds (D3) special rule.`,
     "Spear of Twilight":`Light lance/spear. Gives the wielder the Killing Blow special rule.`,
     "Sword of a Thousand Winters":`Gives the bearer the Ice Attacks special rule. Characters and Monsters must take a Toughness test for each unsaved wound; for every test failed they suffer -1 Strength, Initiative and Attacks for the rest of the game.`,
-    "Vaul's Wrath":`Elven longbow: Range 36", Strength 4, Armour Piercing (1), Multiple Shots (2), Multiple Wounds (2), Volley Fire.`,
+    "Vaul's Wrath":`Elven longbow: Range 24/36", Strength 4, Armour Piercing (1), Multiple Shots (2), Multiple Wounds (2), Volley Fire.`,
     "Spear of the Hunt":`Wild Hunter only. Light lance. Gives the wielder Armour Piercing (1). In addition, they and any unit they are with may re-roll 1's for their charge distance.`,
     "Splinterbirch Blade":`Whenever an enemy model makes a successful save against Wounds caused by this blade, they suffer an additional D6 Strength 1 Hits.`,
     "Starcaster Longbow":`Elven longbow. All shots have Multiple Wounds (D3). On a To Wound roll of a natural 6, that shot has Multiple Wounds (D6) instead.`,
     "Asyendi's Bane":`Elven longbow. Allows the wielder to re-roll all failed rolls To Hit; however, if the shot still misses after the re-roll, they suffer a Strength 3 hit.`,
     "Rageth's Wildfire Blades":`Two hand weapons. Give the wielder the Flaming Attacks special rule.`,
     // -- Magic Armour --
-    "Armour of the Fey":`Light armour. Gives the Ward Save (4+) special rule against Magical Attacks.`,
+    "Armour of the Fey":`Light armour. Gives the bearer the Magical Ward (4+) special rule against Magical Attacks.`,
     "The Oaken Armour":`Light armour. Gives the wearer the Regeneration (4+) special rule.`,
     "Cloak of Tumbling Leaves":`Model on foot only. Light armour. The bearer gains the Fly (10) special rule.`,
     "Briarsheath":`Model on foot only. Light armour. Missile attacks targeted at the wearer suffer -1 To Hit, or -2 To Hit if the wearer is in a forest.`,
@@ -425,10 +425,10 @@
     "Railarian's Mantle":`Light armour. Gives the wearer a Magical Ward (5+) if they are within 6" of a forest.`,
     "Amber Armour":`Light armour. The bearer's armour save can never be reduced below a 6+.`,
     // -- Talismans --
-    "Rhymer's Harp":`Gives the bearer and any unit they join the Ward Save (5+) and Strider special rules.`,
-    "Glamourweave Brooch":`Gives the bearer the Ward Save (4+) against missile attacks. In addition, any model attempting to strike the bearer in close combat must first pass a Leadership test or require 6's To Hit this Combat phase.`,
-    "Amaranthine Brooch":`Gives the wearer the Ward Save (4+) special rule against non-Magical Attacks.`,
-    "Stone of the Crystal Mere":`Gives the bearer the Ward Save (3+). However, if the Ward Save is ever failed, the stone shatters and the save is lost for the rest of the game.`,
+    "Rhymer's Harp":`Gives the bearer and any unit they join the Magical Ward (5+) and Strider special rules.`,
+    "Glamourweave Brooch":`Gives the bearer the Magical Ward (4+) special rule against missile attacks. In addition, any model attempting to strike the bearer in close combat must first pass a Leadership test or require 6's To Hit the bearer during that Combat phase.`,
+    "Amaranthine Brooch":`Gives the wearer the Magical Ward (4+) special rule against non-Magical Attacks.`,
+    "Stone of the Crystal Mere":`Gives the bearer the Magical Ward (3+) special rule. However, if this Ward Save is ever failed, the Magical Ward is lost for the rest of the game.`,
     "Amber Pendant":`Causes all enemy units in base contact with the wearer to be subject to the Always Strikes Last special rule.`,
     "Fimbulwinter Shard":`Enemies attacking the bearer in close combat suffer -1 To Hit. However, all models with the Forest Spirit special rule (including the bearer) suffer Stupidity while the bearer is within 6".`,
     "Talisman of Qwarr":`Models targeting the bearer with missile attacks must re-roll successful rolls To Hit.`,
@@ -442,8 +442,8 @@
     "Oaken Stave":`Staff. The bearer may roll an extra D6 when dispelling and discard the lowest result.`,
     "Viridescent Shawl":`Relic. Gives the bearer a +1 casting bonus. In addition, all enemy missile attacks targeting the bearer suffer -1 To Hit.`,
     "Divination Orb":`Relic. If an opponent uses more than three power dice (from any source) when casting any spell, the bearer may add an extra free Dispel dice into the attempt to dispel that spell.`,
-    "Deepwood Sphere":`Relic. Any enemy unit that enters a forest within 18" of the bearer suffers D6 Strength 4 Hits when it finishes its move, and again at the start of any Movement phase for as long as it remains in the forest.`,
-    "Silverwood Circlet":`Relic. The bearer adds +6" to the range of all their spells.`,
+    "Deepwood Sphere":`Relic. Any enemy unit that enters a forest within 18" of the bearer suffers D6 Strength 4 Hits as soon as it has finished its move. It continues to suffer D6 Strength 4 Hits at the start of any of its Movement phases for as long as it remains in the forest and the bearer remains within range.`,
+    "Silverwood Circlet":`Relic. The bearer adds +12" to the range of all their spells (excluding auras).`,
     "Elf Charm":`Relic. When casting spells from the Lore of Life, the wizard may add a +D3 casting bonus once per Magic phase.`,
     "Calaingor's Stave":`Staff. When casting the Tree Singing spell, the bearer may re-roll the distance the forest moves.`,
     "Heartwood Pendant":`Relic. The bearer may choose their spells from the Lore of Athel Loren in addition to one other spell lore.`,
@@ -451,10 +451,10 @@
     "Wending Wand":`Staff. Any friendly unit that pursued off the table can enter from any point of any table edge in their next turn, as long as it is within 24" of the bearer.`,
     "Sigil of the Mage Queen":`Charm. One use only. May be used after making a casting roll; when used, it adds a +3 casting bonus.`,
     // -- Enchanted Items --
-    "Crown of Fell Bowers":`The wearer and any unit they are with gain +1 To Wound against all enemies in close combat.`,
+    "Crown of Fell Bowers":`The wearer and any unit they are with gain +1 To Wound in close combat.`,
     "Wardroth Horn":`One use only. At the start of any close combat phase, all friendly units (excluding mounts) within 12" gain +1 Attack for the duration of this turn.`,
     "Moonstone of the Hidden Ways":`If the bearer's unit is wholly within a forest at the end of your Movement phase and not in close combat, it can forestwalk — remove it and replace it wholly within any forest on the battlefield (counts as having marched).`,
-    "Hail of Doom Arrow":`One use only. Model with Elven longbow only. Used instead of a Shooting attack (not with Sniper): Range 30", Strength 4, Multiple Shots (3D6).`,
+    "Hail of Doom Arrow":`One use only. Model with Elven longbow only. Used instead of a Shooting attack with the bearer's Elven longbow (not with Sniper); declare before any dice are rolled: Range 24/36", Strength 4, Multiple Shots (3D6).`,
     "Forget-Me-Knot":`One use only. Used against one enemy model in base contact at the start of any round of close combat; for that round the target may not Attack or Stomp.`,
     "Horn of the Asrai":`One use only. At the beginning of any enemy Movement phase, all enemies able to declare a charge against the bearer must take a Psychology test; if they fail, they must declare a charge against the bearer this turn.`,
     "Waystalker's Cloak":`Gives the wearer the Forest Stalker and Scouts special rules.`,
@@ -462,13 +462,13 @@
     "Elynett's Brooch":`Allows the wearer and any unit they are with to re-roll failed Psychology tests.`,
     "Wailing Arrows":`Enchanted Arrows. Any unit that suffers an unsaved wound from these arrows must make a Panic test.`,
     "Arrows of Potency":`Enchanted Arrows. Any shots made with the Arrows of Potency have the Multiple Wounds (2) special rule.`,
-    "Blight-Tipped Arrows":`Enchanted Arrows. Any Character, Monstrous Creature or Monster Wounded by these arrows must pass a Toughness test at the start of each turn for the rest of the game or suffer an additional Wound which Ignores Armour Saves.`,
+    "Blight-Tipped Arrows":`Enchanted Arrows. Any Character, Monstrous Creature or Monster that suffers an unsaved Wound from these arrows must pass a Toughness test at the start of each turn for the rest of the game or suffer an additional Wound which Ignores Armour Saves.`,
     "Crown of Antlers":`The bearer gains the Impact Hits (D3) special rule; the Impact Hits are Armour Piercing (1).`,
     "Orion's Favour":`One use only. The bearer can re-roll any failed rolls To Hit and/or To Wound made during either the Shooting or Close Combat phase.`,
     "Gwytherc's Horn":`All friendly units within 12" of the bearer gain +1 to their Leadership when attempting to Rally.`,
-    "Dragontooth Arrows":`Enchanted Arrows. Any Character, Monstrous Creature or Monster Wounded by these arrows gains the Stupidity special rule for the rest of the game.`,
+    "Dragontooth Arrows":`Enchanted Arrows. Any Character, Monstrous Creature or Monster that suffers an unsaved Wound from these arrows gains the Stupidity special rule for the rest of the game.`,
     // -- Magic Standards --
-    "Battle Standard of Athel Loren":`Any enemy spell cast at a friendly unit within 12" of this standard is automatically dispelled on the roll of a 5+.`,
+    "Battle Standard of Athel Loren":`Whenever an enemy spell is cast at a friendly unit within 12" of this standard, roll a D6; on a 5+, the spell is automatically dispelled.`,
     "Banner of the Wildwood":`All enemy units with Line of Sight to this banner suffer -1 to their Leadership.`,
     "Banner of the Eternal Queen":`The unit carrying this standard has Magic Resistance (3). In addition, it gains +1 combat resolution if it is within 6" of a forest.`,
     "Banner of the Hunter King":`Wild Riders only. The unit adds +D6" to their charge range.`,
@@ -478,16 +478,16 @@
     "Standard of Morning's Chill":`All missile attacks targeting the unit carrying this standard suffer -1 To Hit.`,
     "Tapestry of Talsyn":`The unit carrying this standard gains the Hold Your Ground (6) special rule.`,
     "Banner of the Wild Hunt":`Wild Riders only. The unit gains +1 Combat Resolution and may re-roll failed pursuit rolls.`,
-    "Aech, the Banner of Springtide":`The unit gains Quick to Fire and may fire Multiple Shots with their bows when choosing Stand & Shoot as a charge reaction.`,
-    "Banner of Midsummer's Eve":`The unit does not suffer To Hit penalties for shooting at enemies in cover.`,
+    "Aech, the Banner of Springtide":`The unit gains the Quick Shot special rule and may fire Multiple Shots with their bows when choosing Stand & Shoot as a charge reaction.`,
+    "Banner of Midsummer's Eve":`The unit ignores To Hit penalties for shooting at enemies in cover.`,
     // -- Forest Spites --
     "A Blight of Terrors":`A character with a Blight of Terrors gains the Terror special rule.`,
     "A Cluster of Radiants":`Forest Spirit only. A character with a Cluster of Radiants adds one extra dice to their Dispel pool in their opponent's Magic phase.`,
     "An Annoyance of Netlings":`Any enemy attempting to strike a character with an Annoyance of Netlings in close combat suffers -1 To Hit.`,
-    "A Muster of Malevolents":`A shooting attack used in addition to the model's other shooting attacks (not with Sniper): Range 6/12", Strength 2, Magical Attacks, Multiple Shots (D6), Poisoned Attacks, Quick to Fire, Rapid Fire.`,
-    "Hagbane Spite":`One use only. Used after an enemy Wizard successfully casts a spell instead of dispelling it: the enemy Wizard automatically suffers D3 Hits that Wound on a 4+ with the Ignores Armour Saves special rule.`,
-    "A Pageant of Shrikes":`A shooting attack used in addition to the model's other shooting attacks: Range 12/18", Strength 4, Magical Attacks, Slow to Fire, Sniper.`,
-    "A Befuddlement of Mischiefs":`Bound Spell (Level 2, cast on 7+). A hex spell, range 18": the target must take a Stupidity test using an additional D6 (discarding the lowest) in their next Movement phase.`,
+    "A Muster of Malevolents":`A shooting attack used in addition to the model's other shooting attacks (not with Sniper): Range 6/12", Strength 2, Magical Attacks, Multiple Shots (D6), Poisoned Attacks, Quick Shot, Rapid Fire.`,
+    "Hagbane Spite":`One use only. Used after an enemy Wizard successfully casts a spell within 24", instead of dispelling it: the enemy Wizard automatically suffers D3 Hits that Wound on a 4+ with the Ignores Armour Saves special rule.`,
+    "A Pageant of Shrikes":`A shooting attack used in addition to the model's other shooting attacks: Range 12/18", Strength 4, Cumbersome, Magical Attacks, Sniper.`,
+    "A Befuddlement of Mischiefs":`Bound Spell (Level 2, cast on 7+). A hex spell with a range of 18": the target becomes subject to Stupidity until the start of your next Magic phase.`,
     "A Lamentation of Despairs":`Bound Spell (Level 2, cast on 7+). A direct damage spell, range 12", targeting enemy Characters or Monsters even within a unit: the target must pass a Leadership test or suffer D3 Wounds which Ignores Armour Saves.`,
     "A Resplendence of Luminescents":`Gives the character and any unit they join Magical Attacks.`,
     "A Murder of Spites":`A close combat attack used in addition to the model's other attacks: Combat, Strength 2, Magical Attacks, Poisoned Attacks, Random Attacks (D6).`
@@ -495,7 +495,7 @@
 
   // Lore of Athel Loren — the Wood Elves' own lore. Standard lores come from COMMON_LORES.
   spellLores: {
-    "Athel Loren": { attribute: { name:"Glamourweaving", text:`Whenever a spell from the Lore of Athel Loren is successfully cast, all enemy units suffer a -3" penalty to their spell and weapon ranges in their next turn when targeting friendly units within 6" of the Wizard. This is a cumulative effect.` }, spells: [
+    "Athel Loren": { attribute: { name:"Glamourweaving", text:`Whenever a spell from the Lore of Athel Loren is successfully cast, all enemy units suffer a -3" penalty to their spell and maximum weapon ranges in their next turn when targeting any friendly units within 6" of the Wizard. This is a cumulative effect.` }, spells: [
       { name:"Tree Singing", lvl:0, cast:6, type:"Special", range:`24"`, effect:`Targets a single forest within 24" of the caster. The target immediately moves up to D6+1" in a direction of your choice. A forest cannot move to within 1" of other terrain features.` },
       { name:"Fury of the Forest", lvl:1, cast:5, type:"Direct damage", range:`18"`, effect:`If the target is within 6" of a forest it suffers 2D6 Strength 4 hits. If partially or wholly within a forest it suffers 3D6 Strength 4 hits.` },
       { name:"Durthu's Wrath", lvl:1, cast:6, type:"Direct damage (combat)", range:`Combat`, effect:`All models in the front rank of any unit in base contact with the caster must pass an Initiative test or suffer a Strength 4 hit with the Ignores Armour Saves and Multiple Wounds (D3) special rules.` },
@@ -563,7 +563,7 @@
         options: [
           { id: "wiz", type: "toggle", label: "Upgrade to a Level 1 Wizard", cost: 35, per: "flat" },
           { id: "wep", type: "choice", label: "Combat weapon", choices: [
-            { label: "Additional hand weapon", cost: 5 }, { label: "Spear", cost: 5 }, { label: "Great weapon", cost: 15 } ] }
+            { label: "Additional hand weapon", cost: 5 }, { label: "Saearath", cost: 5 }, { label: "Great weapon", cost: 15 } ] }
         ]
       },
       {
@@ -583,7 +583,7 @@
         access: ["additional hand weapon"],
         variants: [ { name: "Waystalker", points: 90, magicBudget: 50 } ],
         options: [
-          { id: "ahw", type: "toggle", label: "Additional hand weapon", cost: 2, per: "flat" },
+          { id: "ahw", type: "toggle", label: "Additional hand weapon", cost: 3, per: "flat" },
           { id: "bow", type: "toggle", label: "Replace Elven shortbow with Elven longbow", cost: 2, per: "flat" },
           { id: "arrows", type: "choice", label: "Enchanted Arrows", choices: [
             { label: "Arcane Bodkins", cost: 1 }, { label: "Moonfire Shot", cost: 1 }, { label: "Hagbane Tips", cost: 2 },
@@ -617,8 +617,10 @@
       {
         id: "groveguardian", name: "Grove Guardian", isCharacter: true, keyword: "forest-spirit",
         access: ["great weapon"],
-        variants: [ { name: "Grove Guardian", points: 170, magicBudget: 0 } ],
-        options: []
+        magicCatsOnly: ["Forest Spites"],
+        variants: [ { name: "Grove Guardian", points: 170, magicBudget: 100 } ],
+        options: [],
+        notes: "May take Spites (no other Magic Items)."
       },
       {
         id: "branchwraith", name: "Branchwraith", isCharacter: true, keyword: "forest-spirit",
@@ -673,9 +675,9 @@
         variants: [ { name: "Gruarth", points: 75, magicBudget: 0 } ], options: [] },
       { id: "durthu", name: "Durthu Oakheart", isCharacter: true, isSpecialChar: true, keyword: "forest-spirit",
       access: [],
-        lores: ["Beasts"], magicCatsOnly: ["Forest Spites"],
+        lores: ["Beasts"],
         variants: [ { name: "Durthu", points: 320, wizardLevel: 1, magicBudget: 50 } ], options: [],
-        notes: "May take Spites (no other Magic Items)." },
+        notes: "May take one Spite and/or Magic Items up to 50 points." },
       { id: "belthanos", name: "Belthanos", isCharacter: true, isSpecialChar: true, keyword: "forest-spirit",
       access: ["halberd"],
         variants: [ { name: "Belthanos", points: 400, magicBudget: 0 } ], options: [] },
@@ -702,17 +704,17 @@
           { id: "cmd", type: "command", magicStandard: 25 } ] },
       { id: "deepwoodscouts", name: "Deepwood Scouts", perModel: true, basePoints: 12, unitSize: [5,15],
         options: [
-          { id: "bow", type: "toggle", label: "Replace Elven shortbows with Elven longbows", cost: 2, per: "model" },
+          { id: "bow", type: "toggle", label: "Replace Elven shortbows with Elven longbows", cost: 1, per: "model" },
           { id: "arrows", type: "choice", label: "Enchanted Arrows", choices: [
             { label: "Arcane Bodkins", cost: 1, per: "model" }, { label: "Moonfire Shot", cost: 1, per: "model" }, { label: "Starfire Shafts", cost: 1, per: "model" },
             { label: "Hagbane Tips", cost: 2, per: "model" }, { label: "Swiftshiver Shards", cost: 2, per: "model" }, { label: "Trueflight Arrows", cost: 2, per: "model" } ] },
           { id: "cmd", type: "command", magicStandard: 25 } ],
         notes: "You may not have more units of Deepwood Scouts than units of Glade Archers." },
-      { id: "gladeriders", name: "Glade Riders", perModel: true, basePoints: 13, unitSize: [5,null],
+      { id: "gladeriders", name: "Glade Riders", perModel: true, basePoints: 13, unitSize: [5,15],
         options: [
           { id: "lance", type: "toggle", label: "Light lances", cost: 1, per: "model" },
           { id: "bow", type: "choice", label: "Bows", choices: [
-            { label: "Elven shortbows", cost: 2, per: "model" }, { label: "Elven longbows", cost: 2, per: "model" } ] },
+            { label: "Elven shortbows", cost: 3, per: "model" }, { label: "Elven longbows", cost: 3, per: "model" } ] },
           { id: "armour", type: "toggle", label: "Light armour", cost: 1.5, per: "model" },
           { id: "shield", type: "toggle", label: "Shields (if armed with light lances)", cost: 1, per: "model" },
           { id: "arrows", type: "choice", label: "Enchanted Arrows", choices: [
@@ -750,7 +752,7 @@
           { id: "cmd", type: "command", magicStandard: 50 } ] },
       { id: "warhawkriders", name: "Warhawk Riders", perModel: true, basePoints: 24, unitSize: [3,9],
         options: [
-          { id: "bow", type: "toggle", label: "Replace Elven shortbows with Elven longbows", cost: 1, per: "model" },
+          { id: "bow", type: "toggle", label: "Replace Elven shortbows with Elven longbows", cost: 0, per: "model" },
           { id: "shield", type: "toggle", label: "Shields", cost: 2, per: "model" },
           { id: "arrows", type: "choice", label: "Enchanted Arrows", choices: [
             { label: "Arcane Bodkins", cost: 1, per: "model" }, { label: "Moonfire Shot", cost: 1, per: "model" }, { label: "Starfire Shafts", cost: 1, per: "model" },
@@ -758,7 +760,7 @@
           { id: "leader", type: "toggle", label: "Leader", cost: 5, per: "flat" } ] },
       { id: "meadowchariot", name: "Meadow Chariot", perModel: false, basePoints: 70, unitSize: [1,1],
         options: [
-          { id: "bow", type: "toggle", label: "Replace Elven shortbows with Elven longbows", cost: 2, per: "flat" },
+          { id: "bow", type: "toggle", label: "Replace Elven shortbows with Elven longbows", cost: 0, per: "flat" },
           { id: "steeds", type: "toggle", label: "Two additional Elven Steeds", cost: 5, per: "flat" },
           { id: "crew", type: "toggle", label: "Two additional Charioteers", cost: 10, per: "flat" } ] },
       { id: "treerevenants", name: "Tree Revenants", perModel: true, basePoints: 15, unitSize: [5,15], keyword: "forest-spirit",
@@ -777,7 +779,7 @@
     rare: [
       { id: "waywatchers", name: "Waywatchers", perModel: true, basePoints: 19, unitSize: [5,15],
         options: [
-          { id: "bow", type: "toggle", label: "Replace Elven shortbows with Elven longbows", cost: 2, per: "model" },
+          { id: "bow", type: "toggle", label: "Replace Elven shortbows with Elven longbows", cost: 1, per: "model" },
           { id: "ahw", type: "toggle", label: "Additional hand weapons", cost: 1, per: "model" },
           { id: "traps", type: "toggle", label: "Traps", cost: 15, per: "flat" },
           { id: "arrows", type: "choice", label: "Enchanted Arrows", choices: [
