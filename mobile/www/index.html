@@ -2082,6 +2082,14 @@ function renderValidation(){
   itemNames.forEach(nm=>{ seen[nm]=(seen[nm]||0)+1; });
   for(const nm in seen){ if(seen[nm]>1 && !itemCommon(nm)) errs.push(`Magic item "${nm}" taken ${seen[nm]}× — unique items may be taken only once.`); }
 
+  // an item flagged `exclusive:true` (e.g. Talisman of Obsidian) forbids any other magic item on the model
+  state.forEach(e=>{
+    const held=[...Object.values(e.magic||{}),...(e.gifts||[]),e.magicStd].filter(Boolean);
+    const ex=held.find(nm=>{ const it=findItem(nm); return it && it.exclusive; });
+    if(ex && held.length>1){ const u=findUnit(e.cat,e.id); const who=u.isCharacter?u.variants[e.variant].name:u.name;
+      errs.push(`${who}: ${ex} — the bearer may take no other magic items.`); }
+  });
+
   // ---- Runic Items: Rules of the Runes ----
   if(hasRunes()){
     const masterUse={}, combos={};

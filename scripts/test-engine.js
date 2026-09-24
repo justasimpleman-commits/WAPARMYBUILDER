@@ -731,5 +731,27 @@ __setState([]); __setGen(null); __switch("dwarfs",false);
   ok(errs.some(m=>/engineering runes cost .* over/i.test(m)), "Dwarfs: engineering runes over budget → error");
 }
 
+/* ====== Chaos Dwarfs v3.1: exclusive item, Overseer ratios, updated costs ====== */
+console.log("Chaos Dwarfs v3.1: Talisman of Obsidian exclusive, Overseers per N, costs…");
+__setState([]); __setGen(null); __switch("chaos-dwarfs",false);
+{
+  __addUnit("characters","despots"); const d=__getState()[0]; __setGen(d.uid);
+  d.magic={"Talismans":"Talisman of Obsidian"};
+  let errs=validationErrors();
+  ok(!errs.some(m=>/may take no other magic items/.test(m)), "CD: Talisman of Obsidian alone is legal");
+  d.magic["Magic Weapons"]="Obsidian Blade";
+  errs=validationErrors();
+  ok(errs.some(m=>/Talisman of Obsidian — the bearer may take no other magic items/.test(m)), "CD: Talisman of Obsidian + another item → error");
+  __setState([]); __setGen(null);
+  __addUnit("core","orcslaves"); const o=__getState()[0]; o.count=40;
+  ok(__entryPoints(o)===40*6+2*15, "CD: 40 Orc Slaves = 240 + 2 Overseers ×15");
+  __addUnit("special","ogreslaves"); const og=__getState()[1]; og.count=6;
+  ok(__entryPoints(og)===6*24+2*15, "CD: 6 Ogre Slaves = 144 + 2 Overseers ×15");
+  const U=(c,id)=>__findUnit(c,id);
+  ok(U("special","zealots").unitSize[1]===30, "CD: Zealots unit size 10-30");
+  ok(U("characters","astragoth").variants[0].points===300, "CD: Astragoth 300 pts");
+  ok(U("characters","daemonsmith").options.find(x=>x.id==="wiz").cost===35, "CD: Daemonsmith Wizard upgrade +35");
+}
+
 console.log(`\n${fails? "FAIL":"PASS"}: ${checks-fails}/${checks} checks passed.`);
 process.exit(fails?1:0);
