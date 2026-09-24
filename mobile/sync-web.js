@@ -1,54 +1,25 @@
 #!/usr/bin/env node
 /*
- * sync-web.js — copy the desktop app's web assets into mobile/www/.
+ * sync-web.js — copy the web app into mobile/www/ for the Capacitor build.
  *
- * The mobile build reuses the EXACT same index.html + data files as the
- * Electron desktop app (one source of truth, per CLAUDE.md). Run this before
- * every Capacitor build so the phone app matches the desktop app.
+ * The mobile build reuses the EXACT same page as the web app (one source of truth,
+ * per CLAUDE.md). Run this before every Capacitor build so the phone app matches.
  *
- *   node sync-web.js
+ *   node mobile/sync-web.js
  *
- * Layout it produces (mirrors the desktop project so index.html's relative
- * "data/..." <script src> paths resolve unchanged):
+ * Layout it produces (mirrors the project root so index.html's relative paths
+ * resolve unchanged):
  *
  *   www/index.html      (copied from ../index.html — already references mobile-init.js)
- *   www/data/*.js       (copied from ../data/*.js)
  *   www/mobile-init.js  (copied from ../mobile-init.js — ONE shared source of truth)
- *
- * main.js / preload.js (Electron-only) are intentionally NOT copied — the page
- * feature-detects window.armyAPI and falls back to IndexedDB in the WebView.
+ *   www/css/ www/js/ www/data/   (every .css / .js file, mirrored; stale files removed)
  */
 const fs = require("fs");
 const path = require("path");
 
-const SRC = path.resolve(__dirname, "..");        // desktop project root
+const SRC = path.resolve(__dirname, "..");        // project root
 const DST = path.resolve(__dirname, "www");        // capacitor web dir
-
-// Data files the page loads via <script src="data/..."> (mirrors index.html).
-const DATA_FILES = [
-  "lores-common.js",
-  "rules-common.js",
-  "special-rules-common.js",
-  "common-items.js",
-  "chaos-dwarfs.js",
-  "grand-cathay.js",
-  "daemons-of-chaos.js",
-  "beastmen.js",
-  "ogre-kingdoms.js",
-  "orcs-and-goblins.js",
-  "skaven.js",
-  "high-elves.js",
-  "dark-elves.js",
-  "tomb-kings.js",
-  "vampire-counts.js",
-  "bretonnia.js",
-  "wood-elves.js",
-  "dwarfs.js",
-  "lizardmen.js",
-  "estalia.js",
-];
-
-fs.mkdirSync(path.join(DST, "data"), { recursive: true });
+const DIRS = ["css", "js", "data"];
 
 let copied = 0;
 function copy(from, to) {
@@ -61,20 +32,22 @@ function copy(from, to) {
   copied++;
 }
 
-// data files -> www/data/
-for (const f of DATA_FILES) copy(path.join(SRC, "data", f), path.join(DST, "data", f));
+// css/, js/, data/ -> www/<dir>/ (files no longer in the source are removed)
+for (const dir of DIRS) {
+  const from = path.join(SRC, dir), to = path.join(DST, dir);
+  fs.mkdirSync(to, { recursive: true });
+  const files = fs.readdirSync(from).filter(f => /\.(js|css)$/.test(f));
+  for (const f of fs.readdirSync(to)) if (!files.includes(f)) fs.unlinkSync(path.join(to, f));
+  for (const f of files) copy(path.join(from, f), path.join(to, f));
+}
 
-// mobile-init.js -> www/mobile-init.js (single shared source; self-gates on
-// viewport, and always activates under Capacitor).
+// mobile-init.js -> www/mobile-init.js (self-gates on viewport; always active under Capacitor)
 copy(path.join(SRC, "mobile-init.js"), path.join(DST, "mobile-init.js"));
 
-// index.html -> www/index.html, injecting the mobile-only script once.
+// index.html -> www/index.html, injecting the mobile script once if it is missing.
 const idxSrc = path.join(SRC, "index.html");
 if (fs.existsSync(idxSrc)) {
   let html = fs.readFileSync(idxSrc, "utf8");
-  // Look for the actual <script src="mobile-init.js"> tag — NOT a bare substring,
-  // so an unrelated mention of the filename (e.g. in a CSS comment) can't trick
-  // us into skipping the injection.
   if (!/<script[^>]+src=["']mobile-init\.js["']/.test(html)) {
     const tag = '<script src="mobile-init.js"></script>\n</body>';
     if (html.includes("</body>")) html = html.replace("</body>", tag);
@@ -87,4 +60,4 @@ if (fs.existsSync(idxSrc)) {
   process.exitCode = 1;
 }
 
-console.log(`sync-web: wrote ${copied}/${DATA_FILES.length + 2} files into www/ (data/ + index.html + mobile-init.js)`);
+console.log(`sync-web: wrote ${copied} files into www/ (index.html, mobile-init.js, ${DIRS.join("/, ")}/)`);

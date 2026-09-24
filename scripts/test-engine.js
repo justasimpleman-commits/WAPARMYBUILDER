@@ -39,17 +39,15 @@ global.Blob=function(){};
 global.setTimeout=(f)=>0; global.clearTimeout=()=>{};
 document.getElementById("limit").value="2000";
 
-/* ---------- load data, then the engine ---------- */
+/* ---------- load data, then the engine ----------
+   Everything index.html loads with <script src>, in page order: the data files are
+   eval'd one by one, the js/ engine files are concatenated and eval'd as ONE script
+   (they share globals exactly as classic <script> tags do in the browser). */
 function load(f){ return fs.readFileSync(path.join(DIR,f),"utf8"); }
-[ "data/lores-common.js","data/rules-common.js","data/special-rules-common.js","data/common-items.js",
-  "data/chaos-dwarfs.js","data/grand-cathay.js","data/daemons-of-chaos.js","data/beastmen.js",
-  "data/ogre-kingdoms.js","data/orcs-and-goblins.js","data/skaven.js","data/high-elves.js","data/dark-elves.js",
-  "data/tomb-kings.js","data/vampire-counts.js","data/bretonnia.js","data/wood-elves.js",
-  "data/dwarfs.js","data/lizardmen.js","data/estalia.js" ].forEach(f=>{ (0,eval)(load(f)); });
-
 const html=load("index.html");
-const scripts=[...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)].map(m=>m[1]);
-const engine=scripts.sort((a,b)=>b.length-a.length)[0];   // the big inline engine
+const srcs=[...html.matchAll(/<script src="([^"]+)"><\/script>/g)].map(m=>m[1]).filter(s=>s!=="mobile-init.js");
+srcs.filter(s=>s.startsWith("data/")).forEach(f=>{ (0,eval)(load(f)); });
+const engine=srcs.filter(s=>s.startsWith("js/")).map(load).join("\n");
 (0,eval)(engine + `
 ;Object.assign(globalThis,{
   __render:render, __entryPoints:entryPoints, __grand:grandTotal, __cat:catTotal,
@@ -61,9 +59,9 @@ const engine=scripts.sort((a,b)=>b.length-a.length)[0];   // the big inline engi
   __getGen:()=>generalUid, __D:()=>D,
   __rulesToHTML:rulesToHTML, __ruleExact:ruleExact, __ruleDef:ruleDef,
   __openRuleInfo:openRuleInfo, __eqToHTML:eqToHTML, __equipDef:equipDef,
-  __openOptionRules:openOptionRules, __mountEntityHTML:mountEntityHTML,
+  __mountEntityHTML:mountEntityHTML,
   __openMountPicker:openMountPicker,
-  __mkAllInfoBtn:mkAllInfoBtn, __mkRuleInfoBtn:mkRuleInfoBtn, __pk:()=>_pk,
+  __mkRuleInfoBtn:mkRuleInfoBtn, __pk:()=>_pk,
   __honourCondOK:honourCondOK, __selectedHonour:selectedHonour,
   __mountChoiceBlocked:mountChoiceBlocked, __renderOption:renderOption,
   __perNCount:perNCount, __perNMax:perNMax, __optChoiceBlocked:optChoiceBlocked,
@@ -334,21 +332,9 @@ console.log("Spells: render via the modal picker (no inline checkbox list)…");
   e.sigSpells=[]; e.lore="Fire";
 }
 
-/* =================== dropdown 'all options' info window =================== */
-console.log("Dropdown info: shows every option's rule, marks selected, notes no-rule…");
+/* =================== mount entity + mount picker =================== */
+console.log("Mounts: compact entity HTML + shared single-select picker…");
 {
-  __setState([]); __setGen(null); __switch("chaos-dwarfs",false);
-  const body=document.getElementById("modal2Body");
-  // an equipment choice: two real weapons + a no-rule option, second selected
-  const choices=[{label:"Great weapon",cost:2},{label:"Halberd"},{label:"Extra crew",cost:5}];
-  __openOptionRules("Weapon", choices, choices[1]);
-  let h=body.innerHTML;
-  ok(/Great weapon/.test(h) && /Halberd/.test(h) && /Extra crew/.test(h), "lists every option");
-  ok(/A model with a great weapon suffers -2 Initiative/.test(h), "expands the rule text verbatim");
-  ok(/Halberd[\s\S]*?— selected/.test(h), "marks the selected option");
-  ok(/No separate rule text/.test(h), "no-rule option is listed with a note");
-  ok(document.getElementById("modal2Bg").classList.contains("open"), "opens in the stacked window");
-
   // mounts: each rendered as a COMPACT entity (profile + CLICKABLE rules, not expanded)
   __switch("chaos-dwarfs",false);
   const taurus={label:"Great Taurus",cost:235};
@@ -374,10 +360,7 @@ console.log("Dropdown info: shows every option's rule, marks selected, notes no-
   pk.onConfirm([]);
   ok(me.opts.mount===null, "nothing ticked ⇒ no mount");
 
-  // UI distinction: "all options" button vs single/chosen "i"
-  const allb=__mkAllInfoBtn("Rules for all options", ()=>{});
   const oneb=__mkRuleInfoBtn("Hand Weapon");
-  ok(allb.className==="info list" && allb.textContent==="≣", "all-options button: distinct list glyph/class");
   ok(oneb.className==="info" && oneb.textContent==="i", "single/chosen button: plain italic 'i'");
 }
 
