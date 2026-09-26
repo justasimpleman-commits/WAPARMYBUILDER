@@ -63,6 +63,14 @@ function duplicateEntry(uid){
   const i=state.findIndex(x=>x.uid===uid); if(i<0) return;
   update(()=>{ const copy=JSON.parse(JSON.stringify(state[i])); copy.uid=uidc++; copy.collapsed=false; state.splice(i+1,0,copy); });
 }
+/* move an entry one place up (dir -1) or down (+1) among the entries of its own
+   category — the order shows in the roster, summary, export and game view */
+function moveEntry(uid, dir){
+  const i=state.findIndex(x=>x.uid===uid); if(i<0) return;
+  let j=i+dir; while(j>=0 && j<state.length && state[j].cat!==state[i].cat) j+=dir;
+  if(j<0 || j>=state.length) return;
+  update(()=>{ const t=state[i]; state[i]=state[j]; state[j]=t; });
+}
 function removeEntry(uid){
   const e=state.find(x=>x.uid===uid); if(!e) return;
   const nm=entryName(e);

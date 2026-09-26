@@ -122,10 +122,14 @@ function ruleExact(name){
    line) with each recognised token clickable — opens its definition in the
    stacked window. `resolver` decides what is a known rule; a trailing
    parenthetical like "Fly (8)" or "light armour (Handlers)" is stripped for the
-   lookup but kept in the displayed text. Unknown tokens stay plain. */
-function tokensToHTML(str, resolver){
+   lookup but kept in the displayed text. Unknown tokens stay plain.
+   `store` names the global array the clicked names are kept in (default __rw,
+   which the unit-detail popup resets); the game view passes its own so its
+   links survive a popup being opened over it. */
+function tokensToHTML(str, resolver, store){
   if(!str) return "";
-  window.__rw = window.__rw || [];
+  store = store || "__rw";
+  const reg = window[store] = window[store] || [];
   const parts = String(str).split(/([,;.])/);
   let out = "";
   for(const part of parts){
@@ -136,16 +140,16 @@ function tokensToHTML(str, resolver){
     const base = core.replace(/\s*\([^)]*\)\s*$/,"").trim();
     const def = resolver(core) || (base && base!==core ? resolver(base) : null);
     if(def){
-      const idx = window.__rw.push(def.name)-1;
-      out += esc(lead) + `<span class="ruleword" onclick="event.stopPropagation();openRuleInfo(__rw[${idx}])">${esc(core)}</span>` + esc(trail);
+      const idx = reg.push(def.name)-1;
+      out += esc(lead) + `<span class="ruleword" onclick="event.stopPropagation();openRuleInfo(${store}[${idx}])">${esc(core)}</span>` + esc(trail);
     } else {
       out += esc(part);
     }
   }
   return out;
 }
-function rulesToHTML(rules){ return tokensToHTML(rules, ruleExact); }   // strict: special rules
-function eqToHTML(eq){ return tokensToHTML(eq, equipDef); }            // weapons/armour/command
+function rulesToHTML(rules, store){ return tokensToHTML(rules, ruleExact, store); }   // strict: special rules
+function eqToHTML(eq, store){ return tokensToHTML(eq, equipDef, store); }            // weapons/armour/command
 /* render a rule's text: paragraphs are separated by blank lines, and a sub-heading
    wrapped in **double asterisks** becomes bold (rule text is transcribed verbatim
    from the rulebook, which uses bold sub-headers like "Berserk Rage"). */

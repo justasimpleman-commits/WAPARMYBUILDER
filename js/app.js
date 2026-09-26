@@ -64,9 +64,9 @@ function wirePage(){
   if(q) q.addEventListener("input",()=>{ catalogQuery=q.value; renderCatalog(); });
   document.getElementById("modalBg").addEventListener("click",e=>{ if(e.target.id==="modalBg") closeModal(); });
   document.addEventListener("keydown",e=>{
-    if(e.key==="Escape"){ if(document.getElementById("modal2Bg").classList.contains("open")) closeModal2(); else closeModal(); return; }
+    if(e.key==="Escape"){ if(document.getElementById("modal2Bg").classList.contains("open")) closeModal2(); else if(modalOpen()) closeModal(); else if(gameOpen) closeGameMode(); return; }
     // Ctrl/⌘+Z undo, Ctrl/⌘+Shift+Z or Ctrl+Y redo — not while typing or in a modal
-    if(!(e.ctrlKey||e.metaKey) || e.altKey || modalOpen()) return;
+    if(!(e.ctrlKey||e.metaKey) || e.altKey || modalOpen() || gameOpen) return;
     const tag=(e.target&&e.target.tagName)||"";
     if(tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT") return;
     const k=e.key.toLowerCase();

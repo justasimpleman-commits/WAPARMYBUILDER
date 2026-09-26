@@ -251,20 +251,22 @@ const STAT_HEAD=["M","WS","BS","S","T","W","I","A","Ld"];
 /* Render a purchased-loadout list as a clickable comma-line.
    kind "equip" → resolve via ruleDef/openRuleInfo; kind "item" → itemDescOf/openItemInfo.
    A leading "N× ", "Mount: "/"Power: "/etc. prefix and a trailing (parenthetical)
-   are stripped for the lookup but kept in the display. */
-function loadoutHTML(items, kind){
-  window.__rw = window.__rw || []; window.__iw = window.__iw || [];
+   are stripped for the lookup but kept in the display. `store`/`istore` name the
+   global arrays for the click targets (see tokensToHTML). */
+function loadoutHTML(items, kind, store, istore){
+  store=store||"__rw"; istore=istore||"__iw";
+  const rw=window[store]=window[store]||[], iw=window[istore]=window[istore]||[];
   return (items||[]).map(disp=>{
     const base = String(disp)
       .replace(/^\d+×\s*/,"").replace(/^(Mount|Power|Virtue|Standard):\s*/,"")
       .replace(/\s+×\d+$/,"").replace(/\s*\([^)]*\)\s*$/,"").trim();
     if(kind==="equip"){
       const def=ruleDef(base);
-      if(def){ const i=window.__rw.push(def.name)-1;
-        return `<span class="ruleword" onclick="event.stopPropagation();openRuleInfo(__rw[${i}])">${esc(disp)}</span>`; }
+      if(def){ const i=rw.push(def.name)-1;
+        return `<span class="ruleword" onclick="event.stopPropagation();openRuleInfo(${store}[${i}])">${esc(disp)}</span>`; }
     } else {
-      if(itemDescOf(base)){ const i=window.__iw.push(base)-1;
-        return `<span class="ruleword" onclick="event.stopPropagation();openLoadoutItemInfo(__iw[${i}])">${esc(disp)}</span>`; }
+      if(itemDescOf(base)){ const i=iw.push(base)-1;
+        return `<span class="ruleword" onclick="event.stopPropagation();openLoadoutItemInfo(${istore}[${i}])">${esc(disp)}</span>`; }
     }
     return esc(disp);
   }).join(", ");

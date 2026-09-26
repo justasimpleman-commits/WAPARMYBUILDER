@@ -12,7 +12,7 @@
   <div class="limit"><label>Army</label><select id="armySel"></select></div>
   <div class="limit"><label>Points limit</label><input id="limit" type="number" value="2000" min="0" step="50"><select id="limitPreset" class="preset" title="Common game sizes"></select></div>
   <div class="total">
-    <div class="hist"><button class="histbtn" id="undoBtn" onclick="undo()" title="Undo (Ctrl+Z)" disabled>↶</button><button class="histbtn" id="redoBtn" onclick="redo()" title="Redo (Ctrl+Shift+Z)" disabled>↷</button></div>
+    <div class="hist"><button class="histbtn" id="undoBtn" onclick="undo()" title="Undo (Ctrl+Z)" disabled>↶</button><button class="histbtn" id="redoBtn" onclick="redo()" title="Redo (Ctrl+Shift+Z)" disabled>↷</button><button class="histbtn gamebtn" id="gameBtn" onclick="openGameMode()" title="Game mode — compact statlines &amp; rules for the table">⚔ Game</button></div>
     <div><div class="big" id="totalPts">0</div><div class="note" id="totalNote">of 2000</div></div>
   </div>
   <span id="appVersion" title="App version" style="align-self:flex-start;margin-left:6px;font-size:11px;color:var(--muted);opacity:.7;white-space:nowrap"></span>
@@ -42,6 +42,9 @@
   </div>
 </div>
 
+<!-- game mode: read-only army reference (js/game.js), over the builder, under the modals -->
+<div class="gameview" id="gameView"></div>
+
 <div class="modal-bg" id="modalBg"><div class="modal">
   <div class="mhead"><h3 id="modalTitle"></h3><button class="x" onclick="closeModal()">✕</button></div>
   <div class="mbody" id="modalBody"></div>
@@ -65,6 +68,7 @@
 <script src="js/modals.js"></script>
 <script src="js/roster.js"></script>
 <script src="js/storage.js"></script>
+<script src="js/game.js"></script>
 <script src="js/app.js"></script>
 <script src="mobile-init.js"></script>
 </body>

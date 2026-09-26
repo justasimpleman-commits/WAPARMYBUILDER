@@ -56,6 +56,15 @@ script in **`build/`**.
     summary, validation panel.
   - `storage.js` — library (IndexedDB/localStorage), `.json` files, autosave draft,
     share links, text export.
+  - `game.js` — **Game mode** (the ⚔ Game header button, next to undo/redo): a
+    read-only, full-screen overlay (`#gameView`, z-index 97 — under the modals) with
+    one compact card per roster entry in roster order: the chosen profile's statline
+    (a character's other variant rows dropped, `gameProfileRows`) plus the mount's
+    rows, equipment, special rules, mount rules, magic items, lore attribute and
+    spells with casting values — every known word clickable into the stacked
+    window. Jump chips at the top; Esc or "Exit game mode" closes it. Its click
+    targets use their own globals (`__gw`/`__giw`/`__gsp`, via the `store` param of
+    `tokensToHTML`/`loadoutHTML`) so a popup resetting `__rw` can't break them.
   - `app.js` — `switchArmy`, header controls, event wiring, `start()`.
 - **`data/books.js`** — `window.BOOK_INDEX`, the **only list of books**
   (`{id, name, file}`), in dropdown order. The page loads nothing but this up
@@ -376,6 +385,9 @@ stats card, which would make rule-heavy units unreadable.
   army (`×2`), Special/Rare duplicates against the game-size cap (`2/3`, amber at the
   cap, red over it), and a special character already taken is greyed out with its
   **+** disabled.
+- **Reorder:** ▲/▼ on each roster card (`moveEntry(uid,dir)`, an undo step) swap an
+  entry with its neighbour of the same category in `state`; that order is what the
+  roster, summary, export, share link and game mode show.
 - **Points limit:** free input plus a presets dropdown (1000–4000; "Custom" when the
   value isn't a preset).
 

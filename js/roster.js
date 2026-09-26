@@ -8,6 +8,7 @@ function render(){
   state.forEach(reconcileEntry);
   renderCatalog(); renderRoster(); renderBars(); renderSummary(); renderValidation();
   updateSaveStatus(); scheduleDraft();
+  if(gameOpen) renderGame();
 }
 
 /* ---------- Runic-item builder ----------
@@ -276,6 +277,15 @@ function renderEntry(e){
   t.innerHTML=`<span class="nm">${esc(nm)}</span>${cntTag} <span class="cat">${e.cat}</span>`;
   t.style.cursor="pointer"; t.onclick=()=>{ e.collapsed=!e.collapsed; render(); }; head.appendChild(t);
   const ept=document.createElement("span"); ept.className="ept"; ept.textContent=Math.round(pts*10)/10; head.appendChild(ept);
+  const same=state.filter(x=>x.cat===e.cat);
+  if(same.length>1){                                     // reorder within the category
+    const mv=document.createElement("span"); mv.className="mv";
+    const up=document.createElement("button"); up.textContent="▲"; up.title="Move up";
+    const dn=document.createElement("button"); dn.textContent="▼"; dn.title="Move down";
+    up.disabled=same[0]===e; dn.disabled=same[same.length-1]===e;
+    up.onclick=()=>moveEntry(e.uid,-1); dn.onclick=()=>moveEntry(e.uid,1);
+    mv.append(up,dn); head.appendChild(mv);
+  }
   const dup=document.createElement("button"); dup.className="del dup"; dup.textContent="⧉"; dup.title="Duplicate";
   dup.onclick=()=>duplicateEntry(e.uid); head.appendChild(dup);
   const del=document.createElement("button"); del.className="del"; del.textContent="✕"; del.title="Remove";

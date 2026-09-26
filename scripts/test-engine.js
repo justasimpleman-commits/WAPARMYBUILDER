@@ -80,7 +80,8 @@ const engine=srcs.filter(s=>s.startsWith("js/")).map(load).join("\n");
   __modelAccess:modelAccess, __hasAccess:hasAccess, __itemEquipType:itemEquipType, __itemAccessOK:itemAccessOK, __normAccess:normAccess, __findItem:findItem, __pickerGroups:pickerGroups,
   __runeCatCost:runeCatCost, __runesCost:runesCost, __magicRunesCost:magicRunesCost,
   __runeCatsForChar:runeCatsForChar, __runeAllowed:runeAllowed, __runeDef:runeDef,
-  __runeCopyCost:runeCopyCost, __runeMaxCopies:runeMaxCopies, __isBSB:isBSB
+  __runeCopyCost:runeCopyCost, __runeMaxCopies:runeMaxCopies, __isBSB:isBSB,
+  __moveEntry:moveEntry, __openGame:openGameMode, __closeGame:closeGameMode, __gameProfileRows:gameProfileRows
 });`);
 
 /* ---------- helpers ---------- */
@@ -1012,6 +1013,50 @@ __setState([]); __setGen(null); __switch("skaven",false);
   __addUnit("characters",rows[0].u.id);
   ok(rows[0].add.disabled===true && rows[0].badge.textContent==="taken", "a special character already in the army is greyed out");
   __setQuery(""); __renderCatalog();
+}
+
+console.log("Reorder: move an entry up/down within its category…");
+__setState([]); __setGen(null); __switch("chaos-dwarfs",false); __resetHistory();
+{
+  __addUnit("core","warriors"); __addUnit("characters","despots"); __addUnit("core","razers"); __addUnit("core","cutthroats");
+  const ids=()=>__getState().filter(e=>e.cat==="core").map(e=>e.id).join(",");
+  const [w,,r]=__getState();
+  __moveEntry(r.uid,-1);
+  ok(ids()==="razers,warriors,cutthroats", "moving up skips entries of other categories ("+ids()+")");
+  __moveEntry(r.uid,-1);
+  ok(ids()==="razers,warriors,cutthroats", "moving the first entry up is a no-op");
+  __moveEntry(w.uid,1);
+  ok(ids()==="razers,cutthroats,warriors", "moving down swaps with the next entry of the category");
+  __undo();
+  ok(ids()==="razers,warriors,cutthroats", "a move is an undo step");
+  ok(__getState()[1].id==="despots", "the character keeps its place in the state array");
+}
+
+console.log("Game mode: renders every book's full roster; character rows are the chosen profile…");
+{
+  const bad=[];
+  books.forEach(id=>{
+    try{
+      __setState([]); __setGen(null); __switch(id,false); const D=__D();
+      ["characters","core","special","rare"].forEach(cat=>(D.units[cat]||[]).forEach(u=>__addUnit(cat,u.id)));
+      __getState().forEach(e=>{ const u=__findUnit(e.cat,e.id);
+        const mo=(u.options||[]).find(o=>o.type==="mount"); if(mo && mo.choices.length) e.opts.mount=mo.choices.length-1; });
+      __openGame(); __render();
+      const html=document.getElementById("gameView").innerHTML;
+      if(!html.includes('class="gcard"')) bad.push(id+": no cards");
+      if(/undefined|NaN/.test(html)) bad.push(id+": undefined/NaN in output");
+      __closeGame();
+    }catch(err){ bad.push(id+" threw: "+err.message); }
+  });
+  ok(bad.length===0, "game view renders for every book"+(bad.length?" ("+bad.slice(0,4).join("; ")+")":""));
+  __setState([]); __setGen(null); __switch("chaos-dwarfs",false); __addUnit("characters","despots");
+  const e=__getState()[0]; e.variant=1;
+  const rows=__gameProfileRows(e,__findUnit("characters","despots")).map(r=>r[0]);
+  ok(rows.join()==="Overseer", "a character shows only its chosen profile row ("+rows.join()+")");
+  __setGen(e.uid); __openGame();
+  const html=document.getElementById("gameView").innerHTML;
+  ok(/★ General/.test(html) && /Overseer/.test(html), "game card names the profile and marks the General");
+  __closeGame();
 }
 
 console.log(`\n${fails? "FAIL":"PASS"}: ${checks-fails}/${checks} checks passed.`);
