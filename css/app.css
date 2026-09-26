@@ -178,6 +178,10 @@ textarea{width:100%;height:200px;background:#0f0b08;border:1px solid var(--line)
 .ehead .htitle{flex:1}
 .ehead .cnt{color:var(--fire2);font-weight:700;font-size:13px}
 .del.dup{font-size:15px}
+.ehead .mv{display:flex;flex-direction:column;gap:1px;flex:none}
+.ehead .mv button{background:none;border:1px solid var(--line);color:var(--muted);cursor:pointer;font-size:9px;line-height:1;width:22px;height:14px;padding:0;border-radius:3px}
+.ehead .mv button:hover:not(:disabled){color:var(--fire2);border-color:var(--fire)}
+.ehead .mv button:disabled{opacity:.25;cursor:default}
 h2.sec.cathead{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
 h2.sec.cathead .cv{color:var(--fire2)}
 h2.sec.cathead .cpts{margin-left:auto;color:var(--muted);font-size:11px;letter-spacing:0}
@@ -212,3 +216,48 @@ html,body{max-width:100%;overflow-x:hidden}
 .restore-note.show{transform:translateY(0)}
 .restore-note span{flex:1}
 .restore-note .btn{padding:5px 10px}
+/* ---- game mode (js/game.js): read-only army reference over the builder ---- */
+.histbtn.gamebtn{width:auto;padding:0 10px;font-size:13px;margin-left:6px;color:var(--fire2)}
+body.gaming{overflow:hidden}
+.gameview{position:fixed;inset:0;z-index:97;background:var(--bg);overflow-y:auto;display:none;-webkit-overflow-scrolling:touch;
+  padding:0 16px calc(24px + env(safe-area-inset-bottom))}
+.gameview.open{display:block}
+.gameview .gbar{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:12px;margin:0 -16px;
+  padding:calc(10px + env(safe-area-inset-top)) 16px 10px;background:linear-gradient(180deg,#2c1a10,#1a120c);border-bottom:2px solid var(--fire)}
+.gameview .gtitle{flex:1;min-width:0;display:flex;flex-direction:column}
+.gameview .gtitle b{color:var(--fire2);font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gameview .gtitle span{font-size:12px;color:var(--muted)}
+.gameview .gjumps{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px 0 2px}
+.gameview .gjcat{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:0 2px 0 6px}
+.gameview .gjcat:first-child{margin-left:0}
+.gameview .gjump{background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:14px;padding:4px 10px;font-size:12.5px;cursor:pointer}
+.gameview .gjump:hover{border-color:var(--fire)}
+.gameview .gsec{display:flex;gap:8px;align-items:baseline}
+.gameview .gsec .cpts{margin-left:auto;color:var(--muted);font-size:11px;letter-spacing:0}
+.gameview .ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:10px}
+.gameview .gcard{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 11px;min-width:0;transition:border-color .3s}
+.gameview .gcard.flash{border-color:var(--fire2)}
+.gameview .ghead{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;margin-bottom:5px}
+.gameview .gnm{font-weight:700;font-size:15px}
+.gameview .gct{color:var(--fire2)}
+.gameview .gtag{font-size:10.5px;border:1px solid var(--line);border-radius:9px;padding:0 6px;color:var(--muted);white-space:nowrap}
+.gameview .gtag.gen{color:var(--fire2);border-color:var(--fire)}
+.gameview .gpts{margin-left:auto;color:var(--muted);font-size:12px}
+.gameview table.gprof{border-collapse:collapse;width:100%;font-size:12.5px;margin:2px 0 6px}
+.gameview table.gprof th,.gameview table.gprof td{border:1px solid var(--line);padding:2px 4px;text-align:center}
+.gameview table.gprof th{background:var(--head,#2c1a10);color:#fff;font-size:10.5px}
+.gameview table.gprof td.nm{text-align:left;font-weight:600;white-space:nowrap}
+.gameview .gline{font-size:12.5px;line-height:1.45;margin-top:3px}
+.gameview .gl{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--accent);margin-right:2px}
+.gameview .gline b{color:var(--fire2)}
+.gameview .gcast{color:var(--fire2);font-weight:700;font-size:11.5px}
+.gameview .ruleword{color:var(--ink);cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-decoration-color:var(--fire2);text-underline-offset:2px}
+.gameview .ruleword:hover{color:var(--fire2)}
+@media(max-width:600px){
+  .gameview{padding:0 10px calc(20px + env(safe-area-inset-bottom))}
+  .gameview .gbar{margin:0 -10px;padding-left:10px;padding-right:10px}
+  .gameview .ggrid{grid-template-columns:1fr}
+  .gameview table.gprof{font-size:11.5px}
+  .gameview .gline{font-size:13px}
+  .ehead .mv button{width:26px;height:17px;font-size:10px}
+}
