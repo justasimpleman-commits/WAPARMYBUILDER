@@ -43,18 +43,18 @@
 
   magicItems: {
     "Magic Weapons": [
-      { name: "Spear of Righteousness", cost: 55, only: "Priest of Myrmidia or High Priest of Myrmidia", requiresAccess: ["lance","spear"] },
+      { name: "Spear of Righteousness", cost: 55, only: "Priest of Myrmidia or High Priest of Myrmidia", requiresAccess: ["light lance", "spear"] },
       { name: "Staff of Tomas the Pure", cost: 50, only: "Priest of Myrmidia or High Priest of Myrmidia" },
       { name: "Wolfslayer", cost: 40 },
       { name: "Basilisk Blade", cost: 30 },
       { name: "Fencer's Blades", cost: 30, requiresAccess: "additional hand weapon" },
-      { name: "Lance of Rectitude", cost: 25, requiresAccess: "lance" },
+      { name: "Lance of Rectitude", cost: 25, requiresAccess: "heavy lance" },
       { name: "Sword of the Vendetta", cost: 25 },
       { name: "Figuera's Rapier", cost: 25, only: "Maestro" },
       { name: "Mace of Sacrifice", cost: 20, only: "Priest of Myrmidia or High Priest of Myrmidia" },
       { name: "Sword of Fortitude", cost: 20 },
       { name: "Sword of Talabaro", cost: 20 },
-      { name: "Pistols of the Duel", cost: 15 },
+      { name: "Pistols of the Duel", cost: 15, requiresAccess: "brace of pistols" },
       { name: "Relic Sword", cost: 10 }
     ],
     "Magic Armour": [
@@ -133,10 +133,10 @@
       { name: "Alleviating Armour", cost: 20, requiresAccess: "medium armour" },
       { name: "Gambler's Armour", cost: 20, requiresAccess: "light armour" },
       { name: "Bedazzling Helm", cost: 20 },
-      { name: "Shield of the Warrior True", cost: 15 },
+      { name: "Shield of the Warrior True", cost: 15, requiresAccess: "shield" },
       { name: "Dragonhelm", cost: 10 },
       { name: "Enchanted Shield", cost: 10, common: true, requiresAccess: "shield" },
-      { name: "Charmed Shield", cost: 5, common: true }
+      { name: "Charmed Shield", cost: 5, common: true, requiresAccess: "shield" }
     ],
     "Talismans": [
       { name: "Talisman of Preservation", cost: 40 },
@@ -471,7 +471,7 @@ If the Picador(s) are killed before they have lit the bulls, the bulls simply wa
     characters: [
       {
         id: "commanders", name: "Commanders", isCharacter: true,
-        access: ["additional hand weapon","lance","halberd","great weapon","light armour","medium armour","heavy armour","shield","barding"],
+        access: ["additional hand weapon","halberd","great weapon","light armour","medium armour","heavy armour","shield","barding","light lance","heavy lance","pistol","brace of pistols","crossbow","handgun"],
         variants: [
           { name: "Grand Commander", points: 90, magicBudget: 100 },
           { name: "Captain", points: 50, magicBudget: 50 }
@@ -520,7 +520,7 @@ If the Picador(s) are killed before they have lit the bulls, the bulls simply wa
       },
       {
         id: "priests", name: "Priests of Myrmidia", isCharacter: true,
-        access: ["spear","lance","light armour","medium armour","heavy armour","shield","barding"],
+        access: ["spear","light armour","medium armour","heavy armour","shield","barding","light lance"],
         variants: [
           { name: "High Priest of Myrmidia", points: 130, magicBudget: 100 },
           { name: "Priest of Myrmidia", points: 90, magicBudget: 50 }
@@ -542,7 +542,7 @@ If the Picador(s) are killed before they have lit the bulls, the bulls simply wa
       },
       {
         id: "maestro", name: "Maestro", isCharacter: true,
-        access: ["additional hand weapon","light armour"],
+        access: ["additional hand weapon","light armour","buckler","pistol","brace of pistols","throwing weapon"],
         variants: [ { name: "Maestro", points: 100, magicBudget: 50 } ],
         options: [
           { id: "wep", type: "choice", label: "Off-hand", choices: [

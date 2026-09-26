@@ -55,13 +55,13 @@
       { name: "Scimitar of the Sun Resplendent", cost: 45 },
       { name: "Blade of Realities", cost: 40 },
       { name: "Blade of Revered Tzunki", cost: 35 },
-      { name: "Stegadon War-Spear", cost: 35, only: "High Chief", requiresAccess: "lance" },
+      { name: "Stegadon War-Spear", cost: 35, only: "High Chief", requiresAccess: "light lance" },
       { name: "The Lash of Itzaotyl", cost: 30 },
       { name: "Sword of the Hornet", cost: 25 },
       { name: "The Piranha Blade", cost: 20 },
       { name: "Dagger of Sotek", cost: 15 },
       { name: "Burning Blade of Chotec", cost: 15 },
-      { name: "Sacrificial Heart Cloth of Chotec", cost: 15 },
+      { name: "Sacrificial Heart Cloth of Chotec", cost: 15, requiresAccess: "sling" },
       { name: "Staff of the Lost Sun", cost: 15, only: "Priest or High Priest" },
       { name: "Staff of Sotek", cost: 10, only: "Priest or High Priest" }
     ],
@@ -187,10 +187,10 @@
       { name: "Alleviating Armour", cost: 20, requiresAccess: "medium armour" },
       { name: "Gambler's Armour", cost: 20, requiresAccess: "light armour" },
       { name: "Bedazzling Helm", cost: 20 },
-      { name: "Shield of the Warrior True", cost: 15 },
+      { name: "Shield of the Warrior True", cost: 15, requiresAccess: "shield" },
       { name: "Dragonhelm", cost: 10 },
       { name: "Enchanted Shield", cost: 10, common: true, requiresAccess: "shield" },
-      { name: "Charmed Shield", cost: 5, common: true }
+      { name: "Charmed Shield", cost: 5, common: true, requiresAccess: "shield" }
     ],
     "Talismans": [
       { name: "Talisman of Preservation", cost: 40 },
@@ -636,7 +636,7 @@ The Ark of Sotek can be activated in any friendly Shooting phase, even if the Ba
       },
       {
         id: "saurusleaders", name: "Saurus Leaders", isCharacter: true,
-        access: ["additional hand weapon","spear","lance","halberd","great weapon","shield","light armour"],
+        access: ["additional hand weapon","spear","halberd","great weapon","shield","light armour","light lance"],
         magicCatsOnly: ["Magic Weapons","Magic Armour","Talismans","Arcane Items","Enchanted Items","Magic Standards","Blessed Spawnings"],
         variants: [
           { name: "Oldblood", points: 140, magicBudget: 100 },
@@ -661,7 +661,7 @@ The Ark of Sotek can be activated in any friendly Shooting phase, even if the Ba
       },
       {
         id: "skinkchiefs", name: "Skink Chiefs", isCharacter: true,
-        access: ["additional hand weapon","spear","lance","shield","light armour"],
+        access: ["additional hand weapon","spear","shield","light armour","light lance","blowpipe","shortbow","sling","javelin"],
         magicCatsOnly: ["Magic Weapons","Magic Armour","Talismans","Arcane Items","Enchanted Items","Magic Standards","Blessed Spawnings"],
         variants: [
           { name: "High Chief", points: 70, magicBudget: 100 },
@@ -716,7 +716,7 @@ The Ark of Sotek can be activated in any friendly Shooting phase, even if the Ba
       },
       {
         id: "chameleonstalker", name: "Chameleon Stalker", isCharacter: true, cannotBeGeneral: true,
-        access: ["shield"],
+        access: ["shield","blowpipe","sling","javelin"],
         magicCatsOnly: ["Magic Weapons","Magic Armour","Talismans","Arcane Items","Enchanted Items","Magic Standards","Blessed Spawnings"],
         variants: [ { name: "Stalker", points: 45, magicBudget: 50 } ],
         options: [

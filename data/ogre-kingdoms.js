@@ -45,23 +45,23 @@
       { name: "The Tenderiser", cost: 30, requiresAccess: "great weapon" },
       { name: "Bloodcleaver", cost: 30, only: "Slaughtermaster" },
       { name: "The Fang of Ghur", cost: 25 },
-      { name: "Frostshard Javelins", cost: 20, only: "Hunter" },
-      { name: "Sky-Titan Scatter Pistols", cost: 20 },
+      { name: "Frostshard Javelins", cost: 20, only: "Hunter", requiresAccess: "javelin" },
+      { name: "Sky-Titan Scatter Pistols", cost: 20, equipType: "Brace of Ogre pistols", requiresAccess: "ogre pistol" },
       { name: "Bellowing Blade", cost: 15 },
       { name: "Blade of All-Frost", cost: 15 },
       { name: "Headsmasher", cost: 15, requiresAccess: "great weapon" },
       { name: "Splatter-Cleaver", cost: 10, only: "Slaughtermaster" }
     ],
     "Magic Armour": [
-      { name: "Greedy Fist", cost: 35 },
+      { name: "Greedy Fist", cost: 35, requiresAccess: "ironfist" },
       { name: "Mastodon Armour", cost: 30, requiresAccess: "light armour" },
-      { name: "Gut Maw", cost: 25 },
-      { name: "Bullgut", cost: 15 },
-      { name: "Kattanak Browplate", cost: 15 },
-      { name: "Greatskull", cost: 10 },
-      { name: "Grawl's Gut-Plate", cost: 10 },
-      { name: "Ice Mammoth Skull Plate", cost: 10 },
-      { name: "Skullplucker", cost: 10 }
+      { name: "Gut Maw", cost: 25, requiresAccess: "gut-plate" },
+      { name: "Bullgut", cost: 15, requiresAccess: "gut-plate" },
+      { name: "Kattanak Browplate", cost: 15, requiresAccess: "gut-plate" },
+      { name: "Greatskull", cost: 10, requiresAccess: "gut-plate" },
+      { name: "Grawl's Gut-Plate", cost: 10, requiresAccess: "gut-plate" },
+      { name: "Ice Mammoth Skull Plate", cost: 10, requiresAccess: "gut-plate" },
+      { name: "Skullplucker", cost: 10, requiresAccess: "ironfist" }
     ],
     "Talismans": [
       { name: "Gnoblar Thiefstone", cost: 30 },
@@ -153,10 +153,10 @@
       { name: "Alleviating Armour", cost: 20, requiresAccess: "medium armour" },
       { name: "Gambler's Armour", cost: 20, requiresAccess: "light armour" },
       { name: "Bedazzling Helm", cost: 20 },
-      { name: "Shield of the Warrior True", cost: 15 },
+      { name: "Shield of the Warrior True", cost: 15, requiresAccess: "shield" },
       { name: "Dragonhelm", cost: 10 },
       { name: "Enchanted Shield", cost: 10, common: true, requiresAccess: "shield" },
-      { name: "Charmed Shield", cost: 5, common: true }
+      { name: "Charmed Shield", cost: 5, common: true, requiresAccess: "shield" }
     ],
     "Talismans": [
       { name: "Talisman of Preservation", cost: 40 },
@@ -731,7 +731,7 @@
     characters: [
       {
         id: "chieftains", name: "Chieftains", isCharacter: true,
-        access: ["additional hand weapon","spear","lance","great weapon","halberd","light armour"],
+        access: ["additional hand weapon","spear","great weapon","halberd","light armour","gut-plate","light lance","ironfist","ogre pistol"],
         variants: [
           { name: "Tyrant",  points: 215, magicBudget: 100 },
           { name: "Bruiser", points: 155, magicBudget: 50 }
@@ -792,7 +792,7 @@
       },
       {
         id: "hunter", name: "Hunter", isCharacter: true, cannotBeGeneral: true,
-        access: ["additional hand weapon","spear","lance","great weapon", "light armour"],
+        access: ["additional hand weapon","spear","great weapon","gut-plate","light lance","javelin"],
         variants: [
           { name: "Hunter", points: 145, magicBudget: 50 }
         ],
@@ -818,7 +818,7 @@
       },
       {
         id: "firebelly", name: "Firebelly", isCharacter: true,
-        access: ["additional hand weapon","great weapon", "light armour"],
+        access: ["additional hand weapon","great weapon","gut-plate"],
         lores: ["Fire"],
         variants: [
           { name: "Firebelly", points: 130, wizardLevel: 1, magicBudget: 50 }
@@ -847,7 +847,7 @@
       },
       {
         id: "honcho", name: "Honcho", isCharacter: true, cannotBeGeneral: true,
-        access: ["additional hand weapon","shield","great weapon","light armour"],
+        access: ["additional hand weapon","shield","great weapon","light armour","throwing weapon","sling"],
         variants: [
           { name: "Honcho", points: 25, magicBudget: 25 }
         ],
@@ -876,7 +876,7 @@
       },
       {
         id: "ghairkironskin", name: "Ghark Ironskin", isCharacter: true, isSpecialChar: true,
-        access: ["light armour"],
+        access: ["gut-plate"],
         variants: [ { name: "Ghark Ironskin", points: 400, magicBudget: 75 } ],
         options: [],
         notes: "Fixed item: Ironskin Armor (Magic Armour). If the Army General, Leadbelchers count as Core and Grimhorn Rhinox Riders count as Special."
@@ -914,7 +914,7 @@
       },
       {
         id: "braggthegutsman", name: "Bragg the Gutsman", isCharacter: true, isSpecialChar: true,
-        access: ["light armour"],
+        access: ["gut-plate"],
         variants: [ { name: "Bragg the Gutsman", points: 170, magicBudget: 25 } ],
         options: [],
         notes: "Fixed item: Great Gutgouger (Magic Weapon)"
@@ -928,7 +928,7 @@
       },
       {
         id: "jharedthered", name: "Jhared the Red", isCharacter: true, isSpecialChar: true,
-        access: ["light armour"],
+        access: ["javelin","gut-plate"],
         variants: [ { name: "Jhared the Red", points: 160, magicBudget: 50 } ],
         options: []
       }

@@ -108,7 +108,9 @@ function _pkRender(){
       const descHTML = (it.html!=null) ? it.html
         : `<div class="d">${esc((it.desc!=null && it.desc!=="") ? it.desc : (itemDescOf(it.name)||"(no description)"))}</div>`;
       const costHTML = (it.cost!=null) ? ` — <span class="cost">${it.cost} pts</span>` : "";
-      txt.innerHTML=`<div><span class="nm">${esc(it.name)}${it.common?" *":""}</span>${costHTML}${it.only?` <span style="color:var(--muted)">(${esc(it.only)} only)</span>`:""}${(it.disabled&&it.reason&&!isSel)?` <span style="color:var(--fire2)">· ${esc(it.reason)}</span>`:""}</div>${descHTML}`;
+      const et=itemEquipType(it);
+      const typeHTML = et ? ` <span class="etype">${esc(et)}</span>` : "";
+      txt.innerHTML=`<div><span class="nm">${esc(it.name)}${it.common?" *":""}</span>${typeHTML}${costHTML}${it.only?` <span style="color:var(--muted)">(${esc(it.only)} only)</span>`:""}${(it.disabled&&it.reason&&!isSel)?` <span style="color:var(--fire2)">· ${esc(it.reason)}</span>`:""}</div>${descHTML}`;
       row.appendChild(mark); row.appendChild(txt);
       if(!disabled) row.onclick=()=>{
         if(_pk.multi){ _pk.sel = isSel ? _pk.sel.filter(n=>n!==it.name) : [..._pk.sel,it.name]; }
@@ -141,14 +143,18 @@ function _pkRender(){
    army group), and the Common (rulebook) group. `extra` is an extra filter. */
 function pickerGroups(sourceCat, e, u, extra){
   const groups=[];
-  const ok=(it)=>(!extra||extra(it)) && itemAllowed(it,e,u);
-  const army=(D.magicItems[sourceCat]||[]).filter(ok);
+  // Items barred only by equipment access stay listed but disabled, with the
+  // mundane type the model lacks as the reason.
+  const ok=(it)=>(!extra||extra(it)) && itemAllowedIgnoringAccess(it,e,u);
+  const mark=(it)=>(it.requiresAccess && !hasAccess(e,u,it.requiresAccess))
+    ? Object.assign({},it,{disabled:true, reason:`needs ${itemEquipType(it)}`}) : it;
+  const army=(D.magicItems[sourceCat]||[]).filter(ok).map(mark);
   if(D.godSections){
     ["Undivided","Khorne","Nurgle","Slaanesh","Tzeentch"].forEach(sec=>{
       const its=army.filter(it=>(it.god||"Undivided")===sec); if(its.length) groups.push({label:sec, items:its}); });
   } else if(army.length){ groups.push({label:D.name, items:army}); }
   if(D.commonMagicItems && D.commonMagicItems[sourceCat]){
-    const c=D.commonMagicItems[sourceCat].filter(ok); if(c.length) groups.push({label:"Common (rulebook)", items:c}); }
+    const c=D.commonMagicItems[sourceCat].filter(ok).map(mark); if(c.length) groups.push({label:"Common (rulebook)", items:c}); }
   return groups;
 }
 /* info popup that shows ONLY the chosen item(s): rows of {name,cost,desc} */
@@ -156,7 +162,8 @@ function openChosenInfoRows(title, rows){
   rows=(rows||[]).filter(Boolean);
   if(!rows.length){ openModal(title, `<div class="rule" style="color:var(--muted)">Nothing selected yet — tap “Choose…” to pick from the list.</div>`); return; }
   let html="";
-  rows.forEach(r=>{ html+=`<div class="mirow"><div><span class="nm">${esc(r.name)}</span> — <span class="cost">${r.cost} pts</span></div><div class="d">${esc(r.desc||"(no description)")}</div></div>`; });
+  rows.forEach(r=>{ const et=r.type||itemEquipType(findItem(r.name));
+    html+=`<div class="mirow"><div><span class="nm">${esc(r.name)}</span>${et?` <span class="etype">${esc(et)}</span>`:""} — <span class="cost">${r.cost} pts</span></div><div class="d">${esc(r.desc||"(no description)")}</div></div>`; });
   openModal(title, html);
 }
 /* entry-side "open the picker" button (shows the current pick, or "Choose…") */

@@ -51,7 +51,7 @@
       { name: "Dark Mace of Death", cost: 40 },
       { name: "Life Bane Blade", cost: 35 },
       { name: "Hashut's Blade of Greed", cost: 25 },
-      { name: "Zzharg Madeye's Blunderbuss", cost: 25, only: "Daemonsmith" },
+      { name: "Zzharg Madeye's Blunderbuss", cost: 25, only: "Daemonsmith", requiresAccess: "blunderbuss" },
       { name: "Lash of Shurzzhak", cost: 20 },
       { name: "Obsidian Blade", cost: 20 },
       { name: "Inferno Glaive of Hashut", cost: 20, requiresAccess: "fireglaive" }
@@ -142,10 +142,10 @@
       { name: "Alleviating Armour", cost: 20, requiresAccess: "medium armour" },
       { name: "Gambler's Armour", cost: 20, requiresAccess: "light armour" },
       { name: "Bedazzling Helm", cost: 20 },
-      { name: "Shield of the Warrior True", cost: 15 },
+      { name: "Shield of the Warrior True", cost: 15, requiresAccess: "shield" },
       { name: "Dragonhelm", cost: 10 },
       { name: "Enchanted Shield", cost: 10, common: true, requiresAccess: "shield" },
-      { name: "Charmed Shield", cost: 5, common: true }
+      { name: "Charmed Shield", cost: 5, common: true, requiresAccess: "shield" }
     ],
     "Talismans": [
       { name: "Talisman of Preservation", cost: 40 },
@@ -592,7 +592,7 @@
       },
       {
         id: "despots", name: "Despots", isCharacter: true,
-        access: ["additional hand weapon","great weapon","fireglaive","medium armour","heavy armour","shield"],
+        access: ["additional hand weapon","great weapon","fireglaive","medium armour","heavy armour","shield","pistol","blunderbuss","crossbow"],
         variants: [
           { name: "Overlord", points: 125, magicBudget: 100 },
           { name: "Overseer", points: 60, magicBudget: 50 }
@@ -615,7 +615,7 @@
       },
       {
         id: "daemonsmith", name: "Daemonsmith", isCharacter: true,
-        access: ["light armour","medium armour"],
+        access: ["light armour","medium armour","pistol","blunderbuss","fireglaive"],
         lores: ["Fire", "Metal"], wizardIfUpgraded: true,
         variants: [ { name: "Daemonsmith", points: 60, magicBudget: 50 } ],
         options: [
@@ -641,7 +641,7 @@
       },
       {
         id: "hobchief", name: "Hobgoblin Chieftain", isCharacter: true, cannotBeGeneral: true,
-        access: ["additional hand weapon","lance","light armour","medium armour","shield"],
+        access: ["additional hand weapon","light armour","medium armour","shield","light lance","shortbow"],
         variants: [ { name: "Hobgoblin Chieftain", points: 40, magicBudget: 25 } ],
         options: [
           { id: "wep", type: "choice", label: "Weapon", choices: [

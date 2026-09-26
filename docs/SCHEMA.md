@@ -87,20 +87,34 @@ Two extra restriction fields used by the Undead/Bretonnia books:
 - `blood: ["von Carstein", …]` — Vampire Counts only: the item is offered only to a
   model whose unit has a matching `bloodline` (see Vampire characters below).
 - `vampireOnly: true` — offered only to a model whose unit carries `tags:["Vampire"]`.
-- `requiresAccess: "heavy armour" | ["lance","spear"]` — **equipment-access gating**
-  (Magic Weapons / Magic Armour). A magic item that IS a mundane weapon or armour
-  type (e.g. a magic heavy armour, a magic great weapon) is offered only to a model
-  that can actually use that type — i.e. it has it in base equipment or as a buyable
-  option, declared in the character's `access` list (see Unit entry). A string, or an
-  array = **any-of**. Tokens are normalised through an alias map (`heavy lance`/
-  `light lance`/`cavalry spear`≡`lance`, `polearm`≡`halberd`, `two hand weapons`≡
-  `additional hand weapon`, `full plate`/`gromril`/`gut-plate`≡the matching armour…).
-  **Armour is tiered:** `light armour ⊂ medium armour ⊂ heavy armour` — a model that
-  may wear a heavier armour also satisfies a lighter magic-armour requirement (a magic
-  armour replaces the mundane one). Shields, barding and weapons match exactly. Items
-  that self-grant ("may be taken despite not normally being allowed …") and generic
-  magic hand weapons carry no `requiresAccess`. Resolved in `itemAllowed`/`hasAccess`;
-  ineligible items are hidden from the picker and dropped from a loaded save.
+- `requiresAccess: "heavy armour" | ["light lance","spear"] | {all:["heavy armour","shield"]}`
+  — **equipment-access gating** (Magic Weapons / Magic Armour). A magic item that IS a
+  mundane weapon or armour type (a magic heavy armour, a magic great weapon, a magic
+  shield, a magic longbow, a magic gut-plate…) may only be taken by a model that can
+  use that type — i.e. it has it in base equipment or as a buyable option, declared in
+  the character's `access` list (see Unit entry). A string; an array = **any-of**; an
+  `{all:[…]}` object (also allowed inside the array) = **all-of**, for an item that is
+  two types at once (Armour of Agilulf: "Heavy armour and shield"). Tokens are
+  normalised through an alias map (`lance`≡`heavy lance`, `cavalry spear`≡`spear`,
+  `polearm`≡`halberd`, `two hand weapons`≡`additional hand weapon`, `bow`/`elven
+  longbow`≡`longbow`, `elven shortbow`≡`shortbow`, `javelins`≡`javelin`, `throwing
+  weapons`≡`throwing weapon`, `brace of ogre pistols`≡`ogre pistol`, `full plate`/
+  `gromril`≡`heavy armour`). **Armour is tiered:** `light armour ⊂ medium armour ⊂ heavy
+  armour` — a model that may wear a heavier armour also satisfies a lighter magic-armour
+  requirement (a magic armour replaces the mundane one). Everything else matches
+  exactly — in particular **heavy and light lances are different weapons**, and an Ogre
+  **gut-plate** is its own type (not light armour). Items that self-grant ("may be
+  taken despite not normally being allowed …", "May be taken by Necromancers") and
+  generic magic hand weapons carry no `requiresAccess` (an item with no mundane type is
+  open to every character; other restrictions still apply). Resolved in
+  `itemAllowed`/`hasAccess`. In the picker an item barred only by access is **shown
+  disabled** with the reason ("needs Shield"); a loaded save's ineligible pick is dropped.
+- `equipType: "Bow"` — optional display label for the item's mundane type. The picker,
+  the chosen slot button and the info popup show the type as a small badge
+  (`itemEquipType`); without `equipType` it is built from `requiresAccess`
+  ("Heavy armour", "Light lance / Spear", "Heavy armour + Shield", "Polearm (halberd)").
+  Only needed when that would read wrongly (Asp Bow: any bow; Sky-Titan Scatter
+  Pistols: a brace of Ogre pistols).
 
 `god:"Khorne"` (with the book-level `godSections:true` flag) → the item/gift is only
 offered to a model of that god; untagged items are "Undivided" and offered to all.
@@ -145,15 +159,24 @@ sees every category as usual. Forest Spites themselves are a category listed in
 or more Spites from the same budget as its Magic Items ("one Spite and/or Magic Items
 up to N points").
 
-`access:[…]` lists the mundane **armour and melee-weapon types** a character has in
-base equipment **or** can buy as an option — the union, regardless of what's currently
-selected. It drives magic-item `requiresAccess` gating (see Magic item). Build it from
-the character's base `unitInfo.eq` plus every weapon/armour option; a pure caster or a
-model with no armour/special-weapon options gets `access: []`. Canonical tokens:
-`light armour`, `medium armour`, `heavy armour`, `barding`, `shield`, `great weapon`,
-`halberd`, `spear`, `lance`, `additional hand weapon`, `flail`, `morning star`
-(aliases are normalised — see `requiresAccess`). Omit it and the model can take no
-magic weapon/armour item that carries a `requiresAccess` tag.
+`access:[…]` lists the mundane **weapon and armour types** (melee *and* missile) a
+character has in base equipment **or** can buy as an option — the union, regardless of
+what's currently selected. It drives magic-item `requiresAccess` gating (see Magic
+item). Build it from the character's base `unitInfo.eq` plus every weapon/armour option
+(mount options excluded); a pure caster with no armour/weapon options gets `access: []`.
+Canonical tokens: `light armour`, `medium armour`, `heavy armour`, `shield`, `buckler`,
+`barding`, `great weapon`, `halberd`, `spear`, `heavy lance`, `light lance`,
+`additional hand weapon`, `flail`, `morning star`, `pike`, `whip`, `longbow`,
+`shortbow`, `greatbow`, `crossbow`, `repeater crossbow`, `handgun`, `pistol`,
+`brace of pistols`, `blunderbuss`, `javelin`, `throwing weapon`, `sling`, `blowpipe`,
+plus book-specific types: `fireglaive` (CD), `celestial blade`, `dragon fire pistol`
+(GC), `gut-plate`, `ironfist`, `ogre pistol` (OK), `plague censer` (Skaven),
+`deathrain crossbow`, `sea dragon cloak` (DE). A named special weapon of a type
+(Saearath = spear, Keldrisaíth = polearm) is declared by hand. Omit it and the model can
+take no magic weapon/armour item that carries a `requiresAccess` tag.
+`scripts/test-engine.js` audits this: every character with a magic-item budget must
+declare each type found in its equipment/options, and every `requiresAccess` token
+must be a known type.
 
 **Conditional lores.** A `lores` entry may be a plain string (always offered) or an
 object gating that lore on a condition: `{name, requiresChoice:{id,is}}` (a sibling
@@ -298,7 +321,9 @@ Nehekhara wizard is the Hierophant). `requireWizardLoreMsg` overrides the messag
 - Vampiric Powers / Virtues share the per-character magic-item budget (Virtues escalate on duplicates)
 - **Equipment access:** a magic weapon/armour item tagged `requiresAccess` is offered
   only to a model whose `access` list covers that mundane type (armour tiered light⊂
-  medium⊂heavy); ineligible items are hidden and dropped from a loaded save
+  medium⊂heavy; heavy ≠ light lance); ineligible items are shown disabled ("needs
+  Shield") in the picker and dropped from a loaded save. The item's type is shown as a
+  badge in the picker and on the chosen slot
 - **Conditional lores:** a `lores` entry gated by `requiresChoice`/`requiresToggle`/
   `requiresVariant` is offered only while its condition holds; a now-illegal chosen lore is cleared
 

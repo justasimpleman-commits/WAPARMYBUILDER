@@ -47,7 +47,7 @@
       { name: "Axe of Men",            cost: 40 },
       { name: "The Black Maul",        cost: 40 },
       { name: "Slaughterer's Blade",   cost: 40, requiresAccess: "great weapon" },
-      { name: "Hunting Spear",         cost: 35 },
+      { name: "Hunting Spear",         cost: 35, requiresAccess: "spear" },
       { name: "The Steel-Claws",       cost: 35, requiresAccess: "additional hand weapon" },
       { name: "The Brass Cleaver",     cost: 30 },
       { name: "Mangelder",             cost: 30 },
@@ -150,10 +150,10 @@
       { name: "Alleviating Armour",        cost: 20, requiresAccess: "medium armour" },
       { name: "Gambler's Armour",          cost: 20, requiresAccess: "light armour" },
       { name: "Bedazzling Helm",           cost: 20 },
-      { name: "Shield of the Warrior True",cost: 15 },
+      { name: "Shield of the Warrior True",cost: 15, requiresAccess: "shield" },
       { name: "Dragonhelm",               cost: 10 },
       { name: "Enchanted Shield",          cost: 10, common: true, requiresAccess: "shield" },
-      { name: "Charmed Shield",            cost: 5,  common: true }
+      { name: "Charmed Shield",            cost: 5,  common: true, requiresAccess: "shield" }
     ],
     "Talismans": [
       { name: "Talisman of Preservation", cost: 40 },
@@ -764,7 +764,7 @@
   units: {
     characters: [
       { id: "chieftains", name: "Chieftains", isCharacter: true,
-      access: ["spear","additional hand weapon","lance","great weapon","light armour","medium armour","shield"],
+      access: ["spear","additional hand weapon","great weapon","light armour","medium armour","shield","light lance","javelin"],
         variants: [
           { name: "Beastlord", points: 125, magicBudget: 100 },
           { name: "Wargor",    points: 85,  magicBudget: 50  }
@@ -852,7 +852,7 @@
       },
 
       { id: "warhoof", name: "Warhoof", isCharacter: true, cannotBeGeneral: true,
-      access: ["light armour","additional hand weapon","lance","great weapon","medium armour","shield"],
+      access: ["light armour","additional hand weapon","great weapon","medium armour","shield","light lance","javelin"],
         variants: [
           { name: "Warhoof", points: 120, magicBudget: 50 }
         ],
@@ -882,7 +882,7 @@
       },
 
       { id: "halfhorn", name: "Halfhorn", isCharacter: true, cannotBeGeneral: true,
-      access: ["additional hand weapon","spear","light armour","shield"],
+      access: ["additional hand weapon","spear","light armour","shield","shortbow","javelin"],
         variants: [
           { name: "Halfhorn", points: 30, magicBudget: 25 }
         ],

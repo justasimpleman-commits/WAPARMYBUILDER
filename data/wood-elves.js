@@ -52,21 +52,21 @@
     "Magic Weapons": [
       { name: "The Spirit Sword", cost: 50 },
       { name: "Daith's Reaper", cost: 50 },
-      { name: "Dawnspear", cost: 35, requiresAccess: ["lance","spear"] },
+      { name: "Dawnspear", cost: 35, requiresAccess: ["light lance", "spear"] },
       { name: "Callach's Claw", cost: 25 },
-      { name: "The Hunter's Talon", cost: 25 },
-      { name: "Spear of Daith", cost: 25, requiresAccess: ["lance","spear"] },
-      { name: "The Bow of Loren", cost: 20 },
+      { name: "The Hunter's Talon", cost: 25, requiresAccess: "longbow" },
+      { name: "Spear of Daith", cost: 25, requiresAccess: ["light lance", "spear"] },
+      { name: "The Bow of Loren", cost: 20, requiresAccess: "longbow" },
       { name: "Blades of Loec", cost: 20, only: "Shadowdancer", requiresAccess: "additional hand weapon" },
       { name: "Greenwood Gladius", cost: 20 },
-      { name: "Hunt Master's Pride", cost: 20, only: "Wild Hunter", requiresAccess: "lance" },
-      { name: "Spear of Twilight", cost: 20, requiresAccess: ["lance","spear"] },
+      { name: "Hunt Master's Pride", cost: 20, only: "Wild Hunter", requiresAccess: "light lance" },
+      { name: "Spear of Twilight", cost: 20, requiresAccess: ["light lance", "spear"] },
       { name: "Sword of a Thousand Winters", cost: 20 },
-      { name: "Vaul's Wrath", cost: 20 },
-      { name: "Spear of the Hunt", cost: 15, only: "Wild Hunter", requiresAccess: "lance" },
+      { name: "Vaul's Wrath", cost: 20, requiresAccess: "longbow" },
+      { name: "Spear of the Hunt", cost: 15, only: "Wild Hunter", requiresAccess: "light lance" },
       { name: "Splinterbirch Blade", cost: 15 },
-      { name: "Starcaster Longbow", cost: 15 },
-      { name: "Asyendi's Bane", cost: 10 },
+      { name: "Starcaster Longbow", cost: 15, requiresAccess: "longbow" },
+      { name: "Asyendi's Bane", cost: 10, requiresAccess: "longbow" },
       { name: "Rageth's Wildfire Blades", cost: 10, requiresAccess: "additional hand weapon" }
     ],
     "Magic Armour": [
@@ -185,10 +185,10 @@
       { name: "Alleviating Armour", cost: 20, requiresAccess: "medium armour" },
       { name: "Gambler's Armour", cost: 20, requiresAccess: "light armour" },
       { name: "Bedazzling Helm", cost: 20 },
-      { name: "Shield of the Warrior True", cost: 15 },
+      { name: "Shield of the Warrior True", cost: 15, requiresAccess: "shield" },
       { name: "Dragonhelm", cost: 10 },
       { name: "Enchanted Shield", cost: 10, common: true, requiresAccess: "shield" },
-      { name: "Charmed Shield", cost: 5, common: true }
+      { name: "Charmed Shield", cost: 5, common: true, requiresAccess: "shield" }
     ],
     "Talismans": [
       { name: "Talisman of Preservation", cost: 40 },
@@ -517,7 +517,7 @@
     characters: [
       {
         id: "highborns", name: "Highborns", isCharacter: true,
-        access: ["additional hand weapon","spear","lance","great weapon","light armour","shield"],
+        access: ["additional hand weapon","spear","great weapon","light armour","shield","light lance","shortbow","longbow"],
         variants: [
           { name: "Glade Lord", points: 120, magicBudget: 100 },
           { name: "Glade Captain", points: 55, magicBudget: 50 }
@@ -568,7 +568,7 @@
       },
       {
         id: "wildhunter", name: "Wild Hunter", isCharacter: true,
-        access: ["lance","shield","light armour"],
+        access: ["shield","light armour","light lance"],
         variants: [ { name: "Wild Hunter", points: 110, magicBudget: 50 } ],
         options: [
           { id: "shield", type: "toggle", label: "Shield", cost: 5, per: "flat" },
@@ -580,7 +580,7 @@
       },
       {
         id: "waystalker", name: "Waystalker", isCharacter: true,
-        access: ["additional hand weapon"],
+        access: ["additional hand weapon","shortbow","longbow"],
         variants: [ { name: "Waystalker", points: 90, magicBudget: 50 } ],
         options: [
           { id: "ahw", type: "toggle", label: "Additional hand weapon", cost: 3, per: "flat" },
@@ -655,7 +655,7 @@
         variants: [ { name: "Araloth", points: 185, magicBudget: 75 } ], options: [],
         notes: "If included: one Eternal Guard unit may be taken as Core, and one may be upgraded to Guardians of Talsyn (+1/model)." },
       { id: "scarloc", name: "Scarloc", isCharacter: true, isSpecialChar: true,
-      access: [],
+      access: ["longbow"],
         variants: [ { name: "Scarloc", points: 100, magicBudget: 25 } ],
         options: [ { id: "arrows", type: "choice", label: "Enchanted Arrows", choices: [
           { label: "Arcane Bodkins", cost: 1 }, { label: "Moonfire Shot", cost: 1 }, { label: "Starfire Shafts", cost: 1 },

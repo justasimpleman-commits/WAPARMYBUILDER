@@ -39,20 +39,20 @@
   magicItems: {
     "Magic Weapons": [
       { name: "Jade Blade of the Great Fleet", cost: 35 },
-      { name: "Nuku Cho's Crossbow", cost: 35 },
-      { name: "Silver Moon Bow", cost: 30 },
-      { name: "Spirit Longma Spear", cost: 30, requiresAccess: ["lance","spear"] },
+      { name: "Nuku Cho's Crossbow", cost: 35, requiresAccess: "repeater crossbow" },
+      { name: "Silver Moon Bow", cost: 30, requiresAccess: "longbow" },
+      { name: "Spirit Longma Spear", cost: 30, requiresAccess: ["light lance", "spear"] },
       { name: "Vorpal Shard", cost: 30 },
       { name: "The Brazen Blade", cost: 25 },
       { name: "Dawn Glaive", cost: 25, requiresAccess: "halberd" },
       { name: "The Sword of Reason", cost: 25, requiresAccess: "great weapon" },
-      { name: "Ascendant Celestial Blade", cost: 20 },
+      { name: "Ascendant Celestial Blade", cost: 20, requiresAccess: "celestial blade" },
       { name: "Blade of Xen Wu", cost: 20 },
       { name: "Serpent Fang", cost: 20 },
       { name: "Sword of Nan-Gau", cost: 20 },
       { name: "Vermillion Blade", cost: 20 },
       { name: "Sun & Moon Blades", cost: 15, requiresAccess: "additional hand weapon" },
-      { name: "Wrath of Xen Yang", cost: 10, requiresAccess: ["lance","spear"] }
+      { name: "Wrath of Xen Yang", cost: 10, requiresAccess: ["light lance", "spear"] }
     ],
     "Magic Armour": [
       { name: "Jade Armour of Beichai", cost: 55, requiresAccess: "heavy armour" },
@@ -155,10 +155,10 @@
       { name: "Alleviating Armour", cost: 20, requiresAccess: "medium armour" },
       { name: "Gambler's Armour", cost: 20, requiresAccess: "light armour" },
       { name: "Bedazzling Helm", cost: 20 },
-      { name: "Shield of the Warrior True", cost: 15 },
+      { name: "Shield of the Warrior True", cost: 15, requiresAccess: "shield" },
       { name: "Dragonhelm", cost: 10 },
       { name: "Enchanted Shield", cost: 10, common: true, requiresAccess: "shield" },
-      { name: "Charmed Shield", cost: 5, common: true }
+      { name: "Charmed Shield", cost: 5, common: true, requiresAccess: "shield" }
     ],
     "Talismans": [
       { name: "Talisman of Preservation", cost: 40 },
@@ -870,7 +870,7 @@
     characters: [
       {
         id: "celestialcommanders", name: "Celestial Commanders", isCharacter: true,
-        access: ["additional hand weapon","spear","lance","halberd","great weapon","light armour","medium armour","heavy armour"],
+        access: ["additional hand weapon","spear","halberd","great weapon","light armour","medium armour","heavy armour","celestial blade","light lance","shortbow","repeater crossbow","longbow","crossbow","handgun","dragon fire pistol"],
         variants: [
           { name: "Celestial General", points: 105, magicBudget: 100 },
           { name: "Celestial Captain", points: 60, magicBudget: 50 }
@@ -911,7 +911,7 @@
       },
       {
         id: "shugengan", name: "Dragon-Blooded Shugengan", isCharacter: true,
-        access: ["additional hand weapon","spear","lance","halberd","great weapon","light armour","medium armour"],
+        access: ["additional hand weapon","spear","halberd","great weapon","light armour","medium armour","celestial blade","light lance","dragon fire pistol"],
         variants: [
           { name: "Dragon-Blooded Shugengan", points: 240, wizardLevel: 3, magicBudget: 100 }
         ],
@@ -941,7 +941,7 @@
       },
       {
         id: "dragondescendant", name: "Dragon Descendant", isCharacter: true,
-        access: ["light armour","additional hand weapon","halberd","great weapon"],
+        access: ["light armour","additional hand weapon","halberd","great weapon","celestial blade"],
         variants: [
           { name: "Dragon Descendant", points: 340, wizardLevel: 3, magicBudget: 100 }
         ],
@@ -991,7 +991,7 @@
       },
       {
         id: "gatemasters", name: "Gate Masters", isCharacter: true,
-        access: ["spear","lance","halberd","light armour","medium armour","shield"],
+        access: ["spear","halberd","light armour","medium armour","shield","light lance","shortbow","longbow","repeater crossbow","crossbow"],
         variants: [
           { name: "Gate Master", points: 70, magicBudget: 100 },
           { name: "Gate Keeper", points: 45, magicBudget: 50 }
@@ -1038,7 +1038,7 @@
       },
       {
         id: "blademaster", name: "Blademaster", isCharacter: true, cannotBeGeneral: true,
-        access: ["additional hand weapon","spear","halberd","great weapon","light armour"],
+        access: ["additional hand weapon","spear","halberd","great weapon","light armour","celestial blade"],
         variants: [
           { name: "Blademaster", points: 120, magicBudget: 50 }
         ],

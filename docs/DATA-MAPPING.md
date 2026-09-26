@@ -67,7 +67,7 @@ units → Special Characters**. Map it like this:
 | **Special Characters** | same arrays, `isSpecialChar:true` (engine enforces unique) | `mustBeGeneral` / `cannotBeGeneral` as needed |
 | Every unit's **Profile / Equipment / Special Rules** | `unitInfo: { id:{ profile:[[name,M,WS,BS,S,T,W,I,A,Ld],…], eq, rules } }` | drives the detail popup; `eq`/`rules` are comma/semicolon lists |
 | Each character's **EQUIPMENT + weapon/armour OPTIONS** (the union of types it may use) | `access:[…]` on the character | powers magic-item `requiresAccess` gating — SCHEMA "Unit entry" |
-| A **Magic Weapon/Armour** whose description names a mundane type (*Heavy armour*, *Great weapon*, *Shield*, *Light lance*…) | `requiresAccess:"<type>"` on that item | only models with the type in `access` may take it; self-granting items ("…despite not normally allowed") stay untagged — SCHEMA "Magic item" |
+| A **Magic Weapon/Armour** whose description names a mundane type (*Heavy armour*, *Great weapon*, *Shield*, *Light lance*, *Elven longbow*, *Whip*, *Gut-plate*…) | `requiresAccess:"<type>"` on that item (heavy vs light lance matters; `{all:[…]}` for "X and Y") | only models with the type in `access` may take it; self-granting items ("…despite not normally allowed") stay untagged — SCHEMA "Magic item" |
 | A **lore only legal under a sub-species / upgrade / alignment** | a `lores` entry object with `requiresChoice`/`requiresToggle`/`requiresVariant` | e.g. Goblin Shaman Bad Moon (Night Goblin), Daemon Prince god-lore (alignment) — SCHEMA "Unit entry" |
 
 ## Extracting one unit entry

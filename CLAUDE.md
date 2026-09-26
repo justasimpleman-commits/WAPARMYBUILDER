@@ -181,7 +181,13 @@ Category caps; 25% single-unit cost limit; duplicate Special/Rare caps by game
 size; special characters unique; army-wide magic-item uniqueness (common `*` items
 exempt); one item per category per model; per-character magic-item budgets;
 Expendable Core needs a non-Expendable Core unit; slave units ≤ Hobgoblin
-Cutthroat/Archer units; exactly one Army General.
+Cutthroat/Archer units; exactly one Army General; **equipment access** — a magic
+weapon/armour that *is* a mundane type (`requiresAccess`: heavy armour, shield, heavy
+lance, longbow, gut-plate…) only for a character whose `access` list (base equipment +
+buyable options) includes that type (armour tiered light⊂medium⊂heavy; items with no
+mundane type are open to all). The picker shows such items disabled ("needs Shield")
+and every typed item carries a type badge (`itemEquipType`); `test-engine.js` audits
+every book's `access` lists against equipment/options.
 
 **Validation is data, then view.** `collectIssues()` (engine) returns
 `{errs:[{msg,uid}], warns:[…]}`; `uid` names the roster entry an issue is about

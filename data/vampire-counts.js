@@ -123,13 +123,13 @@
       { name: "Frostblade", cost: 60 },
       { name: "Skabscrath", cost: 40 },
       { name: "Slaking Blade", cost: 40 },
-      { name: "Dreadlance", cost: 35, requiresAccess: "lance" },
-      { name: "Asp Bow", cost: 25 },
+      { name: "Dreadlance", cost: 35, requiresAccess: "heavy lance" },
+      { name: "Asp Bow", cost: 25, equipType: "Bow", requiresAccess: ["longbow","shortbow"] },   // "Bow." — any bow (the Lahmian buys a shortbow)
       { name: "Slitter", cost: 25, requiresAccess: "additional hand weapon" },
       { name: "Keening Bone", cost: 20, blood: ["Strigoi"] },   // self-grants throwing weapon access — unrestricted
       { name: "Reaper of Sorrows", cost: 15, only: "Cairn Wraith", requiresAccess: "great weapon" },
       { name: "Sword of Kings", cost: 15, only: "Wight King" },
-      { name: "The Balefire Spike", cost: 15, requiresAccess: "lance" },
+      { name: "The Balefire Spike", cost: 15, requiresAccess: "heavy lance" },
       { name: "Shadow's Edge", cost: 10 }
     ],
     "Magic Armour": [
@@ -253,10 +253,10 @@
       { name: "Alleviating Armour", cost: 20, requiresAccess: "medium armour" },
       { name: "Gambler's Armour", cost: 20, requiresAccess: "light armour" },
       { name: "Bedazzling Helm", cost: 20 },
-      { name: "Shield of the Warrior True", cost: 15 },
+      { name: "Shield of the Warrior True", cost: 15, requiresAccess: "shield" },
       { name: "Dragonhelm", cost: 10 },
       { name: "Enchanted Shield", cost: 10, common: true, requiresAccess: "shield" },
-      { name: "Charmed Shield", cost: 5, common: true }
+      { name: "Charmed Shield", cost: 5, common: true, requiresAccess: "shield" }
     ],
     "Talismans": [
       { name: "Talisman of Preservation", cost: 40 },
@@ -323,7 +323,7 @@
     characters: [
       // ===== von Carsteins =====
       { id: "voncarstein", name: "von Carstein", isCharacter: true, tags: ["Vampire"], bloodline: "von Carstein",
-        access: ["additional hand weapon","lance","halberd","great weapon","light armour","medium armour","heavy armour"],
+        access: ["additional hand weapon","halberd","great weapon","light armour","medium armour","heavy armour","heavy lance"],
         lores: ["Death","Necromancy","Shadow"],
         variants: [
           { name: "Count", points: 190, wizardLevel: 0, magicBudget: 100 },
@@ -394,7 +394,7 @@
 
       // ===== Blood Dragons =====
       { id: "blooddragon", name: "Blood Dragon", isCharacter: true, tags: ["Vampire"], bloodline: "Blood Dragon",
-        access: ["heavy armour","shield","additional hand weapon","lance","great weapon"],   // heavy armour is BASE equipment
+        access: ["heavy armour","shield","additional hand weapon","great weapon","heavy lance"],   // heavy armour is BASE equipment
         lores: ["Death","Necromancy","Shadow"],
         variants: [
           { name: "Lord", points: 215, wizardLevel: 0, magicBudget: 100 },
@@ -467,7 +467,7 @@
 
       // ===== Wight Lords (NOT vampires) =====
       { id: "wightlord", name: "Wight Lord", isCharacter: true,
-        access: ["additional hand weapon","lance","great weapon","medium armour","heavy armour","shield"],
+        access: ["additional hand weapon","great weapon","medium armour","heavy armour","shield","heavy lance"],
         variants: [
           { name: "Wight King", points: 140, wizardLevel: 0, magicBudget: 100 },
           { name: "Wight Lord", points: 100, wizardLevel: 0, magicBudget: 50 }
@@ -507,7 +507,7 @@
 
       // ===== Swain (conditional — Lahmian char required) =====
       { id: "swain", name: "Swain", isCharacter: true, cannotBeGeneral: true,
-        access: ["additional hand weapon","halberd","great weapon","light armour","medium armour","heavy armour","shield"],
+        access: ["additional hand weapon","halberd","great weapon","light armour","medium armour","heavy armour","shield","pistol"],
         variants: [ { name: "Swain", points: 50, wizardLevel: 0, magicBudget: 50 } ],
         options: [
           { id: "wpn", type: "choice", label: "Weapon", choices: [
