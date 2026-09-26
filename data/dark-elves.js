@@ -51,18 +51,18 @@
       { name: "Executioner's Axe", cost: 45, requiresAccess: "great weapon" },
       { name: "Blood Blades", cost: 30, requiresAccess: "additional hand weapon" },
       { name: "Shade Claw", cost: 30 },
-      { name: "Lifetaker", cost: 25 },
+      { name: "Lifetaker", cost: 25, requiresAccess: "deathrain crossbow" },
       { name: "Web of Shadows", cost: 25 },
       { name: "Blade of Spite", cost: 20 },
       { name: "Crone Blade", cost: 20 },
-      { name: "Deathpiercer", cost: 20, requiresAccess: "lance" },
+      { name: "Deathpiercer", cost: 20, requiresAccess: "heavy lance" },
       { name: "Draich of Dark Power", cost: 20, requiresAccess: "great weapon" },
       { name: "Shadesliver", cost: 20, requiresAccess: "additional hand weapon" },
       { name: "The Mirror Glaive", cost: 20, requiresAccess: "halberd" },
       { name: "Shadracar's Fang", cost: 20 },
       { name: "Soulrender", cost: 20, requiresAccess: "great weapon" },
       { name: "Sword of Ruin", cost: 20 },
-      { name: "Caledor's Bane", cost: 15, requiresAccess: "lance" },
+      { name: "Caledor's Bane", cost: 15, requiresAccess: "heavy lance" },
       { name: "Heartseeker", cost: 15 },
       { name: "Hydra Blade", cost: 15 },
       { name: "Dagger of Hotek", cost: 10, requiresAccess: "additional hand weapon" }
@@ -72,7 +72,7 @@
       { name: "Armour of Living Death", cost: 40, requiresAccess: "heavy armour" },
       { name: "Armour of Darkness", cost: 35, requiresAccess: "heavy armour" },
       { name: "Blood Armour", cost: 30, requiresAccess: "heavy armour" },
-      { name: "Cloak of Hag Graef", cost: 25 },
+      { name: "Cloak of Hag Graef", cost: 25, requiresAccess: "sea dragon cloak" },
       { name: "Shield of Ghrond", cost: 25, requiresAccess: "shield" }
     ],
     "Talismans": [
@@ -183,10 +183,10 @@
       { name: "Alleviating Armour", cost: 20, requiresAccess: "medium armour" },
       { name: "Gambler's Armour", cost: 20, requiresAccess: "light armour" },
       { name: "Bedazzling Helm", cost: 20 },
-      { name: "Shield of the Warrior True", cost: 15 },
+      { name: "Shield of the Warrior True", cost: 15, requiresAccess: "shield" },
       { name: "Dragonhelm", cost: 10 },
       { name: "Enchanted Shield", cost: 10, common: true, requiresAccess: "shield" },
-      { name: "Charmed Shield", cost: 5, common: true }
+      { name: "Charmed Shield", cost: 5, common: true, requiresAccess: "shield" }
     ],
     "Talismans": [
       { name: "Talisman of Preservation", cost: 40 },
@@ -588,7 +588,7 @@
     characters: [
       {
         id: "commanders", name: "Commanders", isCharacter: true,
-        access: ["additional hand weapon","spear","lance","halberd","great weapon","light armour","medium armour","heavy armour","shield"],
+        access: ["additional hand weapon","spear","halberd","great weapon","light armour","medium armour","heavy armour","shield","light lance","heavy lance","deathrain crossbow","sea dragon cloak"],
         variants: [
           { name: "Dreadlord", points: 125, magicBudget: 100 },
           { name: "Dreadmaster", points: 55, magicBudget: 50 }
@@ -645,7 +645,7 @@
       },
       {
         id: "fleetmaster", name: "Black Ark Fleetmaster", isCharacter: true,
-        access: ["additional hand weapon","light armour"],
+        access: ["additional hand weapon","light armour","sea dragon cloak"],
         variants: [ { name: "Fleetmaster", points: 70, magicBudget: 50 } ],
         options: [
           { id: "wep", type: "choice", label: "Weapon", choices: [
@@ -656,7 +656,7 @@
       },
       {
         id: "beastmaster", name: "Beastmaster", isCharacter: true,
-        access: ["additional hand weapon","spear","lance","light armour"],
+        access: ["additional hand weapon","spear","light armour","light lance","sea dragon cloak"],
         variants: [ { name: "Beastmaster", points: 45, magicBudget: 50 } ],
         options: [
           { id: "wep", type: "choice", label: "Weapon", choices: [
@@ -680,7 +680,7 @@
       },
       {
         id: "assassin", name: "Khainite Assassin", isCharacter: true, cannotBeGeneral: true,
-        access: ["additional hand weapon","light armour"],
+        access: ["additional hand weapon","light armour","throwing weapon"],
         variants: [ { name: "Khainite Assassin", points: 105, magicBudget: 50 } ],
         options: [
           { id: "ahw", type: "toggle", label: "Additional hand weapon", cost: 2, per: "flat" },
@@ -692,7 +692,7 @@
       },
       {
         id: "gladiatrix", name: "High Gladiatrix", isCharacter: true, cannotBeGeneral: true,
-        access: ["additional hand weapon","halberd","light armour"],
+        access: ["additional hand weapon","halberd","light armour","buckler"],
         variants: [ { name: "High Gladiatrix", points: 145, magicBudget: 50 } ],
         options: [
           { id: "wep", type: "choice", label: "Weapon", choices: [

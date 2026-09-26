@@ -41,18 +41,18 @@
       { name: "Deathsinger", cost: 65 },
       { name: "Sword of Ages", cost: 60 },
       { name: "Blade of the Phoenix", cost: 50 },
-      { name: "Bow of the Seafarer", cost: 45, only: "Lothern Sea Helm" },
+      { name: "Bow of the Seafarer", cost: 45, only: "Lothern Sea Helm", requiresAccess: "shortbow" },
       { name: "Cloudcleaver", cost: 45, requiresAccess: "halberd" },
-      { name: "Spear of the Shores", cost: 40, requiresAccess: ["lance","spear"] },
+      { name: "Spear of the Shores", cost: 40, requiresAccess: ["light lance", "spear"] },
       { name: "Sword of Victory", cost: 35 },
-      { name: "The Reaver Bow", cost: 30 },
+      { name: "The Reaver Bow", cost: 30, requiresAccess: "shortbow" },
       { name: "The Blade of Leaping Gold", cost: 25 },
       { name: "Blade of Darting Steel", cost: 25 },
       { name: "Sword of Hoeth", cost: 20, requiresAccess: "great weapon" },
-      { name: "Dragonblade Lance", cost: 20, requiresAccess: "lance" },
-      { name: "Jade Bow", cost: 20 },
+      { name: "Dragonblade Lance", cost: 20, requiresAccess: "heavy lance" },
+      { name: "Jade Bow", cost: 20, requiresAccess: "longbow" },
       { name: "Foe Bane", cost: 15 },
-      { name: "Bow of Tor Alessi", cost: 10 }
+      { name: "Bow of Tor Alessi", cost: 10, requiresAccess: "longbow" }
     ],
     "Magic Armour": [
       { name: "The Golden Shield", cost: 30, requiresAccess: "shield" },
@@ -160,10 +160,10 @@
       { name: "Alleviating Armour", cost: 20, requiresAccess: "medium armour" },
       { name: "Gambler's Armour", cost: 20, requiresAccess: "light armour" },
       { name: "Bedazzling Helm", cost: 20 },
-      { name: "Shield of the Warrior True", cost: 15 },
+      { name: "Shield of the Warrior True", cost: 15, requiresAccess: "shield" },
       { name: "Dragonhelm", cost: 10 },
       { name: "Enchanted Shield", cost: 10, common: true, requiresAccess: "shield" },
-      { name: "Charmed Shield", cost: 5, common: true }
+      { name: "Charmed Shield", cost: 5, common: true, requiresAccess: "shield" }
     ],
     "Talismans": [
       { name: "Talisman of Preservation", cost: 40 },
@@ -552,7 +552,7 @@
     characters: [
       {
         id: "commanders", name: "Commanders", isCharacter: true,
-        access: ["light armour","additional hand weapon","spear","lance","halberd","great weapon","medium armour","heavy armour","shield"],
+        access: ["light armour","additional hand weapon","spear","halberd","great weapon","medium armour","heavy armour","shield","light lance","heavy lance","shortbow","longbow"],
         variants: [
           { name: "Prince", points: 125, magicBudget: 100 },
           { name: "Noble", points: 55, magicBudget: 50 }
@@ -610,7 +610,7 @@
       },
       {
         id: "lordaenarion", name: "Lords of Aenarion", isCharacter: true,
-        access: ["additional hand weapon","spear","lance","halberd","great weapon","light armour","medium armour","heavy armour","shield"],
+        access: ["additional hand weapon","spear","halberd","great weapon","light armour","medium armour","heavy armour","shield","light lance","heavy lance"],
         variants: [ { name: "Lord of Aenarion", points: 175, magicBudget: 100 } ],
         options: [
           { id: "wep", type: "choice", label: "Combat weapon", choices: [

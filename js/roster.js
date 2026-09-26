@@ -656,7 +656,8 @@ function addMagicSlot(box,e,u,label,slotKey,sourceCat,budget,extra){
     remaining:(sel)=> isFinite(base) ? base - sel.reduce((s,n)=>s+itemCost(n),0) : Infinity,
     onConfirm:(sel)=>update(()=>{ e.magic[slotKey]=sel[0]||""; })
   });
-  r.appendChild(pickBtn(cur?`${cur} (${itemCost(cur)})`:"Choose…", !cur, open));
+  const et=cur?itemEquipType(findItem(cur)):null;
+  r.appendChild(pickBtn(cur?`${cur}${et?` · ${et}`:""} (${itemCost(cur)})`:"Choose…", !cur, open));
   r.appendChild(pickInfoBtn("Selected item", ()=>openChosenInfoRows(label, cur?[{name:cur,cost:itemCost(cur),desc:itemDescOf(cur)}]:[])));
   box.appendChild(r);
 }

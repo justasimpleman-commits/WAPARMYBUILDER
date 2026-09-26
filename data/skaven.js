@@ -47,24 +47,24 @@
   magicItems: {
     "Magic Weapons": [
       { name: "Fellblade", cost: 85, only: "Clawlord" },
-      { name: "Electro-whip", cost: 40, common: true, only: "Clan Moulder" },
+      { name: "Electro-whip", cost: 40, common: true, only: "Clan Moulder", requiresAccess: "whip" },
       { name: "Dwarf Slayer", cost: 35 },
       { name: "Desolate Blade", cost: 30 },
-      { name: "The Fumigatous", cost: 30, only: "Clan Pestilens" },
+      { name: "The Fumigatous", cost: 30, only: "Clan Pestilens", requiresAccess: "plague censer" },
       { name: "Languisher Sword", cost: 25 },
       { name: "Shock-Prod", cost: 25, common: true, only: "Clan Moulder", requiresAccess: "halberd" },
       { name: "The Three Fangs", cost: 25, requiresAccess: "additional hand weapon" },
       { name: "Cursed Blade of Delirium", cost: 20 },
-      { name: "Headsplitter", cost: 20, only: "Clan Eshin" },
+      { name: "Headsplitter", cost: 20, only: "Clan Eshin", requiresAccess: "sling" },
       { name: "Things-Catcher", cost: 20, common: true, only: "Clan Moulder", requiresAccess: "halberd" },
       { name: "Snap-Snap Snarepole", cost: 20, common: true, only: "Clan Moulder", requiresAccess: "halberd" },
       { name: "Blade of Black Fury", cost: 15 },
       { name: "Gnawshard", cost: 15 },
       { name: "Things-Bane", cost: 15 },
       { name: "Weeping Blades", cost: 15, common: true, only: "Clan Eshin", requiresAccess: "additional hand weapon" },
-      { name: "Warpstone Stars", cost: 15, common: true },
+      { name: "Warpstone Stars", cost: 15, common: true, requiresAccess: "throwing weapon" },
       { name: "Brooding Blade", cost: 10 },
-      { name: "Lash of Fangs", cost: 10, only: "Clan Moulder" },
+      { name: "Lash of Fangs", cost: 10, only: "Clan Moulder", requiresAccess: "whip" },
       { name: "Warpforged Blade", cost: 10, common: true, only: "Clan Skryre" }
     ],
     "Magic Armour": [
@@ -167,10 +167,10 @@
       { name: "Alleviating Armour", cost: 20, requiresAccess: "medium armour" },
       { name: "Gambler's Armour", cost: 20, requiresAccess: "light armour" },
       { name: "Bedazzling Helm", cost: 20 },
-      { name: "Shield of the Warrior True", cost: 15 },
+      { name: "Shield of the Warrior True", cost: 15, requiresAccess: "shield" },
       { name: "Dragonhelm", cost: 10 },
       { name: "Enchanted Shield", cost: 10, common: true, requiresAccess: "shield" },
-      { name: "Charmed Shield", cost: 5, common: true }
+      { name: "Charmed Shield", cost: 5, common: true, requiresAccess: "shield" }
     ],
     "Talismans": [
       { name: "Talisman of Preservation", cost: 40 },
@@ -615,7 +615,7 @@
       },
       {
         id: "commanders", name: "Commanders", isCharacter: true,
-        access: ["medium armour","additional hand weapon","halberd","great weapon","light armour","heavy armour","shield"],
+        access: ["medium armour","additional hand weapon","halberd","great weapon","light armour","heavy armour","shield","pistol"],
         variants: [
           { name: "Clawlord", points: 85, magicBudget: 100 },
           { name: "Clawleader", points: 45, magicBudget: 50 }
@@ -652,7 +652,7 @@
       },
       {
         id: "assassins", name: "Assassins", isCharacter: true,
-        access: ["additional hand weapon"],
+        access: ["additional hand weapon","throwing weapon","blowpipe","sling"],
         variants: [
           { name: "Master Assassin", points: 145, magicBudget: 100 },
           { name: "Assassin", points: 100, magicBudget: 50 }
@@ -679,7 +679,7 @@
       },
       {
         id: "moulders", name: "Master Moulders", isCharacter: true,
-        access: ["light armour","additional hand weapon","great weapon"],
+        access: ["light armour","additional hand weapon","great weapon","whip"],
         variants: [
           { name: "Master Mutator", points: 80, magicBudget: 100 },
           { name: "Master Moulder", points: 30, magicBudget: 50 }
@@ -699,7 +699,7 @@
       },
       {
         id: "plaguepriests", name: "Plague Priests", isCharacter: true, lores: ["Plague"],
-        access: ["additional hand weapon","flail","great weapon"],
+        access: ["additional hand weapon","flail","great weapon","plague censer"],
         variants: [
           { name: "Plaguelord", points: 165, wizardLevel: 2, magicBudget: 100 },
           { name: "Plague Priest", points: 90, wizardLevel: 1, magicBudget: 50 }
@@ -715,7 +715,7 @@
       },
       {
         id: "warlocks", name: "Warlock Engineers", isCharacter: true, lores: ["Ruin"],
-        access: ["halberd","light armour"],
+        access: ["halberd","light armour","pistol"],
         variants: [
           { name: "Warlock Master", points: 155, wizardLevel: 3, magicBudget: 100 },
           { name: "Warlock Engineer", points: 60, magicBudget: 50 }

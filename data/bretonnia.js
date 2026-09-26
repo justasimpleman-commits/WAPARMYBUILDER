@@ -71,24 +71,24 @@
 
   magicItems: {
     "Magic Weapons": [
-      { name: "Silver Lance of the Blessed", cost: 70, requiresAccess: "lance" },
+      { name: "Silver Lance of the Blessed", cost: 70, requiresAccess: "heavy lance" },
       { name: "Dragon Slaying Sword", cost: 45, requiresAccess: "great weapon" },
-      { name: "Crusader's Lance", cost: 30, requiresAccess: "lance" },
+      { name: "Crusader's Lance", cost: 30, requiresAccess: "heavy lance" },
       { name: "Sword of Heroes", cost: 30 },
-      { name: "Wyrmlance", cost: 30, requiresAccess: "lance" },
+      { name: "Wyrmlance", cost: 30, requiresAccess: "heavy lance" },
       { name: "Birth-sword of Carcassonne", cost: 25 },
       { name: "Sword of the Quest", cost: 25, only: "Questing Vow" },
-      { name: "Heartwood Lance", cost: 25, requiresAccess: "lance" },
+      { name: "Heartwood Lance", cost: 25, requiresAccess: "heavy lance" },
       { name: "Frontier Axe", cost: 25, requiresAccess: "great weapon" },
-      { name: "The Virtuous Lance", cost: 25, requiresAccess: "lance" },
+      { name: "The Virtuous Lance", cost: 25, requiresAccess: "heavy lance" },
       { name: "Foebreaker", cost: 20 },
-      { name: "Lance of Artois", cost: 15, requiresAccess: "lance" },
+      { name: "Lance of Artois", cost: 15, requiresAccess: "heavy lance" },
       { name: "Sword of the Lady's Champion", cost: 15, only: "Grail Vow" },
       { name: "Sword of the Stout Hearted", cost: 10, requiresAccess: "great weapon" }
     ],
     "Magic Armour": [
       { name: "Armour of the Midsummer Sun", cost: 50, requiresAccess: "heavy armour" },
-      { name: "Armour of Agilulf", cost: 40, requiresAccess: "heavy armour" },
+      { name: "Armour of Agilulf", cost: 40, requiresAccess: { all: ["heavy armour", "shield"] } },
       { name: "Cuirass of Fortune", cost: 40, requiresAccess: "heavy armour" },
       { name: "Anointed Armour", cost: 35, requiresAccess: "heavy armour" },
       { name: "Gromril Great Helm", cost: 35 },
@@ -180,10 +180,10 @@
       { name: "Alleviating Armour", cost: 20, requiresAccess: "medium armour" },
       { name: "Gambler's Armour", cost: 20, requiresAccess: "light armour" },
       { name: "Bedazzling Helm", cost: 20 },
-      { name: "Shield of the Warrior True", cost: 15 },
+      { name: "Shield of the Warrior True", cost: 15, requiresAccess: "shield" },
       { name: "Dragonhelm", cost: 10 },
       { name: "Enchanted Shield", cost: 10, common: true, requiresAccess: "shield" },
-      { name: "Charmed Shield", cost: 5, common: true }
+      { name: "Charmed Shield", cost: 5, common: true, requiresAccess: "shield" }
     ],
     "Talismans": [
       { name: "Talisman of Preservation", cost: 40 },
@@ -447,7 +447,7 @@
     characters: [
       {
         id: "lords", name: "Lords (Baron / Paladin)", isCharacter: true, virtueEligible: true,
-        access: ["lance","halberd","great weapon","heavy armour","shield","barding"],
+        access: ["halberd","great weapon","heavy armour","shield","barding","heavy lance"],
         variants: [
           { name: "Baron", points: 100, magicBudget: 100 },
           { name: "Paladin", points: 60, magicBudget: 50 }
@@ -574,7 +574,7 @@
       },
       {
         id: "tristan", name: "Tristan the Trobadour", isCharacter: true, isSpecialChar: true,
-        access: ["lance","heavy armour","shield","barding"],
+        access: ["heavy armour","shield","barding","heavy lance"],
         variants: [ { name: "Tristan the Trobadour", points: 145, magicBudget: 25 } ], options: [],
         notes: "Cavalry on Warhorse, accompanied by Jules the Jester. May take Magic Items up to 25 points. May use a heavy lance despite the Questing Vow."
       },

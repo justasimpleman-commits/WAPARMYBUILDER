@@ -448,18 +448,23 @@ function entryBlood(e,u){ return u.bloodline || null; }
    A magic item that IS a mundane weapon or armour type (e.g. a magic heavy
    armour, a magic great weapon) may only be taken by a model that can use that
    type — i.e. it has it in base equipment or can buy it. Each such item carries
-   `requiresAccess:"heavy armour"` (or an array = any-of); each character declares
+   `requiresAccess:"heavy armour"` (or an array = any-of; `{all:[…]}` = all-of,
+   e.g. an item that is both heavy armour and a shield); each character declares
    the union of types it has/can buy in `access:[…]` (unit-level, optionally
    extended per variant). Items with no `requiresAccess` (a generic magic sword,
    a talisman) are unrestricted. Tokens are matched after normalising through a
-   small alias map so "heavy lance"≡"lance", "polearm"≡"halberd", etc. */
+   small alias map so "polearm"≡"halberd", "elven longbow"≡"longbow", etc.
+   Heavy and light lances are different weapons and don't satisfy each other. */
 const ACCESS_ALIASES={
   "two hand weapons":"additional hand weapon","paired weapons":"additional hand weapon","additional weapon":"additional hand weapon",
+  "additional hand weapons":"additional hand weapon",
   "double-handed weapon":"great weapon","great sword":"great weapon",
   "polearm":"halberd",
-  "heavy lance":"lance","light lance":"lance","cavalry spear":"lance",
+  "lance":"heavy lance","cavalry spear":"spear",
   "full plate armour":"heavy armour","gromril armour":"heavy armour",
-  "gut-plate":"light armour","gut plate":"light armour"   // Ogre Kingdoms base armour ≈ light armour tier
+  "gut plate":"gut-plate",
+  "bow":"longbow","elven longbow":"longbow","elven shortbow":"shortbow","short bow":"shortbow",
+  "javelins":"javelin","throwing weapons":"throwing weapon","brace of ogre pistols":"ogre pistol"
 };
 function normAccess(s){
   const t=String(s||"").toLowerCase().replace(/\s*\([^)]*\)\s*/g," ").replace(/[^a-z0-9 +'-]/g," ").replace(/\s+/g," ").trim();
@@ -474,23 +479,53 @@ function modelAccess(e,u){
 }
 // light/medium/heavy armour form a tier: a model that may wear a heavier armour
 // may also take a lighter magic armour (a magic armour replaces the mundane one).
-// Shields, barding and weapons are matched exactly.
+// Everything else (shields, lances, bows, …) is matched exactly.
 const ARMOUR_RANK={"light armour":1,"medium armour":2,"heavy armour":3};
 function hasAccess(e,u,req){
   const acc=modelAccess(e,u);
   let maxArmour=0; acc.forEach(a=>{ if(ARMOUR_RANK[a]>maxArmour) maxArmour=ARMOUR_RANK[a]; });
-  return (Array.isArray(req)?req:[req]).map(normAccess).some(r=>
-    ARMOUR_RANK[r] ? maxArmour>=ARMOUR_RANK[r] : acc.has(r));
+  const one=r=>{ if(r && typeof r==="object" && !Array.isArray(r)) return (r.all||[]).every(one);
+    r=normAccess(r); return ARMOUR_RANK[r] ? maxArmour>=ARMOUR_RANK[r] : acc.has(r); };
+  return (Array.isArray(req)?req:[req]).some(one);
+}
+/* The mundane equipment type a magic weapon/armour item IS, for display in the
+   picker and on the chosen slot: an explicit `equipType` label wins, else it's
+   built from `requiresAccess` ("Light lance / Spear", "Heavy armour + Shield").
+   Null when the item has no mundane type (e.g. a plain magic sword). */
+const EQUIP_TYPE_LABEL={"halberd":"polearm (halberd)"};
+function itemEquipType(it){
+  if(!it) return null;
+  if(it.equipType) return it.equipType;
+  const r=it.requiresAccess; if(!r) return null;
+  const cap=s=>{ s=normAccess(s); s=EQUIP_TYPE_LABEL[s]||s; return s.charAt(0).toUpperCase()+s.slice(1); };
+  const one=x=>(x && typeof x==="object" && !Array.isArray(x)) ? (x.all||[]).map(cap).join(" + ") : cap(x);
+  return (Array.isArray(r)?r:[r]).map(one).join(" / ");
 }
 // unified magic-item eligibility for a model: variant/keyword restriction (`only`),
 // Bloodline list (`blood:[...]`), vampire-only (`vampireOnly`), god (`god`), and
 // equipment access (`requiresAccess` — magic weapon/armour must match a usable type).
 function itemAllowed(it,e,u){
+  if(!itemAllowedIgnoringAccess(it,e,u)) return false;
+  if(!itemAccessOK(it,e,u)) return false;
+  return true;
+}
+// equipment-access half of itemAllowed. `accessWaivedFor:[…]` names models (variant
+// or unit names) the item's own text lets take it regardless of equipment
+// (Armour of Bone: "May be taken by Necromancers").
+function itemAccessOK(it,e,u){
+  if(!it.requiresAccess) return true;
+  if(it.accessWaivedFor){ const nm=u.isCharacter&&u.variants&&u.variants[e.variant]?u.variants[e.variant].name:u.name;
+    if([].concat(it.accessWaivedFor).some(w=>w===nm||w===u.name)) return true; }
+  return hasAccess(e,u,it.requiresAccess);
+}
+// every restriction except equipment access — the picker uses it to show an item
+// the model is barred from only by its equipment as disabled ("needs Shield")
+// rather than hiding it, so the rule is visible.
+function itemAllowedIgnoringAccess(it,e,u){
   if(it.only && !restrictOK(e,u,it.only)) return false;
   if(it.blood && !it.blood.includes(entryBlood(e,u))) return false;
   if(it.vampireOnly && !unitHasTag(u,"Vampire")) return false;
   if(it.god && !godOK(it,entryGod(e,u))) return false;
-  if(it.requiresAccess && !hasAccess(e,u,it.requiresAccess)) return false;
   return true;
 }
 // requires:{unit:"id"|["id",...]} — option only available if such a unit is in the army.

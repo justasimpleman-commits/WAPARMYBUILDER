@@ -76,7 +76,7 @@ const engine=srcs.filter(s=>s.startsWith("js/")).map(load).join("\n");
   __mountChoiceBlocked:mountChoiceBlocked, __renderOption:renderOption,
   __perNCount:perNCount, __perNMax:perNMax, __optChoiceBlocked:optChoiceBlocked,
   __availableLores:availableLores, __loreNames:loreNames, __itemAllowed:itemAllowed,
-  __modelAccess:modelAccess, __hasAccess:hasAccess, __findItem:findItem, __pickerGroups:pickerGroups,
+  __modelAccess:modelAccess, __hasAccess:hasAccess, __itemEquipType:itemEquipType, __itemAccessOK:itemAccessOK, __normAccess:normAccess, __findItem:findItem, __pickerGroups:pickerGroups,
   __runeCatCost:runeCatCost, __runesCost:runesCost, __magicRunesCost:magicRunesCost,
   __runeCatsForChar:runeCatsForChar, __runeAllowed:runeAllowed, __runeDef:runeDef,
   __runeCopyCost:runeCopyCost, __runeMaxCopies:runeMaxCopies, __isBSB:isBSB
@@ -579,9 +579,10 @@ console.log("Equipment access: magic weapon/armour hidden unless the model can u
   __setState([]); __addUnit("characters","necrarch"); const nx=__getState()[0];
   ok(!__itemAllowed(flayed,nx,__findUnit("characters","necrarch")), "VC: Necrarch (no armour access) cannot take Flayed Hauberk");
   // the Flayed Hauberk is filtered out of the Necrarch's Magic Armour picker
+  // …it stays listed in the Necrarch's Magic Armour picker, but disabled with the missing type
   const groups=__pickerGroups("Magic Armour", nx, __findUnit("characters","necrarch"), null);
-  const names=groups.flatMap(g=>g.items.map(i=>i.name));
-  ok(!names.includes("The Flayed Hauberk"), "VC: Flayed Hauberk absent from Necrarch's Magic Armour list");
+  const fh=groups.flatMap(g=>g.items).find(i=>i.name==="The Flayed Hauberk");
+  ok(fh && fh.disabled && /Heavy armour/.test(fh.reason||""), "VC: Flayed Hauberk shown disabled ('needs Heavy armour') in Necrarch's picker");
   // a stored illegal pick is dropped on render
   nx.magic={"Magic Armour":"The Flayed Hauberk"}; __render();
   ok(nx.magic["Magic Armour"]==="", "VC: illegal stored heavy-armour item dropped on render");
@@ -596,6 +597,106 @@ console.log("Equipment access: magic weapon/armour hidden unless the model can u
   const bigaxe=__findItem("Bigger, Choppier Axe");   // Great weapon
   ok(!__itemAllowed(bigaxe,osh,__findUnit("characters","orcshamans")), "O&G: Orc Shaman (no great weapon) cannot take Bigger, Choppier Axe");
   ok(__itemAllowed(bigaxe,ob,__findUnit("characters","orcbosses")), "O&G: Orc Boss (great weapon access) may take Bigger, Choppier Axe");
+}
+
+/* ====== Equipment type label + mundane-access audit across every book ====== */
+console.log("Equipment type: label on magic weapons/armour, lance split, all-of, audit…");
+{
+  __setState([]); __setGen(null); __switch("chaos-dwarfs",false);
+  ok(__itemEquipType(__findItem("Armour of the Forge"))==="Heavy armour", "type label: Armour of the Forge → Heavy armour");
+  ok(__itemEquipType(__findItem("Shield of Contempt"))==="Shield", "type label: Shield of Contempt → Shield");
+  ok(__itemEquipType(__findItem("Obsidian Blade"))===null, "type label: a plain magic weapon has no mundane type");
+  // common shields are now gated too; a sorcerer (no shield option) can't take one
+  const cs=__findItem("Charmed Shield");
+  ok(cs.requiresAccess==="shield", "common: Charmed Shield tagged shield");
+  __addUnit("characters","sorcerers"); const so=__getState()[0];
+  ok(!__itemAllowed(cs,so,__findUnit("characters","sorcerers")), "CD: Sorcerer (no shield) cannot take Charmed Shield");
+  // Daemonsmith buys a fireglaive → Inferno Glaive of Hashut is legal for him
+  __setState([]); __addUnit("characters","daemonsmith"); const ds=__getState()[0];
+  ok(__itemAllowed(__findItem("Inferno Glaive of Hashut"),ds,__findUnit("characters","daemonsmith")), "CD: Daemonsmith (fireglaive option) may take Inferno Glaive");
+
+  // Armour of Bone: medium armour, but Necromancers may take it regardless
+  __setState([]); __switch("vampire-counts",false);
+  const ab=__findItem("Armour of Bone"); const nec=__findUnit("characters","necromancer");
+  ok(ab.requiresAccess==="medium armour", "VC: Armour of Bone tagged medium armour");
+  __addUnit("characters","necromancer"); const ne=__getState()[0];
+  ok(__itemAllowed(ab,ne,nec), "VC: Necromancer (no armour) may take Armour of Bone (waiver)");
+  ne.variant=0; ok(__itemAllowed(ab,ne,nec), "VC: Master Necromancer may take Armour of Bone (waiver)");
+  const noArm=Object.values(window.ARMY_BOOKS["vampire-counts"].units).flat().find(u=>u.isCharacter && u.id!=="necromancer"
+    && u.variants.some(v=>v.magicBudget>0) && !(u.access||[]).some(a=>/armour/.test(a)));
+  if(noArm){ __setState([]); __addUnit(noArm.cat||"characters",noArm.id); const ne2=__getState()[0];
+    ok(!__itemAllowed(ab,ne2,noArm), `VC: ${noArm.name} (no armour access, not a Necromancer) cannot take Armour of Bone`); }
+  __setState([]);
+
+  // heavy and light lances are different weapons
+  __setState([]); __switch("dark-elves",false);
+  const dp=__findItem("Deathpiercer");
+  ok(dp.requiresAccess==="heavy lance" && __itemEquipType(dp)==="Heavy lance", "DE: Deathpiercer is a Heavy lance");
+  __addUnit("characters","beastmaster"); const bm=__getState()[0];
+  ok(!__itemAllowed(dp,bm,__findUnit("characters","beastmaster")), "DE: Beastmaster (light lance only) cannot take a magic heavy lance");
+  __setState([]); __addUnit("characters","commanders"); const dl=__getState()[0];
+  ok(__itemAllowed(dp,dl,__findUnit("characters","commanders")), "DE: Dreadlord (heavy lance option) may take Deathpiercer");
+  ok(__itemAllowed(__findItem("Lifetaker"),dl,__findUnit("characters","commanders")), "DE: Dreadlord (Deathrain crossbow option) may take Lifetaker");
+  ok(__itemAllowed(__findItem("Cloak of Hag Graef"),dl,__findUnit("characters","commanders")), "DE: Dreadlord (Sea Dragon Cloak option) may take Cloak of Hag Graef");
+  ok(__itemEquipType(__findItem("The Mirror Glaive"))==="Polearm (halberd)", "type label: polearm items read Polearm (halberd)");
+
+  // all-of: Armour of Agilulf is heavy armour AND a shield
+  __setState([]); __switch("bretonnia",false);
+  const ag=__findItem("Armour of Agilulf");
+  ok(__itemEquipType(ag)==="Heavy armour + Shield", "type label: Armour of Agilulf → Heavy armour + Shield");
+  const bl=__findUnit("characters","lords"); __addUnit("characters","lords"); const le=__getState()[0];
+  ok(__hasAccess(le,bl,{all:["heavy armour","shield"]}) && __itemAllowed(ag,le,bl), "BR: Lord (heavy armour + shield) may take Agilulf");
+  ok(!__hasAccess(le,{access:["heavy armour"]},{all:["heavy armour","shield"]}), "all-of: heavy armour alone does not satisfy heavy armour + shield");
+
+  // Ogres: gut-plate is its own type, not light armour
+  __setState([]); __switch("ogre-kingdoms",false);
+  __addUnit("characters","firebelly"); const fb=__getState()[0]; const fbu=__findUnit("characters","firebelly");
+  ok(__itemAllowed(__findItem("Gut Maw"),fb,fbu), "OK: Firebelly (gut-plate) may take Gut Maw");
+  ok(!__itemAllowed(__findItem("Mastodon Armour"),fb,fbu), "OK: Firebelly (no light armour option) cannot take Mastodon Armour");
+
+  // the picker shows the type badge on typed rows
+  __setState([]); __switch("high-elves",false); __addUnit("characters","commanders"); const pr=__getState()[0];
+  const hg=__pickerGroups("Magic Weapons",pr,__findUnit("characters","commanders"),null).flatMap(g=>g.items);
+  ok(hg.some(i=>i.name==="Dragonblade Lance" && !i.disabled), "HE: Prince (heavy lance option) sees Dragonblade Lance enabled");
+
+  /* Data audit: every character with a magic-item budget declares (in `access`) each
+     mundane weapon/armour type found in its base equipment or its options, and every
+     `requiresAccess` token is one some character in the book can hold. Keeps new or
+     edited data honest so the magic-item rule stays enforced. */
+  const VOC=[
+    ["additional hand weapons?|two hand weapons|pair of hand weapons|paired weapons","additional hand weapon"],
+    ["great weapons?|double-handed weapons?","great weapon"],["halberds?|polearms?","halberd"],["pikes?","pike"],["flails?","flail"],
+    ["heavy lances?","heavy lance"],["light lances?","light lance"],["(?<!light |heavy )lances?","heavy lance"],["(?:cavalry )?spears?","spear"],
+    ["light armour","light armour"],["medium armour","medium armour"],["heavy armour|full plate armour|gromril armour","heavy armour"],
+    ["shields?","shield"],["bucklers?","buckler"],["gut-?plates?","gut-plate"],["ironfists?","ironfist"],["sea dragon cloaks?","sea dragon cloak"],
+    ["plague censers?","plague censer"],["whips?","whip"],["celestial blades?","celestial blade"],["fireglaives?","fireglaive"],
+    ["(?:elven )?longbows?|bows?","longbow"],["(?:elven )?shortbows?","shortbow"],["repeater crossbows?","repeater crossbow"],
+    ["deathrain crossbows?","deathrain crossbow"],["crossbows?","crossbow"],["handguns?","handgun"],["dragon fire pistols?","dragon fire pistol"],
+    ["brace of ogre pistols|ogre pistols?","ogre pistol"],["brace of pistols","brace of pistols"],["pistols?","pistol"],["blunderbuss(?:es)?","blunderbuss"],
+    ["javelins?","javelin"],["throwing weapons?","throwing weapon"],["slings?","sling"],["blowpipes?","blowpipe"]
+  ].map(([re,t])=>[new RegExp("\\b(?:"+re+")\\b","g"),new RegExp("^(?:"+re+")$"),t]);
+  const low=s=>String(s||"").toLowerCase().replace(/\([^)]*\)/g," ").replace(/\s+/g," ").trim();
+  const scan=s=>{ s=low(s); const hits=[]; VOC.forEach(([g,,t])=>{ g.lastIndex=0; let m; while((m=g.exec(s))) hits.push({i:m.index,j:m.index+m[0].length,t}); });
+    hits.sort((a,b)=>(b.j-b.i)-(a.j-a.i)); const used=[], out=new Set();
+    hits.forEach(h=>{ if(!used.some(u=>h.i<u.j&&u.i<h.j)){ used.push(h); out.add(h.t); } }); return out; };
+  const exact=p=>{ p=low(p); const v=VOC.find(([,x])=>x.test(p)); return v?v[2]:null; };
+  let bad=[];
+  window.BOOK_INDEX.forEach(b=>{ __switch(b.id,false); const B=window.ARMY_BOOKS[b.id]; const held=new Set();
+    Object.values(B.units).flat().filter(u=>u.isCharacter && u.variants.some(v=>v.magicBudget>0)).forEach(u=>{
+      const need=new Set();
+      String(((B.unitInfo||{})[u.id]||{}).eq||"").replace(/fixed items?:.*$/i,"").split(/[,;.]| and /).forEach(p=>{ const t=exact(p); if(t) need.add(t); });
+      (u.options||[]).forEach(o=>{ if(o.type==="mount"||o.type==="command"||o.bsb) return;
+        (o.choices?o.choices.map(c=>c.label):[o.label]).forEach(l=>scan(l).forEach(t=>need.add(t))); });
+      const acc=new Set((u.access||[]).map(__normAccess)); acc.forEach(a=>held.add(a));
+      need.forEach(t=>{ if(!acc.has(t)) bad.push(`${b.id}/${u.id} lacks access "${t}"`); });
+    });
+    ["magicItems","commonMagicItems"].forEach(src=>["Magic Weapons","Magic Armour"].forEach(cat=>((B[src]||{})[cat]||[]).forEach(it=>{
+      if(!it.requiresAccess) return;
+      const toks=[].concat(it.requiresAccess).flatMap(r=>(r&&r.all)?r.all:[r]).map(__normAccess);
+      toks.forEach(t=>{ if(!["light armour","medium armour","heavy armour"].includes(t) && !VOC.some(v=>v[2]===t)) bad.push(`${b.id}: ${it.name} has unknown access token "${t}"`); });
+    })));
+  });
+  ok(!bad.length, "access audit: "+(bad.slice(0,8).join("; ")||"ok"));
 }
 
 /* =================== Daemons: alignment locks the wizard's lore =================== */

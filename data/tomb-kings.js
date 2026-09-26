@@ -41,7 +41,7 @@
 
   magicItems: {
     "Magic Weapons": [
-      { name: "Spear of Antarhak", cost: 50, requiresAccess: "lance" },
+      { name: "Spear of Antarhak", cost: 50, requiresAccess: ["spear", "light lance"] },
       { name: "Crook and Flail of Radiance", cost: 50, requiresAccess: "additional hand weapon" },
       { name: "Destroyer of Eternities", cost: 40, only: "Tomb King", requiresAccess: "great weapon" },
       { name: "Phakth's Blades of Justice", cost: 35, requiresAccess: "additional hand weapon" },
@@ -143,10 +143,10 @@
       { name: "Alleviating Armour", cost: 20, requiresAccess: "medium armour" },
       { name: "Gambler's Armour", cost: 20, requiresAccess: "light armour" },
       { name: "Bedazzling Helm", cost: 20 },
-      { name: "Shield of the Warrior True", cost: 15 },
+      { name: "Shield of the Warrior True", cost: 15, requiresAccess: "shield" },
       { name: "Dragonhelm", cost: 10 },
       { name: "Enchanted Shield", cost: 10, common: true, requiresAccess: "shield" },
-      { name: "Charmed Shield", cost: 5, common: true }
+      { name: "Charmed Shield", cost: 5, common: true, requiresAccess: "shield" }
     ],
     "Talismans": [
       { name: "Talisman of Preservation", cost: 40 },
@@ -491,7 +491,7 @@
     characters: [
       {
         id: "tombmonarchs", name: "Tomb Monarchs", isCharacter: true,
-        access: ["additional hand weapon","spear","lance","flail","halberd","great weapon","light armour","shield"],
+        access: ["additional hand weapon","spear","flail","halberd","great weapon","light armour","shield","light lance"],
         variants: [
           { name: "Tomb King", points: 155, magicBudget: 100 },
           { name: "Tomb Prince", points: 105, magicBudget: 50 }
@@ -529,7 +529,7 @@
       },
       {
         id: "tombheralds", name: "Tomb Heralds", isCharacter: true,
-        access: ["additional hand weapon","spear","lance","flail","halberd","great weapon","light armour","shield"],
+        access: ["additional hand weapon","spear","flail","halberd","great weapon","light armour","shield","light lance"],
         variants: [ { name: "Tomb Herald", points: 50, magicBudget: 50 } ],
         options: [
           { id: "wep", type: "choice", label: "Combat weapon", choices: [
@@ -565,7 +565,7 @@
         ],
         notes: "Blessing of Asaph: Skeleton Archers/Horsemen/Chariots may gain Poisoned Attacks shooting for +2/model." },
       { id: "tutankhanut", name: "Prince Tutankhanut", isCharacter: true, isSpecialChar: true,
-      access: ["heavy armour"],
+      access: ["heavy armour","longbow"],
         variants: [ { name: "Tutankhanut", points: 115, magicBudget: 50 } ],
         options: [
           { id: "mount", type: "mount", label: "Mount", choices: [ { label: "Skeleton Chariot", cost: 45 } ] }

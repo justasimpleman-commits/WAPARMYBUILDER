@@ -194,7 +194,7 @@
   units: {
     characters: [
       { id:"lords", name:"Lord", isCharacter:true,
-        access:["additional hand weapon","great weapon","medium armour","heavy armour","shield"],
+        access: ["additional hand weapon","great weapon","medium armour","heavy armour","shield","pistol","crossbow","handgun"],
         variants:[
           { name:"King", points:125, magicBudget:100 },
           { name:"Thane", points:65, magicBudget:50 }
@@ -265,7 +265,7 @@
         ] },
 
       { id:"masterengineer", name:"Master Engineer", isCharacter:true,
-        access:["great weapon","light armour","medium armour"],
+        access: ["great weapon","light armour","medium armour","pistol","brace of pistols","handgun"],
         variants:[ { name:"Master Engineer", points:60, magicBudget:50 } ],
         options:[
           { id:"gw", type:"toggle", label:"Great weapon", cost:10 },

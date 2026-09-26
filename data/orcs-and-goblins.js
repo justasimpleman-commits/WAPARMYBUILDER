@@ -56,11 +56,11 @@
       { name: "Hacka's Sword of Hackin'", cost: 25 },
       { name: "The Humie Hewers", cost: 25, requiresAccess: "additional hand weapon" },
       { name: "Krumpa's Club of Crumpin'", cost: 25, requiresAccess: "great weapon" },
-      { name: "Porko's Pigstikka", cost: 25, only: "Mounted Orcs", requiresAccess: "lance" },
+      { name: "Porko's Pigstikka", cost: 25, only: "Mounted Orcs", requiresAccess: "light lance" },
       { name: "Ulag's Ak'rit Axe", cost: 25 },
       { name: "Bigger, Choppier Axe", cost: 20, only: "Orcs", requiresAccess: "great weapon" },
       { name: "Kurbog's Curmudgeonly Clobbera", cost: 20, requiresAccess: "additional hand weapon" },
-      { name: "Smasha and Kunnin'", cost: 20, only: "Orcs" },
+      { name: "Smasha and Kunnin'", cost: 20, only: "Orcs", requiresAccess: "additional hand weapon" },
       { name: "Backstabber's Blade", cost: 15, only: "Goblins" },
       { name: "Weepwood Big Shiv", cost: 15, only: "Savage Orcs", requiresAccess: "additional hand weapon" },
       { name: "The Black Fang", cost: 10 },
@@ -209,10 +209,10 @@
       { name: "Alleviating Armour", cost: 20, requiresAccess: "medium armour" },
       { name: "Gambler's Armour", cost: 20, requiresAccess: "light armour" },
       { name: "Bedazzling Helm", cost: 20 },
-      { name: "Shield of the Warrior True", cost: 15 },
+      { name: "Shield of the Warrior True", cost: 15, requiresAccess: "shield" },
       { name: "Dragonhelm", cost: 10 },
       { name: "Enchanted Shield", cost: 10, common: true, requiresAccess: "shield" },
-      { name: "Charmed Shield", cost: 5, common: true }
+      { name: "Charmed Shield", cost: 5, common: true, requiresAccess: "shield" }
     ],
     "Talismans": [
       { name: "Talisman of Preservation", cost: 40 },
@@ -790,7 +790,7 @@
     characters: [
       {
         id: "orcbosses", name: "Orc Bosses", isCharacter: true,
-        access: ["additional hand weapon","spear","lance","halberd","great weapon","light armour","medium armour","heavy armour","shield"],
+        access: ["additional hand weapon","spear","halberd","great weapon","light armour","medium armour","heavy armour","shield","light lance"],
         variants: [
           { name: "Orc Warboss", points: 115, magicBudget: 100 },
           { name: "Orc Big Boss", points: 70, magicBudget: 50 }
@@ -835,7 +835,7 @@
       },
       {
         id: "goblinbosses", name: "Goblin Bosses", isCharacter: true,
-        access: ["additional hand weapon","spear","lance","halberd","great weapon","shortbow","light armour","medium armour","shield"],
+        access: ["additional hand weapon","spear","halberd","great weapon","shortbow","light armour","medium armour","shield","light lance"],
         variants: [
           { name: "Goblin Warboss", points: 60, magicBudget: 100 },
           { name: "Goblin Big Boss", points: 35, magicBudget: 50 }
@@ -959,12 +959,12 @@
         variants: [ { name: "Grom the Paunch", points: 140, magicBudget: 0 } ],
         options: [ { id: "mount", type: "mount", label: "Mount", choices: [ { label: "Wolf Chariot (replaces one crew)", cost: 100 } ] } ],
         notes: "Must be Army General; army may include no Orc Lords and must include a unit of Goblin Gitz. Lucky Banner needs the Wolf Chariot to work." },
-      { id: "kiknik", name: "Kiknik Toofsnatcha", isCharacter: true, isSpecialChar: true,
+      { id: "kiknik", name: "Kiknik Toofsnatcha", access: ["light armour","shield"], isCharacter: true, isSpecialChar: true,
         variants: [ { name: "Kiknik Toofsnatcha", points: 145, magicBudget: 50 } ], options: [] },
-      { id: "gitilla", name: "Gitilla da Hunter", isCharacter: true, isSpecialChar: true, cannotBeGeneral: true,
+      { id: "gitilla", name: "Gitilla da Hunter", access: ["spear"], isCharacter: true, isSpecialChar: true, cannotBeGeneral: true,
         variants: [ { name: "Gitilla da Hunter", points: 65, magicBudget: 25 } ], options: [],
         notes: "Must be accompanied by a unit of Goblin Wolf Riders (+2 pts/model); may never leave it." },
-      { id: "skarsnik", name: "Skarsnik", isCharacter: true, isSpecialChar: true,
+      { id: "skarsnik", name: "Skarsnik", access: ["light armour"], isCharacter: true, isSpecialChar: true,
         variants: [ { name: "Skarsnik", points: 200, magicBudget: 50 } ], options: [] },
       { id: "skitgit", name: "Skitgit", isCharacter: true, isSpecialChar: true,
         variants: [ { name: "Skitgit", points: 145, magicBudget: 0 } ],
@@ -972,7 +972,7 @@
           { label: "Additional hand weapon", cost: 3 }, { label: "Shield", cost: 3 } ] } ] },
       { id: "skragrott", name: "Skragrott", isCharacter: true, isSpecialChar: true,
         variants: [ { name: "Skragrott", points: 310, wizardLevel: 4, magicBudget: 0 } ], lores: ["Bad Moon"], options: [] },
-      { id: "snagla", name: "Snagla Grobspit", isCharacter: true, isSpecialChar: true, cannotBeGeneral: true,
+      { id: "snagla", name: "Snagla Grobspit", access: ["light lance"], isCharacter: true, isSpecialChar: true, cannotBeGeneral: true,
         variants: [ { name: "Snagla Grobspit", points: 80, magicBudget: 25 } ], options: [],
         notes: "Must be accompanied by a unit of Forest Goblin Spider Riders (+2 pts/model); may never leave it." },
       { id: "trugg", name: "Trugg the Troll King", isCharacter: true, isSpecialChar: true, cannotBeGeneral: true,

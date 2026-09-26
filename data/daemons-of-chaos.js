@@ -238,10 +238,10 @@
       { name: "Alleviating Armour", cost: 20, requiresAccess: "medium armour" },
       { name: "Gambler's Armour", cost: 20, requiresAccess: "light armour" },
       { name: "Bedazzling Helm", cost: 20 },
-      { name: "Shield of the Warrior True", cost: 15 },
+      { name: "Shield of the Warrior True", cost: 15, requiresAccess: "shield" },
       { name: "Dragonhelm", cost: 10 },
       { name: "Enchanted Shield", cost: 10, common: true, requiresAccess: "shield" },
-      { name: "Charmed Shield", cost: 5, common: true }
+      { name: "Charmed Shield", cost: 5, common: true, requiresAccess: "shield" }
     ],
     "Talismans": [
       { name: "Talisman of Preservation", cost: 40 },
@@ -763,7 +763,7 @@
       access: [],
         variants: [ { name: "Spoilpox Scrivener", points: 95, magicBudget: 50 } ], options: [] },
       { id: "keeperofsecrets", god: "Slaanesh", name: "Keeper of Secrets", isCharacter: true,
-      access: [],
+      access: ["buckler"],
         variants: [ { name: "Keeper of Secrets", points: 400, wizardLevel: 1, magicBudget: 100 } ],
         lores: ["Slaanesh"],
         options: [
