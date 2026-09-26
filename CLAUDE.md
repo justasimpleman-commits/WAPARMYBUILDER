@@ -13,7 +13,7 @@ Multiple army books are bundled (Chaos Dwarfs, Grand Cathay, Daemons of Chaos,
 Beastmen, Ogre Kingdoms, Orcs & Goblins, Skaven, High Elves, Dark Elves, Tomb
 Kings, Vampire Counts, Bretonnia, Wood Elves, Dwarfs, Lizardmen, Estalia) and chosen
 from the **Army** dropdown in the header;
-switching armies clears the roster (after a confirm). Each army nominates exactly one character as its **Army General** (radio
+switching armies clears the roster (no confirm — it is an undo step). Each army nominates exactly one character as its **Army General** (radio
 on each character entry; any character is eligible, exactly one required —
 enforced in validation, shown with ★ in the summary and `[General]` in export).
 
@@ -353,13 +353,17 @@ stats card, which would make rule-heavy units unreadable.
   keeps the current fold state. Undo/redo: the ↶ ↷ header buttons, Ctrl/⌘+Z and
   Ctrl/⌘+Shift+Z / Ctrl+Y (ignored while typing in a field or with a modal open), and
   the "Undo" button on the toast after removing a unit or clearing the army
-  (`removeEntry`, `clearArmy` — no confirm dialogs; undo is the safety net). Loading
-  an army or switching books resets the history (`resetHistory`).
+  (`removeEntry`, `clearArmy` — no confirm dialogs; undo is the safety net).
+  Switching books and loading an army (file, library, shared link) are undo steps
+  too, with no confirm: snapshots record the active book (`restoreSnapshot` calls
+  `activateBook`), and these whole-army steps (`update(fn,{meta:true})` /
+  `pushHistory(before,meta)`) also restore the save name/file, saved-state and
+  limit (`saveMeta`/`restoreMeta`). Deleting a library army shows an Undo toast
+  instead of a confirm.
 - **Dirty tracking:** `markSaved()` records the roster + points limit as saved
   (after Save, Save to file, or any load); `isDirty()` compares. The status line shows
-  "● unsaved changes", the tab title gets a "●", `beforeunload` warns, and loading
-  a file / library army / shared link over unsaved work asks first
-  (`confirmDiscard`).
+  "● unsaved changes", the tab title gets a "●" and `beforeunload` warns (the only
+  unsaved-work prompt — loads don't ask, they are undoable).
 - **`render()` is incremental.** It reconciles entries, then: the catalogue DOM is
   rebuilt only when the book, search text or collapse state changes (otherwise
   `refreshCatalog` just updates each row's badge); roster cards are cached per entry
@@ -397,8 +401,9 @@ stats card, which would make rule-heavy units unreadable.
   prefix; `j` = plain JSON fallback). Opening such a URL (at start-up, or via
   `hashchange` in an open tab) loads the army unsaved, suggests its name for the
   first Save, and strips the fragment. Links made from `file://` only work on that
-  machine; share from the hosted site. Start-up order: shared link (asks if an
-  unsaved draft exists) → restored draft → default army.
+  machine; share from the hosted site. Start-up order: restored draft, then a
+  shared link opened over it as an undo step (undo returns to the draft) →
+  default army.
 
 ## Phone layout
 

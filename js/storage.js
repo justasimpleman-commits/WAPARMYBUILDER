@@ -35,8 +35,6 @@ function updateSaveStatus(){
     + (dirty && currentSaveName ? ' <span class="dirty" title="Changes since your last save">● unsaved changes</span>' : "");
   if(D) document.title=(dirty?"● ":"")+"Army Builder — "+D.name;
 }
-/* ask before replacing an army that has unsaved changes */
-function confirmDiscard(action){ return !isDirty() || confirm(`Your current army has unsaved changes. ${action}?`); }
 function downloadFile(fname, text, type){
   const blob=new Blob([text],{type});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=fname; a.click();
@@ -67,14 +65,14 @@ function readDraft(){
   try{ snap=JSON.parse(localStorage.getItem(LS_DRAFT)||"null"); }catch(_){ snap=null; }
   return (snap && Array.isArray(snap.state) && snap.state.length) ? snap : null;
 }
-async function restoreDraft(){
+async function restoreDraft(notice){
   const snap=readDraft(); if(!snap) return false;
   if(!(await applyArmy(snap))) return false;         // applyArmy loads the book, the roster, renders
   currentSaveName = snap.savedName || null;          // restore "unsaved" status, not the draft's placeholder name
   currentSaveFile = null;
   if(snap.dirty!==false) _savedSig=null;             // it was unsaved when the page closed
   updateSaveStatus();
-  showRestoreNotice();
+  if(notice!==false) showRestoreNotice();
   return true;
 }
 function showRestoreNotice(){
@@ -106,8 +104,11 @@ function serializeArmy(name){
   };
 }
 /* load a saved army (library, file, draft or shared link): fetches its book if
-   needed, replaces the roster, and starts a fresh undo history. */
-async function applyArmy(data){
+   needed and replaces the roster as one undo step (no confirm — undo brings the
+   previous army back). At start-up (no army yet) there is nothing to undo to.
+   `hist` = {s,m} snapshot + meta taken by a caller that changed things first. */
+async function applyArmy(data, hist){
+  hist = hist || (D ? {s:snapshot(), m:saveMeta()} : null);
   if(!data || !Array.isArray(data.state)){ alert("That file is not a valid army."); return false; }
   if(data.app && data.app!==SAVE_APP){
     if(!confirm("This file was not created by this app. Try to load it anyway?")) return false;
@@ -125,9 +126,13 @@ async function applyArmy(data){
   currentSaveName = data.name||null;
   currentSaveFile = null;            // set by library load when applicable
   saveNameHint = null;
-  resetHistory(); render(); markSaved(); updateSaveStatus();
+  render();
+  if(hist && hist.s!==snapshot()) pushHistory(hist.s, hist.m);
+  markSaved(); updateSaveStatus();
   return true;
 }
+/* "Loaded" toast, with Undo when the load replaced an army */
+function loadedToast(msg, undoable){ toast(msg, undoable ? {label:"Undo", fn:undo} : null); }
 
 /* ---- browser-fallback library store ----
    Primary store is IndexedDB (persists on file:// across Chrome/Firefox/Safari,
@@ -210,8 +215,8 @@ async function openArmyFromFile(){
   inp.onchange=()=>{ const f=inp.files[0]; if(!f) return;
     const rd=new FileReader(); rd.onload=async()=>{
       let data; try{ data=JSON.parse(rd.result); }catch(_){ alert("Could not read that file."); return; }
-      if(!confirmDiscard("Open this file anyway")) return;
-      if(await applyArmy(data)) toast("Loaded"); };
+      const had=!!state.length;
+      if(await applyArmy(data)) loadedToast("Loaded", had); };
     rd.readAsText(f);
   };
   inp.click();
@@ -225,15 +230,19 @@ async function listLibrary(){
     .sort((a,b)=>String(b.savedAt).localeCompare(String(a.savedAt)));
 }
 async function libraryLoad(file){
-  if(!confirmDiscard("Load this army anyway")) return;
-  const data=await libGet(file);
-  if(await applyArmy(data)){ currentSaveFile=file; closeModal(); toast("Loaded"); }
+  const data=await libGet(file), had=!!state.length;
+  if(await applyArmy(data)){ currentSaveFile=file; closeModal(); loadedToast("Loaded", had); }
 }
 async function libraryDelete(file,name){
-  if(!confirm('Delete "'+name+'" from the library?')) return;
+  const data=await libGet(file), wasCurrent=currentSaveFile===file;
   await libDelete(file);
-  if(currentSaveFile===file){ currentSaveFile=null; }
+  if(wasCurrent){ currentSaveFile=null; }
   openLibrary();
+  // no confirm: the toast's Undo puts the saved army back
+  if(data) toast('Deleted "'+name+'"', {label:"Undo", fn:async()=>{
+    await libSave(file,data); if(wasCurrent) currentSaveFile=file;
+    if(document.getElementById("modalBg").classList.contains("open") && document.getElementById("modalTitle").textContent==="Army library") openLibrary();
+  }});
 }
 async function openLibrary(){
   const items=await listLibrary();
@@ -319,20 +328,20 @@ function copyShareUrl(){
 }
 function sharedCodeInUrl(){ const h=location.hash||""; return h.startsWith("#"+SHARE_KEY) ? h.slice(1+SHARE_KEY.length) : null; }
 function clearShareHash(){ try{ history.replaceState(null,"",location.pathname+location.search); }catch(_){ location.hash=""; } }
-/* open an army from a share code; `ask` = confirm before replacing unsaved work */
-async function openSharedArmy(code, ask){
+/* open an army from a share code, as one undo step over the current army */
+async function openSharedArmy(code){
   clearShareHash();
   let p; try{ p=await decodeShare(code); }catch(err){ toast("Could not open that link ("+err.message+")"); return false; }
   if(!p || !p.a || !Array.isArray(p.s)){ toast("That link doesn't contain an army"); return false; }
   if(!bookMeta(p.a)){ alert(`That link is for an army this app doesn't have ("${p.a}").`); return false; }
-  if(ask!==false && !confirmDiscard("Open the shared army instead")) return false;
+  const hist = D ? {s:snapshot(), m:saveMeta()} : null, had=!!state.length;
   if(!(await switchArmy(p.a,true))) return false;
   let skipped=0; const st=[];
   p.s.forEach((o,i)=>{ if(!findUnit(o.c,o.i)){ skipped++; return; } const e=unpackEntry(o,i+1); migrateEntry(e); st.push(e); });
   const ok=await applyArmy({ app:SAVE_APP, army:p.a, name:null, limit:p.l, uidc:p.s.length+1,
-    generalUid:(p.g>=0?p.g+1:null), state:st });
+    generalUid:(p.g>=0?p.g+1:null), state:st }, hist);
   if(!ok) return false;
   saveNameHint=p.n||null; _savedSig=null; updateSaveStatus();
-  toast(`Opened a shared ${D.name} army${p.n?` “${p.n}”`:""}${skipped?` (${skipped} unknown unit${skipped>1?"s":""} skipped)`:""} — Save to keep it`);
+  toast(`Opened a shared ${D.name} army${p.n?` “${p.n}”`:""}${skipped?` (${skipped} unknown unit${skipped>1?"s":""} skipped)`:""} — Save to keep it`, had ? {label:"Undo", fn:undo} : null);
   return true;
 }
