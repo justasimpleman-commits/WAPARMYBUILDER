@@ -260,6 +260,86 @@ function renderRoster(){
   patchChildren(el,nodes);
 }
 
+/* ---------- drag to reorder ----------
+   The card header is the handle: a mouse drags once it moves a few px; a finger
+   has to hold still ~350ms first (so a swipe still scrolls). The card follows the
+   pointer, a line marks the drop slot among its own category's cards, and the drop
+   is one reorderEntry() — an undo step. Buttons/inputs in the header don't drag. */
+let _drag=null;
+function wireDrag(head,card,e){
+  head.classList.add("draggable"); head.title="Drag to reorder (touch: press and hold)";
+  head.addEventListener("contextmenu",ev=>{ if(_drag) ev.preventDefault(); });
+  head.addEventListener("pointerdown",ev=>{
+    if(_drag || (ev.pointerType==="mouse" && ev.button!==0)) return;
+    if(ev.target.closest && ev.target.closest("button,input,select,label,a")) return;
+    const d=_drag={uid:e.uid, cat:e.cat, card, id:ev.pointerId, touch:ev.pointerType!=="mouse",
+      x0:ev.clientX, y0:ev.clientY, y:ev.clientY, active:false, t:0, timer:null, target:0};
+    if(d.touch) d.timer=setTimeout(()=>{ if(_drag===d) dragStart(d); },350);
+    document.addEventListener("pointermove",dragMove);
+    document.addEventListener("pointerup",dragEnd);
+    document.addEventListener("pointercancel",dragEnd);
+  });
+}
+function dragStart(d){
+  d.active=true;
+  const r=d.card.getBoundingClientRect(); d.grab=d.y-r.top;
+  d.card.classList.add("dragging");
+  if(d.touch && navigator.vibrate) try{ navigator.vibrate(15); }catch(_){}
+  dragTick(d);
+}
+function dragMove(ev){
+  const d=_drag; if(!d || ev.pointerId!==d.id) return;
+  d.y=ev.clientY;
+  if(!d.active){
+    const moved=Math.hypot(ev.clientX-d.x0,ev.clientY-d.y0);
+    if(d.touch){ if(moved>8) dragEnd(); }            // it's a scroll, not a hold
+    else if(moved>5) dragStart(d);
+    return;
+  }
+  ev.preventDefault(); dragPlace(d);
+}
+// keep a held card moving while its scroll container auto-scrolls near an edge
+function dragTick(d){
+  if(_drag!==d || !d.active) return;
+  const sc=scrollParent(d.card), box=sc===document.scrollingElement?{top:0,bottom:innerHeight}:sc.getBoundingClientRect();
+  const edge=60, v= d.y<box.top+edge ? -Math.ceil((box.top+edge-d.y)/4) : d.y>box.bottom-edge ? Math.ceil((d.y-box.bottom+edge)/4) : 0;
+  if(v) sc.scrollTop+=v;
+  dragPlace(d);
+  requestAnimationFrame(()=>dragTick(d));
+}
+function scrollParent(n){
+  for(let p=n.parentElement;p;p=p.parentElement){
+    const oy=getComputedStyle(p).overflowY;
+    if((oy==="auto"||oy==="scroll") && p.scrollHeight>p.clientHeight) return p;
+  }
+  return document.scrollingElement||document.documentElement;
+}
+function dragPlace(d){
+  const natural=d.card.getBoundingClientRect().top-d.t;      // where the card sits un-moved
+  d.t=d.y-d.grab-natural; d.card.style.transform=`translateY(${d.t}px)`;
+  const others=state.filter(x=>x.cat===d.cat && x.uid!==d.uid)
+    .map(x=>document.getElementById("entry-"+x.uid)).filter(Boolean);
+  let i=0; others.forEach(n=>{ const r=n.getBoundingClientRect(); if(d.y>r.top+r.height/2) i++; });
+  d.target=i;
+  others.forEach((n,k)=>{ n.classList.toggle("drop-before",k===i); n.classList.toggle("drop-after",i===others.length && k===others.length-1); });
+}
+function dragEnd(ev){
+  const d=_drag; if(!d || (ev && ev.pointerId!=null && ev.pointerId!==d.id)) return;
+  _drag=null; clearTimeout(d.timer);
+  document.removeEventListener("pointermove",dragMove);
+  document.removeEventListener("pointerup",dragEnd);
+  document.removeEventListener("pointercancel",dragEnd);
+  if(!d.active) return;
+  d.card.classList.remove("dragging"); d.card.style.transform="";
+  document.querySelectorAll("#roster .drop-before,#roster .drop-after").forEach(n=>n.classList.remove("drop-before","drop-after"));
+  // swallow the click that follows the drop (the title toggles collapse on click)
+  const eat=c=>{ c.stopPropagation(); c.preventDefault(); };
+  document.addEventListener("click",eat,true); setTimeout(()=>document.removeEventListener("click",eat,true),0);
+  if(ev && ev.type==="pointerup") reorderEntry(d.uid,d.target);
+}
+// a held finger must not scroll the page while a card is being dragged
+document.addEventListener("touchmove",ev=>{ if(_drag && _drag.active) ev.preventDefault(); },{passive:false});
+
 function renderEntry(e){
   const u=findUnit(e.cat,e.id);
   const wrap=document.createElement("div"); wrap.className="entry"; wrap.id="entry-"+e.uid;
@@ -277,15 +357,7 @@ function renderEntry(e){
   t.innerHTML=`<span class="nm">${esc(nm)}</span>${cntTag} <span class="cat">${e.cat}</span>`;
   t.style.cursor="pointer"; t.onclick=()=>{ e.collapsed=!e.collapsed; render(); }; head.appendChild(t);
   const ept=document.createElement("span"); ept.className="ept"; ept.textContent=Math.round(pts*10)/10; head.appendChild(ept);
-  const same=state.filter(x=>x.cat===e.cat);
-  if(same.length>1){                                     // reorder within the category
-    const mv=document.createElement("span"); mv.className="mv";
-    const up=document.createElement("button"); up.textContent="▲"; up.title="Move up";
-    const dn=document.createElement("button"); dn.textContent="▼"; dn.title="Move down";
-    up.disabled=same[0]===e; dn.disabled=same[same.length-1]===e;
-    up.onclick=()=>moveEntry(e.uid,-1); dn.onclick=()=>moveEntry(e.uid,1);
-    mv.append(up,dn); head.appendChild(mv);
-  }
+  if(state.filter(x=>x.cat===e.cat).length>1) wireDrag(head,wrap,e);   // drag the header to reorder
   const dup=document.createElement("button"); dup.className="del dup"; dup.textContent="⧉"; dup.title="Duplicate";
   dup.onclick=()=>duplicateEntry(e.uid); head.appendChild(dup);
   const del=document.createElement("button"); del.className="del"; del.textContent="✕"; del.title="Remove";

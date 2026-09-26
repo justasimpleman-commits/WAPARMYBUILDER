@@ -81,7 +81,7 @@ const engine=srcs.filter(s=>s.startsWith("js/")).map(load).join("\n");
   __runeCatCost:runeCatCost, __runesCost:runesCost, __magicRunesCost:magicRunesCost,
   __runeCatsForChar:runeCatsForChar, __runeAllowed:runeAllowed, __runeDef:runeDef,
   __runeCopyCost:runeCopyCost, __runeMaxCopies:runeMaxCopies, __isBSB:isBSB,
-  __moveEntry:moveEntry, __openGame:openGameMode, __closeGame:closeGameMode, __gameProfileRows:gameProfileRows
+  __reorderEntry:reorderEntry, __openGame:openGameMode, __closeGame:closeGameMode, __gameProfileRows:gameProfileRows
 });`);
 
 /* ---------- helpers ---------- */
@@ -1015,21 +1015,24 @@ __setState([]); __setGen(null); __switch("skaven",false);
   __setQuery(""); __renderCatalog();
 }
 
-console.log("Reorder: move an entry up/down within its category…");
+console.log("Reorder: drag an entry to a new slot within its category…");
 __setState([]); __setGen(null); __switch("chaos-dwarfs",false); __resetHistory();
 {
   __addUnit("core","warriors"); __addUnit("characters","despots"); __addUnit("core","razers"); __addUnit("core","cutthroats");
   const ids=()=>__getState().filter(e=>e.cat==="core").map(e=>e.id).join(",");
-  const [w,,r]=__getState();
-  __moveEntry(r.uid,-1);
-  ok(ids()==="razers,warriors,cutthroats", "moving up skips entries of other categories ("+ids()+")");
-  __moveEntry(r.uid,-1);
-  ok(ids()==="razers,warriors,cutthroats", "moving the first entry up is a no-op");
-  __moveEntry(w.uid,1);
-  ok(ids()==="razers,cutthroats,warriors", "moving down swaps with the next entry of the category");
+  const [w,,r,c]=__getState();
+  __reorderEntry(c.uid,0);
+  ok(ids()==="cutthroats,warriors,razers", "dropping at the top of the category ("+ids()+")");
+  ok(__getState()[1].id==="despots", "an entry of another category keeps its slot in state");
+  __reorderEntry(c.uid,99);
+  ok(ids()==="warriors,razers,cutthroats", "an index past the end drops it last");
+  const n=__historyLen()[0];
+  __reorderEntry(w.uid,0);
+  ok(__historyLen()[0]===n, "dropping an entry where it already was is not an undo step");
+  __reorderEntry(w.uid,1);
+  ok(ids()==="razers,warriors,cutthroats", "dropping between two entries");
   __undo();
-  ok(ids()==="razers,warriors,cutthroats", "a move is an undo step");
-  ok(__getState()[1].id==="despots", "the character keeps its place in the state array");
+  ok(ids()==="warriors,razers,cutthroats", "a reorder is an undo step");
 }
 
 console.log("Game mode: renders every book's full roster; character rows are the chosen profile…");

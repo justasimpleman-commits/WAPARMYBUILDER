@@ -63,13 +63,17 @@ function duplicateEntry(uid){
   const i=state.findIndex(x=>x.uid===uid); if(i<0) return;
   update(()=>{ const copy=JSON.parse(JSON.stringify(state[i])); copy.uid=uidc++; copy.collapsed=false; state.splice(i+1,0,copy); });
 }
-/* move an entry one place up (dir -1) or down (+1) among the entries of its own
-   category — the order shows in the roster, summary, export and game view */
-function moveEntry(uid, dir){
-  const i=state.findIndex(x=>x.uid===uid); if(i<0) return;
-  let j=i+dir; while(j>=0 && j<state.length && state[j].cat!==state[i].cat) j+=dir;
-  if(j<0 || j>=state.length) return;
-  update(()=>{ const t=state[i]; state[i]=state[j]; state[j]=t; });
+/* reorder: put an entry at position `to` (0-based) among the OTHER entries of its
+   own category — the order shows in the roster, summary, export and game mode.
+   The category's slots in `state` stay where they are; only who fills them changes. */
+function reorderEntry(uid, to){
+  const e=state.find(x=>x.uid===uid); if(!e) return;
+  update(()=>{
+    const slots=[], order=[];
+    state.forEach((x,i)=>{ if(x.cat===e.cat){ slots.push(i); if(x!==e) order.push(x); } });
+    order.splice(Math.max(0,Math.min(to,order.length)),0,e);
+    slots.forEach((si,k)=>{ state[si]=order[k]; });
+  });
 }
 function removeEntry(uid){
   const e=state.find(x=>x.uid===uid); if(!e) return;

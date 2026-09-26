@@ -385,9 +385,12 @@ stats card, which would make rule-heavy units unreadable.
   army (`×2`), Special/Rare duplicates against the game-size cap (`2/3`, amber at the
   cap, red over it), and a special character already taken is greyed out with its
   **+** disabled.
-- **Reorder:** ▲/▼ on each roster card (`moveEntry(uid,dir)`, an undo step) swap an
-  entry with its neighbour of the same category in `state`; that order is what the
-  roster, summary, export, share link and game mode show.
+- **Reorder:** drag a roster card by its header (`wireDrag` in roster.js): a mouse
+  drags after a few px, a finger after a ~350ms hold (a swipe still scrolls); a line
+  marks the drop slot among the card's own category and the drop is one
+  `reorderEntry(uid,to)` (an undo step) — the category keeps its slots in `state`,
+  only their order changes. That order is what the roster, summary, export, share
+  link and game mode show. Header buttons/inputs never start a drag.
 - **Points limit:** free input plus a presets dropdown (1000–4000; "Custom" when the
   value isn't a preset).
 
