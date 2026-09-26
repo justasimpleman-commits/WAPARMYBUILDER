@@ -69,7 +69,8 @@ const engine=srcs.filter(s=>s.startsWith("js/")).map(load).join("\n");
   __openMountPicker:openMountPicker,
   __mkRuleInfoBtn:mkRuleInfoBtn, __pk:()=>_pk,
   __honourCondOK:honourCondOK, __optionActive:optionActive, __collectIssues:collectIssues,
-  __undo:undo, __redo:redo, __update:update, __removeEntry:removeEntry, __isDirty:isDirty, __markSaved:markSaved,
+  __undo:undo, __redo:redo, __resetHistory:resetHistory, __applyArmy:applyArmy, __serialize:serializeArmy,
+  __saveName:()=>currentSaveName, __setSaveName:(n)=>{currentSaveName=n;}, __update:update, __removeEntry:removeEntry, __isDirty:isDirty, __markSaved:markSaved,
   __packEntry:packEntry, __unpackEntry:unpackEntry, __blankEntry:blankEntry, __entryGod:entryGod,
   __historyLen:()=>[_undo.length,_redo.length], __catalogRows:()=>_catalogRows, __setQuery:(q)=>{catalogQuery=q;},
   __renderCatalog:renderCatalog, __reconcile:reconcileEntry,
@@ -876,9 +877,9 @@ console.log("Registry: every data/books.js entry registers its id and name…");
 }
 
 console.log("Undo/redo: every change is one step; view state is not recorded…");
-__setState([]); __setGen(null); __switch("chaos-dwarfs",false);
+__setState([]); __setGen(null); __switch("chaos-dwarfs",false); __resetHistory();
 {
-  ok(__historyLen()[0]===0, "switching armies starts a fresh history");
+  ok(__historyLen()[0]===0, "fresh history");
   __addUnit("characters","sorcerers"); __addUnit("core","warriors");
   ok(__getState().length===2 && __historyLen()[0]===2, "two adds = two undo steps");
   const e=__getState()[0];
@@ -901,6 +902,29 @@ __setState([]); __setGen(null); __switch("chaos-dwarfs",false);
   ok(__historyLen()[1]===0, "a new change clears the redo stack");
 }
 
+console.log("Undo: switching armies and loading an army are undo steps (no confirm)…");
+{
+  const before=JSON.stringify(__getState().map(e=>e.uid)), n=__historyLen()[0];
+  __setSaveName("My Dwarfs");
+  __switch("skaven",false);
+  ok(__D().id==="skaven" && __getState().length===0 && __historyLen()[0]===n+1, "switching armies clears the roster as one undo step");
+  __undo();
+  ok(__D().id==="chaos-dwarfs" && JSON.stringify(__getState().map(e=>e.uid))===before && __saveName()==="My Dwarfs", "undo brings back the old army, book and save name");
+  __redo();
+  ok(__D().id==="skaven" && __getState().length===0, "redo switches again");
+  __undo();
+  const save=(()=>{ __switch("skaven",true); __addUnit("core","clanrats"); const d=__serialize("Rats"); return d; })();
+  __setState([]); __switch("chaos-dwarfs",true); __resetHistory();
+  __addUnit("core","warriors"); __setSaveName("Dwarfs");
+  __applyArmy(save).then(r=>{
+    ok(r && __D().id==="skaven" && __getState().length===1 && __historyLen()[0]===2, "loading an army is one undo step");
+    __undo();
+    ok(__D().id==="chaos-dwarfs" && __getState().length===1 && __getState()[0].id==="warriors" && __saveName()==="Dwarfs", "undoing a load restores the previous army");
+    finish();
+  });
+}
+function finish(){
+__addUnit("core","warriors");
 console.log("Dirty tracking: saved vs changed…");
 {
   __markSaved(); ok(!__isDirty(), "just saved ⇒ clean");
@@ -992,3 +1016,4 @@ __setState([]); __setGen(null); __switch("skaven",false);
 
 console.log(`\n${fails? "FAIL":"PASS"}: ${checks-fails}/${checks} checks passed.`);
 process.exit(fails?1:0);
+}

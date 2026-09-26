@@ -2,25 +2,29 @@
 
 /* ---------- army switching ----------
    Loads the book's data file on first use. Resolves to true once the book is
-   active (synchronously when it is already loaded). `silent` skips the "this
-   clears your roster" confirmation — used by loaders that replace the roster
-   straight away (files, library, draft, shared links). */
+   active (synchronously when it is already loaded). A switch from the Army menu
+   is an undo step (no confirm — undo brings the old army back). `silent` skips
+   the history step — used by loaders that replace the roster straight away and
+   record their own step (files, library, draft, shared links). */
+function activateBook(id){
+  CURRENT_ARMY=id; D=ARMY_BOOKS[id];
+  collapsedCats={}; collapsedCatalog={}; catalogQuery="";
+  const q=document.getElementById("catSearch"); if(q) q.value="";
+  const sub=document.getElementById("titleSub"); if(sub) sub.textContent="WARHAMMER — "+D.name.toUpperCase();
+  const sel=document.getElementById("armySel"); if(sel) sel.value=id;
+}
 function switchArmy(id, silent){
   const sel=document.getElementById("armySel");
   const back=()=>{ if(sel) sel.value=CURRENT_ARMY||""; return false; };
   if(!bookMeta(id)) return Promise.resolve(back());
   if(id===CURRENT_ARMY && D) return Promise.resolve(true);
-  if(!silent && state.length && !confirm(isDirty()
-      ? "Switching armies clears the current roster, which has unsaved changes. Continue?"
-      : "Switching armies will clear the current roster. Continue?")) return Promise.resolve(back());
   const go=()=>{
-    CURRENT_ARMY=id; D=ARMY_BOOKS[id];
-    state=[]; generalUid=null; currentSaveName=null; currentSaveFile=null; saveNameHint=null;
-    collapsedCats={}; collapsedCatalog={}; catalogQuery="";
-    const q=document.getElementById("catSearch"); if(q) q.value="";
-    const sub=document.getElementById("titleSub"); if(sub) sub.textContent="WARHAMMER — "+D.name.toUpperCase();
-    if(sel) sel.value=id;
-    resetHistory(); render(); markSaved(); updateSaveStatus();
+    const reset=()=>{ activateBook(id); state=[]; generalUid=null; currentSaveName=null; currentSaveFile=null; saveNameHint=null; };
+    const had=state.length;
+    if(silent || !D){ reset(); render(); }
+    else update(reset, {meta:true});
+    markSaved(); updateSaveStatus();
+    if(!silent && had) toast("Switched to "+D.name, {label:"Undo", fn:undo});
     return true;
   };
   if(ARMY_BOOKS[id]) return Promise.resolve(go());
@@ -85,11 +89,9 @@ async function start(){
   updateHistoryUI();
   const code=sharedCodeInUrl(), draft=readDraft();
   let ready=false;
-  if(code){
-    if(!draft || confirm("Open the shared army from this link? It replaces the unsaved army from your last visit.")) ready=await openSharedArmy(code, false);
-    else clearShareHash();
-  }
-  if(!ready && draft) ready=await restoreDraft();
+  // a shared link opens over a restored draft as an undo step (undo returns to the draft)
+  if(draft) ready=await restoreDraft(!code);
+  if(code) ready=(await openSharedArmy(code)) || ready;
   if(!D) await switchArmy(DEFAULT_ARMY, true);
 }
 start();

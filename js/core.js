@@ -71,7 +71,7 @@ function removeEntry(uid){
 }
 function clearArmy(){
   if(!state.length) return;
-  update(()=>{ state=[]; generalUid=null; });
+  update(()=>{ state=[]; generalUid=null; }, {meta:true});
   currentSaveName=null; currentSaveFile=null;
   toast("Army cleared", {label:"Undo", fn:undo});
 }
@@ -81,28 +81,52 @@ function clearArmy(){
    change, re-renders (render reconciles entries) and, if the roster actually
    changed, pushes the old snapshot onto the undo stack. Pure view state
    (collapse carets) passes {history:false}. Snapshots leave out `collapsed`, and
-   undo keeps each entry's current collapse state, so undo never re-folds cards. */
+   undo keeps each entry's current collapse state, so undo never re-folds cards.
+   Snapshots also record the active book, so switching armies and loading an army
+   are undoable too (no confirm dialogs). Such whole-army steps ({meta:true}) also
+   carry the save name/file, saved-state and points limit, restored with them. */
 const HISTORY_MAX=100;
 let _undo=[], _redo=[];
 function snapshot(){
-  return JSON.stringify({ uidc, generalUid, state: state.map(e=>{ const c=Object.assign({},e); delete c.collapsed; return c; }) });
+  return JSON.stringify({ army: CURRENT_ARMY, uidc, generalUid, state: state.map(e=>{ const c=Object.assign({},e); delete c.collapsed; return c; }) });
 }
 function restoreSnapshot(s){
   const o=JSON.parse(s), folded={};
+  if(o.army && o.army!==CURRENT_ARMY && ARMY_BOOKS[o.army]) activateBook(o.army);
   state.forEach(e=>{ folded[e.uid]=!!e.collapsed; });
   state=o.state.map(e=>Object.assign(e,{collapsed:!!folded[e.uid]}));
   uidc=o.uidc; generalUid=o.generalUid;
 }
+/* save name/file, saved-state and limit — restored only by whole-army steps */
+function saveMeta(){ return { name:currentSaveName, file:currentSaveFile, hint:saveNameHint, sig:_savedSig, limit:currentLimit() }; }
+function restoreMeta(m){
+  if(!m) return;
+  currentSaveName=m.name; currentSaveFile=m.file; saveNameHint=m.hint; _savedSig=m.sig;
+  const l=document.getElementById("limit"); if(l && m.limit) l.value=m.limit;
+  if(typeof syncLimitPreset==="function") syncLimitPreset();
+}
+function pushHistory(before, meta){
+  _undo.push({s:before, m:meta||null}); if(_undo.length>HISTORY_MAX) _undo.shift(); _redo=[];
+  updateHistoryUI();
+}
 function update(fn, opts){
-  const before=snapshot();
+  const before=snapshot(), meta=opts&&opts.meta ? saveMeta() : null;
   fn();
   render();
   if(opts && opts.history===false) return;
-  if(snapshot()!==before){ _undo.push(before); if(_undo.length>HISTORY_MAX) _undo.shift(); _redo=[]; }
+  if(snapshot()!==before) pushHistory(before, meta);
   updateHistoryUI();
 }
-function undo(){ if(!_undo.length) return; _redo.push(snapshot()); restoreSnapshot(_undo.pop()); render(); updateHistoryUI(); }
-function redo(){ if(!_redo.length) return; _undo.push(snapshot()); restoreSnapshot(_redo.pop()); render(); updateHistoryUI(); }
+function stepHistory(from, to){
+  if(!from.length) return;
+  const h=from.pop();
+  to.push({s:snapshot(), m:h.m ? saveMeta() : null});
+  restoreSnapshot(h.s); restoreMeta(h.m);
+  render(); updateHistoryUI();
+  if(h.m && typeof updateSaveStatus==="function") updateSaveStatus();
+}
+function undo(){ stepHistory(_undo, _redo); }
+function redo(){ stepHistory(_redo, _undo); }
 function resetHistory(){ _undo=[]; _redo=[]; updateHistoryUI(); }
 function updateHistoryUI(){
   const u=document.getElementById("undoBtn"), r=document.getElementById("redoBtn");
