@@ -142,7 +142,7 @@
       { name: "The Red Casket", cost: 30, blood: ["Blood Dragon"], requiresAccess: "heavy armour" },
       { name: "Wailing Helm", cost: 25 },   // enchanted helm (grants a save) — no mundane armour type
       { name: "The Cadaverous Cuirass", cost: 25, vampireOnly: true, requiresAccess: "heavy armour" },
-      { name: "Armour of Bone", cost: 15 },   // medium armour but self-grants (may be taken by Necromancers) — unrestricted
+      { name: "Armour of Bone", cost: 15, requiresAccess: "medium armour", accessWaivedFor: ["Master Necromancer","Necromancer"] },   // "May be taken by Necromancers"
       { name: "The Cursed Shield of Mousillon", cost: 10, requiresAccess: "shield" }
     ],
     "Talismans": [

@@ -76,7 +76,7 @@ const engine=srcs.filter(s=>s.startsWith("js/")).map(load).join("\n");
   __mountChoiceBlocked:mountChoiceBlocked, __renderOption:renderOption,
   __perNCount:perNCount, __perNMax:perNMax, __optChoiceBlocked:optChoiceBlocked,
   __availableLores:availableLores, __loreNames:loreNames, __itemAllowed:itemAllowed,
-  __modelAccess:modelAccess, __hasAccess:hasAccess, __itemEquipType:itemEquipType, __normAccess:normAccess, __findItem:findItem, __pickerGroups:pickerGroups,
+  __modelAccess:modelAccess, __hasAccess:hasAccess, __itemEquipType:itemEquipType, __itemAccessOK:itemAccessOK, __normAccess:normAccess, __findItem:findItem, __pickerGroups:pickerGroups,
   __runeCatCost:runeCatCost, __runesCost:runesCost, __magicRunesCost:magicRunesCost,
   __runeCatsForChar:runeCatsForChar, __runeAllowed:runeAllowed, __runeDef:runeDef,
   __runeCopyCost:runeCopyCost, __runeMaxCopies:runeMaxCopies, __isBSB:isBSB
@@ -614,6 +614,19 @@ console.log("Equipment type: label on magic weapons/armour, lance split, all-of,
   // Daemonsmith buys a fireglaive → Inferno Glaive of Hashut is legal for him
   __setState([]); __addUnit("characters","daemonsmith"); const ds=__getState()[0];
   ok(__itemAllowed(__findItem("Inferno Glaive of Hashut"),ds,__findUnit("characters","daemonsmith")), "CD: Daemonsmith (fireglaive option) may take Inferno Glaive");
+
+  // Armour of Bone: medium armour, but Necromancers may take it regardless
+  __setState([]); __switch("vampire-counts",false);
+  const ab=__findItem("Armour of Bone"); const nec=__findUnit("characters","necromancer");
+  ok(ab.requiresAccess==="medium armour", "VC: Armour of Bone tagged medium armour");
+  __addUnit("characters","necromancer"); const ne=__getState()[0];
+  ok(__itemAllowed(ab,ne,nec), "VC: Necromancer (no armour) may take Armour of Bone (waiver)");
+  ne.variant=0; ok(__itemAllowed(ab,ne,nec), "VC: Master Necromancer may take Armour of Bone (waiver)");
+  const noArm=Object.values(window.ARMY_BOOKS["vampire-counts"].units).flat().find(u=>u.isCharacter && u.id!=="necromancer"
+    && u.variants.some(v=>v.magicBudget>0) && !(u.access||[]).some(a=>/armour/.test(a)));
+  if(noArm){ __setState([]); __addUnit(noArm.cat||"characters",noArm.id); const ne2=__getState()[0];
+    ok(!__itemAllowed(ab,ne2,noArm), `VC: ${noArm.name} (no armour access, not a Necromancer) cannot take Armour of Bone`); }
+  __setState([]);
 
   // heavy and light lances are different weapons
   __setState([]); __switch("dark-elves",false);

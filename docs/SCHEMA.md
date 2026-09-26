@@ -104,11 +104,15 @@ Two extra restriction fields used by the Undead/Bretonnia books:
   requirement (a magic armour replaces the mundane one). Everything else matches
   exactly — in particular **heavy and light lances are different weapons**, and an Ogre
   **gut-plate** is its own type (not light armour). Items that self-grant ("may be
-  taken despite not normally being allowed …", "May be taken by Necromancers") and
+  taken despite not normally being allowed …") and
   generic magic hand weapons carry no `requiresAccess` (an item with no mundane type is
   open to every character; other restrictions still apply). Resolved in
   `itemAllowed`/`hasAccess`. In the picker an item barred only by access is **shown
   disabled** with the reason ("needs Shield"); a loaded save's ineligible pick is dropped.
+- `accessWaivedFor: ["Master Necromancer","Necromancer"]` — models (variant or unit
+  names) that may take a `requiresAccess` item regardless of their equipment, when the
+  item's own text says so (Armour of Bone: "May be taken by Necromancers"). Everyone
+  else still needs the type.
 - `equipType: "Bow"` — optional display label for the item's mundane type. The picker,
   the chosen slot button and the info popup show the type as a small badge
   (`itemEquipType`); without `equipType` it is built from `requiresAccess`

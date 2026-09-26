@@ -506,8 +506,17 @@ function itemEquipType(it){
 // equipment access (`requiresAccess` — magic weapon/armour must match a usable type).
 function itemAllowed(it,e,u){
   if(!itemAllowedIgnoringAccess(it,e,u)) return false;
-  if(it.requiresAccess && !hasAccess(e,u,it.requiresAccess)) return false;
+  if(!itemAccessOK(it,e,u)) return false;
   return true;
+}
+// equipment-access half of itemAllowed. `accessWaivedFor:[…]` names models (variant
+// or unit names) the item's own text lets take it regardless of equipment
+// (Armour of Bone: "May be taken by Necromancers").
+function itemAccessOK(it,e,u){
+  if(!it.requiresAccess) return true;
+  if(it.accessWaivedFor){ const nm=u.isCharacter&&u.variants&&u.variants[e.variant]?u.variants[e.variant].name:u.name;
+    if([].concat(it.accessWaivedFor).some(w=>w===nm||w===u.name)) return true; }
+  return hasAccess(e,u,it.requiresAccess);
 }
 // every restriction except equipment access — the picker uses it to show an item
 // the model is barred from only by its equipment as disabled ("needs Shield")

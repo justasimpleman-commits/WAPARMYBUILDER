@@ -146,7 +146,7 @@ function pickerGroups(sourceCat, e, u, extra){
   // Items barred only by equipment access stay listed but disabled, with the
   // mundane type the model lacks as the reason.
   const ok=(it)=>(!extra||extra(it)) && itemAllowedIgnoringAccess(it,e,u);
-  const mark=(it)=>(it.requiresAccess && !hasAccess(e,u,it.requiresAccess))
+  const mark=(it)=>!itemAccessOK(it,e,u)
     ? Object.assign({},it,{disabled:true, reason:`needs ${itemEquipType(it)}`}) : it;
   const army=(D.magicItems[sourceCat]||[]).filter(ok).map(mark);
   if(D.godSections){
