@@ -29,13 +29,14 @@ forbids it) plus choice-gated mounts (`requiresChoice` on a mount choice — a m
 that only unlocks under its honour) are engine features toggled by data fields, see
 SCHEMA.md. Don't key engine logic on a book's option ids or unit ids.)
 
-Visual theme ("grimdark Renaissance": soot-and-iron frame, dark smoky-grey unit cards,
-rule windows and game-mode cards (seamless charcoal gradient fade, no tiled texture) with light ink and red accents, red info seals, blackletter title beside an inline-SVG Old World hammer-axe crest, IM Fell English SC
-display + EB Garamond body from Google Fonts with Palatino/Georgia fallbacks offline)
-is the block at the end of `css/app.css`, driven by the `:root` tokens (`--gold*`,
-`--blood*`, `--parch*`, `--font-title/display/body`). `.entry`, `.modal` and
-`.gameview .gcard` redefine `--ink/--muted/--line/…` for the grey leaf (tokens still named `--parch*`), so styles inside
-them that use those variables stay readable.
+Visual theme: modelled on **Old World Builder** (old-world-builder.com, light theme) —
+warm parchment page with a horizontal fade, slate-blue header (`#303d4d`), tan category
+bars and 2px tan rules between list rows, green primary buttons (`#4f7f6b`), square white
+inputs, system sans-serif body with Gideon Roman (Google Fonts) for the title, flat red
+info seals. The palette is the `--owb-*` tokens in `:root` at the top of `css/app.css`;
+the base tokens (`--bg/--ink/--line/--fire…`) map onto them, and the theme block at the
+end of the file styles each area. `mobile-init.js` still reads a few legacy token names
+(`--gold*`, `--iron-bg`, `--blood`), which `:root` aliases.
 
 Repository layout: `index.html`, `mobile-init.js` and `package.json` at the
 **root**; styles in **`css/`**, the engine in **`js/`**, the data layer in
