@@ -115,7 +115,7 @@ function restoreMeta(m){
   if(!m) return;
   currentSaveName=m.name; currentSaveFile=m.file; saveNameHint=m.hint; _savedSig=m.sig;
   const l=document.getElementById("limit"); if(l && m.limit) l.value=m.limit;
-  if(typeof syncLimitPreset==="function") syncLimitPreset();
+  if(typeof syncLimitPreset==="function") syncLimitPreset(true);
 }
 function pushHistory(before, meta){
   _undo.push({s:before, m:meta||null}); if(_undo.length>HISTORY_MAX) _undo.shift(); _redo=[];

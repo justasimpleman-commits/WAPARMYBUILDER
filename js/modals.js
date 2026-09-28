@@ -296,6 +296,7 @@ function openUnitDetail(cat,id,variant,e){
   if(v && v.variants.some(x=>x.magicBudget)) meta.push("Magic items: "+v.variants.map(x=>`${x.name} ${x.magicBudget}`).join(" / ")+" pts");
   if(meta.length) html+=`<div class="rule" style="color:var(--muted)">${esc(meta.join("  •  "))}</div>`;
   if(inf && (inf.eq || inf.rules)) window.__rw=[];
+  if(inf && inf.troop) html+=`<div class="lbl">Troop type <span style="color:var(--muted);font-weight:400">— click to open the rules</span></div><div class="rule">${troopHTML(inf.troop, e?entryTroop(e,u):null)}</div>`;
   if(inf && inf.eq) html+=`<div class="lbl">Equipment <span style="color:var(--muted);font-weight:400">— click an item to open it</span></div><div class="rule">${eqToHTML(inf.eq)}</div>`;
   if(inf && inf.rules){
     html+=`<div class="lbl">Special rules <span style="color:var(--muted);font-weight:400">— click a rule to open it</span></div><div class="rule">${rulesToHTML(inf.rules)}</div>`;
@@ -322,6 +323,17 @@ function openUnitDetail(cat,id,variant,e){
   }
   const title = u.isCharacter && u.variants.length>1 ? u.name : (inf&&inf.profile?inf.profile[0][0]:u.name);
   openModal(title, html);
+}
+
+/* the unit's own TROOP TYPE line, plus — for a mounted character — the type the
+   whole model counts as (War Beast → Cavalry, Monster → Monster, …) */
+function troopHTML(troop, et, store){
+  let h=troopToHTML(troop, store);
+  if(et && et.mounted){
+    const reg=window[store||"__rw"]=window[store||"__rw"]||[], i=reg.push("troop:"+et.base)-1;
+    h+=` <span class="note">— mounted: counts as <span class="ruleword" onclick="event.stopPropagation();openRuleInfo(${store||"__rw"}[${i}])">${esc(et.base)}</span></span>`;
+  }
+  return h;
 }
 
 function openSpellInfo(loreName){
@@ -366,6 +378,7 @@ function mountEntityHTML(c){
   let h=`<table class="prof"><tr><th>Profile</th>${STAT_HEAD.map(s=>`<th>${s}</th>`).join("")}</tr>`;
   h+=d.rows.map(row=>`<tr><td class="nm">${esc(row[0])}</td>${row.slice(1).map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`).join("");
   h+=`</table>`;
+  if(d.troop) h+=`<div class="lbl">Troop type</div><div class="rule">${troopToHTML(d.troop)}</div>`;
   if(d.eq && d.eq!=="—") h+=`<div class="lbl">Equipment</div><div class="rule">${eqToHTML(d.eq)}</div>`;
   if(d.rules) h+=`<div class="lbl">Special rules</div><div class="rule">${rulesToHTML(d.rules)}</div>`;
   return h;

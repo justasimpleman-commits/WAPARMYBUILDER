@@ -122,7 +122,7 @@ async function applyArmy(data, hist){
   state.forEach(migrateEntry);                       // upgrade older save formats
   uidc = data.uidc || (state.reduce((m,e)=>Math.max(m,e.uid||0),0)+1);
   generalUid = data.generalUid || null;
-  if(data.limit) document.getElementById("limit").value=data.limit;
+  if(data.limit){ document.getElementById("limit").value=data.limit; syncLimitPreset(true); }
   currentSaveName = data.name||null;
   currentSaveFile = null;            // set by library load when applicable
   saveNameHint = null;

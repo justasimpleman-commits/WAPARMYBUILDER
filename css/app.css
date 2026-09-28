@@ -17,6 +17,7 @@ header h1 small{color:var(--fire2);font-weight:400;display:block;font-size:11px;
 .histbtn{background:var(--panel2);border:1px solid var(--line);color:var(--ink);width:32px;height:30px;border-radius:6px;cursor:pointer;font-size:17px;line-height:1}
 .histbtn:hover:not(:disabled){border-color:var(--fire)}
 .histbtn:disabled{opacity:.35;cursor:default}
+.limit input[hidden]{display:none}
 .limit select.preset{background:#0f0b08;border:1px solid var(--line);color:var(--ink);padding:6px 4px;border-radius:6px;font-size:13px;max-width:92px}
 .total .big{font-size:24px;font-weight:700;color:var(--fire2)}
 .total .big.over{color:var(--err)}

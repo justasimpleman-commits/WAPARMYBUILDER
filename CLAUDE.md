@@ -123,6 +123,19 @@ script in **`build/`**.
   Special-rules line as a **clickable word** (`rulesToHTML` + `ruleExact`) that
   opens its definition. A profile parenthetical (e.g. `Fly (8)`, `Immunity
   (Psychology)`) is stripped to the base name for lookup but kept in the display.
+- **`troop-types-common.js`** — `window.COMMON_TROOP_TYPES`: the rulebook's Troop
+  Types chapter (pp.71-76, plus the War Machines chapter pp.77-78) **verbatim**, keyed by
+  the rulebook heading (Infantry, Monstrous Infantry, Cavalry, Monstrous Cavalry, Swarms,
+  War Beasts, Monstrous Beasts, Monstrous Creatures, Monsters, Chariots, Shrines, War
+  Machines) plus a "Troop Types" intro. Each `unitInfo` entry's `troop` field is the
+  army book's TROOP TYPE line verbatim; `troopBase()` strips the parenthetical and maps
+  singular→heading, `troopToHTML` makes the base type clickable (a `troop:<name>` link
+  that `ruleDef` resolves), and `entryTroop(e,u)` gives a mounted character's effective
+  type (War Beast → Cavalry, Monstrous Beast → Monstrous Cavalry, Monstrous
+  Creature/Monster/Chariot/Shrine → the mount's type). Shown on the unit-detail popup,
+  the mount picker entity and the game-mode card. **Only the three books with PDFs in
+  `reference/Army books/` have `troop` lines so far** — the others still need them
+  transcribed from their PDFs (don't guess).
 - **`common-items.js`** — `window.COMMON_ITEM_DESC`: descriptions of the common
   (core-rulebook) magic items, shared across all books so they aren't duplicated
   per file. The engine resolves an item's text via `itemDescOf()`: the book's own
@@ -144,8 +157,10 @@ script in **`build/`**.
   It is the companion to SCHEMA.md (which is the field reference): SCHEMA.md says
   what a field *means*, DATA-MAPPING.md says what to pull from the PDF and where it
   goes. Don't touch the data layer without reading it first.
-- **`reference/`** — source material, not shipped in the build: the army-book and
-  rulebook PDFs (`reference/Army books/`) used to audit data, plus
+- **`reference/`** — source material, not shipped in the build (but committed): the
+  core rulebook PDF (`reference/Rulebook/`, 9th Ed 3.11) and the army-book PDFs
+  (`reference/Army books/` — so far Dark Elves, Vampire Counts, Wood Elves 3.1) used to
+  audit data, the audit notes, plus
   `reference/Chaos-Dwarfs-Stats-and-Logic.docx`, a printable stats + logic
   reference (title page, logic section, per-unit profiles, magic-item tables).
 - **`build/release.command`** — runs the tests, bumps the version and snapshots the
@@ -391,8 +406,10 @@ stats card, which would make rule-heavy units unreadable.
   `reorderEntry(uid,to)` (an undo step) — the category keeps its slots in `state`,
   only their order changes. That order is what the roster, summary, export, share
   link and game mode show. Header buttons/inputs never start a drag.
-- **Points limit:** free input plus a presets dropdown (1000–4000; "Custom" when the
-  value isn't a preset).
+- **Points limit:** a presets dropdown (1000–4000) plus a free number input that is
+  **hidden while a preset is selected** and only shown for "Custom" (`limitCustom` in
+  app.js keeps it open after picking Custom even at a preset value; loads/undo
+  re-derive it via `syncLimitPreset(true)`).
 
 ## Save / load
 

@@ -37,6 +37,7 @@ the engine lives in **`js/`** and `index.html` stays at the **root** (see CLAUDE
 | `data/books.js` | the book registry (`BOOK_INDEX`: id, name, file) | adding a *new* book (one line) |
 | `data/lores-common.js` | the 8 standard Lores (`COMMON_LORES`) | a wizard uses a standard lore — reference it, don't recopy |
 | `data/rules-common.js` | weapon/armour/command rules (`COMMON_RULES`) | almost never (rulebook kit) |
+| `data/troop-types-common.js` | rulebook Troop Types chapter pp.71-78 (`COMMON_TROOP_TYPES`) | a unit's troop type isn't clickable |
 | `data/special-rules-common.js` | universal special rules (`COMMON_SPECIAL_RULES`) | a **core** rule (Fear, Strider, Ignores Armour…) is missing app-wide |
 | `data/common-items.js` | descriptions of rulebook common magic items (`COMMON_ITEM_DESC`) | a shared common item lacks a description |
 
@@ -66,6 +67,7 @@ units → Special Characters**. Map it like this:
 | **Core / Special / Rare** units | `units.core / .special / .rare` | `perModel`+`basePoints` for regiments, flat `basePoints` for single models |
 | **Special Characters** | same arrays, `isSpecialChar:true` (engine enforces unique) | `mustBeGeneral` / `cannotBeGeneral` as needed |
 | Every unit's **Profile / Equipment / Special Rules** | `unitInfo: { id:{ profile:[[name,M,WS,BS,S,T,W,I,A,Ld],…], eq, rules } }` | drives the detail popup; `eq`/`rules` are comma/semicolon lists |
+| Every unit's **TROOP TYPE** line | `unitInfo.<id>.troop` — verbatim, parenthetical included (`"Monster (Draconid)"`) | base type must resolve in `troop-types-common.js`; mounts (`mount_…`) too |
 | Each character's **EQUIPMENT + weapon/armour OPTIONS** (the union of types it may use) | `access:[…]` on the character | powers magic-item `requiresAccess` gating — SCHEMA "Unit entry" |
 | A **Magic Weapon/Armour** whose description names a mundane type (*Heavy armour*, *Great weapon*, *Shield*, *Light lance*, *Elven longbow*, *Whip*, *Gut-plate*…) | `requiresAccess:"<type>"` on that item (heavy vs light lance matters; `{all:[…]}` for "X and Y") | only models with the type in `access` may take it; self-granting items ("…despite not normally allowed") stay untagged — SCHEMA "Magic item" |
 | A **lore only legal under a sub-species / upgrade / alignment** | a `lores` entry object with `requiresChoice`/`requiresToggle`/`requiresVariant` | e.g. Goblin Shaman Bad Moon (Night Goblin), Daemon Prince god-lore (alignment) — SCHEMA "Unit entry" |
@@ -79,6 +81,7 @@ KOLOSSUS                                  →  units.rare[].name / .id
 Profile … 250 pts                         →  basePoints:250  (+ unitInfo.profile row)
 TROOP TYPE: Monster (Animated Construct)  →  (informational; "Animated Construct" is a rule)
 BASE SIZE                                 →  not modelled
+TROOP TYPE: (e.g. DE Avatar: "Monster (Animated Construct)") → unitInfo.<id>.troop
 EQUIPMENT: Bane maces, heavy armour       →  unitInfo.kolossus.eq
 SPECIAL RULES: Animated Construct, Hellbound → unitInfo.kolossus.rules  (each name → glossary/COMMON)
 UPGRADES: Greed Pistons / Breath of … / Overdrive →  glossary entries (the rule text)
