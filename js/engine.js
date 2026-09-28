@@ -280,11 +280,11 @@ function mountProfile(label){
   // (e.g. Walach, Melkhior, Zacharias) where the mount is only a later sub-row and the
   // entry's `rules` belong to the rider.
   for(const k in (D.unitInfo||{})){ const inf=D.unitInfo[k]; const first=(inf.profile||[])[0];
-    if(first && wanted.includes(mountNorm(first[0]))) return {row:first, rules:inf.rules, eq:inf.eq};
+    if(first && wanted.includes(mountNorm(first[0]))) return {row:first, rules:inf.rules, eq:inf.eq, troop:inf.troop};
   }
   // Pass 2: fall back to any-row match (mount only exists inside a combined profile).
   for(const k in (D.unitInfo||{})){ const inf=D.unitInfo[k];
-    for(const row of (inf.profile||[])){ if(wanted.includes(mountNorm(row[0]))) return {row, rules:inf.rules, eq:inf.eq}; }
+    for(const row of (inf.profile||[])){ if(wanted.includes(mountNorm(row[0]))) return {row, rules:inf.rules, eq:inf.eq}; }   // no troop: that line is the rider's
   }
   return null;
 }
@@ -322,9 +322,39 @@ function availableLores(e,u){ return loreEntries(u).filter(le=>loreEntryAvailabl
 function mountChoiceData(c){
   // `prof` may be a single stat row [name,M,…] or an array of such rows (a monster
   // + its crew, e.g. the Arachnarok Spider). Normalise to `rows` (array of rows).
-  if(c.prof){ const rows=Array.isArray(c.prof[0])?c.prof:[c.prof]; return {rows, rules:c.rules||"", eq:c.eq||""}; }
-  const hit=mountProfile(c.label); if(hit) return {rows:[hit.row], rules:hit.rules||"", eq:hit.eq||""};
+  if(c.prof){ const rows=Array.isArray(c.prof[0])?c.prof:[c.prof]; return {rows, rules:c.rules||"", eq:c.eq||"", troop:c.troop||""}; }
+  const hit=mountProfile(c.label); if(hit) return {rows:[hit.row], rules:hit.rules||"", eq:hit.eq||"", troop:c.troop||hit.troop||""};
   return null;
+}
+/* ---------- troop types (rulebook pp.71-76) ----------
+   `unitInfo[id].troop` is the army book's TROOP TYPE line verbatim, e.g.
+   "Infantry (Character, Dark Elf)". troopBase() strips the parenthetical and
+   maps it (singular or plural) onto a COMMON_TROOP_TYPES key. */
+function troopBase(troop){
+  if(!troop) return null;
+  const T=window.COMMON_TROOP_TYPES||{};
+  const b=String(troop).replace(/\s*\(.*$/,"").trim();
+  if(T[b]) return b;
+  for(const k in T){ const lk=k.toLowerCase(), lb=b.toLowerCase();
+    if(lk===lb+"s" || lk===lb.replace(/y$/,"ies") || lk.replace(/s$/,"")===lb) return k; }
+  return null;
+}
+/* A character's troop type once mounted (rulebook "Character Mount" rules):
+   a War Beast makes the model Cavalry, a Monstrous Beast makes it Monstrous
+   Cavalry; on a Monstrous Creature, Monster, Chariot or Shrine the whole model
+   takes the mount's troop type. Returns {troop, base, mounted} — `troop` is the
+   unit's own line, `base` the type the model actually counts as. */
+const MOUNT_TROOP={"War Beasts":"Cavalry","Monstrous Beasts":"Monstrous Cavalry",
+  "Monstrous Creatures":"Monstrous Creatures","Monsters":"Monsters","Chariots":"Chariots","Shrines":"Shrines"};
+function entryTroop(e,u){
+  const inf=(D.unitInfo||{})[u.id]||{};
+  const own=inf.troop||"", ownBase=troopBase(own);
+  const m=selectedMount(e,u);
+  if(m && !mountChoiceBlocked(e,u,m)){
+    const md=mountChoiceData(m), mb=md && troopBase(md.troop), eff=mb && MOUNT_TROOP[mb];
+    if(eff && eff!==ownBase) return {troop:own, base:eff, mounted:true, mountTroop:md.troop};
+  }
+  return {troop:own, base:ownBase, mounted:false};
 }
 /* ---------- helpers for variant/wizard/magic ---------- */
 function variantMatch(e,u,only){ if(!u.isCharacter) return true; return u.variants[e.variant].name===only; }

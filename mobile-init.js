@@ -51,6 +51,9 @@
       '.m-hrow .limit label{display:none;}',
       'header #armySel{flex:1 1 auto;min-width:0;width:100%;max-width:none;}',
       'header #limit{flex:1 1 auto;min-width:0;width:100% !important;}',
+      /* a preset limit hides the number input — the preset chooser takes the row */
+      'header #limit[hidden]{display:none !important;}',
+      'header #limit[hidden] + .preset{flex:1 1 auto;max-width:none;}',
 
       /* used / limit points counter — its own row directly above the category bars */
       '.m-ptsline{display:flex;align-items:baseline;justify-content:center;gap:8px;',

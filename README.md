@@ -36,12 +36,13 @@ data/                all data (the engine reads these)
   lores-common.js      the 8 shared rulebook Lores of Magic
   rules-common.js      shared rulebook equipment & command rules
   special-rules-common.js  universal special-rules glossary
+  troop-types-common.js    rulebook Troop Types chapter (Infantry, Cavalry, Monster, …)
   common-items.js      descriptions of the common rulebook magic items
   <book>.js            one file per army book
 docs/                SCHEMA.md (field reference), DATA-MAPPING.md (extraction playbook), RELEASING.md
 scripts/             test-engine.js (test harness), sweep.js, release helpers
 build/               release.command (tests + version bump + source snapshot) — see docs/RELEASING.md
-reference/           source PDFs + a printable stats/logic .docx (not shipped)
+reference/           Rulebook/ (9th Ed 3.11 PDF), Army books/ (source PDFs), audits, stats/logic .docx (not shipped)
 ```
 
 The app is a generic **engine** (`js/`) driven by **data files** in `data/`.

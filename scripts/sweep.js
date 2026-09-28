@@ -3,7 +3,7 @@
    COMMON_RULES). Run: node scripts/sweep.js <book-id>  (cwd = project root) */
 const fs=require("fs");
 global.window=global;
-["data/lores-common.js","data/rules-common.js","data/special-rules-common.js","data/common-items.js","data/books.js"]
+["data/lores-common.js","data/rules-common.js","data/special-rules-common.js","data/troop-types-common.js","data/common-items.js","data/books.js"]
   .forEach(f=>eval(fs.readFileSync(f,"utf8")));
 window.BOOK_INDEX.forEach(b=>eval(fs.readFileSync(b.file,"utf8")));   // every bundled book
 

@@ -43,17 +43,27 @@ function renderArmySelect(){
 
 /* ---------- points limit + presets ---------- */
 const LIMIT_PRESETS=[1000,1500,2000,2500,3000,4000];
-function syncLimitPreset(){
-  const p=document.getElementById("limitPreset"); if(!p) return;
-  const v=currentLimit(); p.value=LIMIT_PRESETS.includes(v)?String(v):"";
+// The free number input only shows for a Custom limit: a preset value needs no
+// writer. `limitCustom` keeps it open after the user picks "Custom" even while
+// the typed value happens to equal a preset; a load/undo (reset=true) re-derives.
+let limitCustom=false;
+function syncLimitPreset(reset){
+  const p=document.getElementById("limitPreset"), inp=document.getElementById("limit"); if(!p) return;
+  const v=currentLimit(), isPreset=LIMIT_PRESETS.includes(v);
+  if(reset||!isPreset) limitCustom=!isPreset;
+  p.value=(isPreset&&!limitCustom)?String(v):"";
+  if(inp) inp.hidden=!limitCustom;
 }
 function wireLimit(){
   const inp=document.getElementById("limit"), p=document.getElementById("limitPreset");
   inp.addEventListener("input",()=>{ syncLimitPreset(); render(); });
   if(p){
     p.innerHTML='<option value="">Custom</option>'+LIMIT_PRESETS.map(v=>`<option value="${v}">${v}</option>`).join("");
-    p.onchange=()=>{ if(p.value){ inp.value=p.value; render(); } };
-    syncLimitPreset();
+    p.onchange=()=>{
+      if(p.value){ limitCustom=false; inp.value=p.value; render(); }
+      else { limitCustom=true; syncLimitPreset(); inp.focus(); inp.select(); }
+    };
+    syncLimitPreset(true);
   }
 }
 

@@ -45,6 +45,7 @@ function equipRegexHit(l){
 }
 function ruleDef(label){
   if(!label) return null;
+  if(/^troop:/.test(label)) return troopDef(label.slice(6));   // troop-type link (troopToHTML)
   const ex=ruleExact(label); if(ex) return ex;             // glossary, then SR, then R (exact)
   const hit=equipRegexHit(label.toLowerCase()); if(hit) return hit;
   if(D.glossary){ for(const k in D.glossary){ if(label.toLowerCase().includes(k.toLowerCase())) return {name:k, text:D.glossary[k]}; } }
@@ -148,6 +149,22 @@ function tokensToHTML(str, resolver, store){
   }
   return out;
 }
+/* a unit's TROOP TYPE line: the base type ("Monstrous Infantry") is clickable into
+   the rulebook Troop Types text (COMMON_TROOP_TYPES); the parenthetical stays plain. */
+function troopDef(label){
+  const k=troopBase(label); if(!k) return null;
+  return {name:k, text:window.COMMON_TROOP_TYPES[k]};
+}
+function troopToHTML(troop, store){
+  if(!troop) return "";
+  store = store || "__rw";
+  const reg = window[store] = window[store] || [];
+  const m=String(troop).match(/^([^(]*?)(\s*\(.*)?$/), head=m[1], rest=m[2]||"";
+  const def=troopDef(head);
+  if(!def) return esc(troop);
+  const idx=reg.push("troop:"+def.name)-1;
+  return `<span class="ruleword" onclick="event.stopPropagation();openRuleInfo(${store}[${idx}])">${esc(head)}</span>${esc(rest)}`;
+}
 function rulesToHTML(rules, store){ return tokensToHTML(rules, ruleExact, store); }   // strict: special rules
 function eqToHTML(eq, store){ return tokensToHTML(eq, equipDef, store); }            // weapons/armour/command
 /* render a rule's text: paragraphs are separated by blank lines, and a sub-heading
@@ -155,5 +172,5 @@ function eqToHTML(eq, store){ return tokensToHTML(eq, equipDef, store); }       
    from the rulebook, which uses bold sub-headers like "Berserk Rage"). */
 function ruleTextHTML(text){
   return String(text).split(/\n[ \t]*\n/).map(p=>p.trim()).filter(Boolean)
-    .map(p=>`<div class="rule">${esc(p).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>")}</div>`).join("");
+    .map(p=>`<div class="rule">${esc(p).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\n(?=• )/g,"<br>")}</div>`).join("");
 }

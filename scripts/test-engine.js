@@ -14,7 +14,7 @@ class El {
     this.value=""; this.checked=false; this.selected=false; this.disabled=false; }
   appendChild(c){ this.children.push(c); return c; }
   append(){ [...arguments].forEach(c=>this.children.push(typeof c==="string"?new El("#t"):c)); }
-  addEventListener(){}
+  addEventListener(){} focus(){} select(){}
   removeChild(c){ this.children=this.children.filter(x=>x!==c); }
   setAttribute(){} getAttribute(){return null;}
   querySelector(){return null;} querySelectorAll(){return [];}
@@ -81,7 +81,9 @@ const engine=srcs.filter(s=>s.startsWith("js/")).map(load).join("\n");
   __runeCatCost:runeCatCost, __runesCost:runesCost, __magicRunesCost:magicRunesCost,
   __runeCatsForChar:runeCatsForChar, __runeAllowed:runeAllowed, __runeDef:runeDef,
   __runeCopyCost:runeCopyCost, __runeMaxCopies:runeMaxCopies, __isBSB:isBSB,
-  __reorderEntry:reorderEntry, __openGame:openGameMode, __closeGame:closeGameMode, __gameProfileRows:gameProfileRows
+  __reorderEntry:reorderEntry, __openGame:openGameMode, __closeGame:closeGameMode, __gameProfileRows:gameProfileRows,
+  __troopBase:troopBase, __entryTroop:entryTroop, __troopToHTML:troopToHTML, __mountChoiceData:mountChoiceData,
+  __openUnitDetail:openUnitDetail, __syncLimitPreset:syncLimitPreset, __wireLimit:wireLimit
 });`);
 
 /* ---------- helpers ---------- */
@@ -903,7 +905,7 @@ console.log("Registry: every data/books.js entry registers its id and name…");
     ok(bk && bk.name===b.name, `registry: ${b.id} name "${b.name}" matches the book (${bk&&bk.name})`);
   });
   const files=fs.readdirSync(path.join(DIR,"data")).filter(f=>f.endsWith(".js"));
-  const common=["books.js","lores-common.js","rules-common.js","special-rules-common.js","common-items.js"];
+  const common=["books.js","lores-common.js","rules-common.js","special-rules-common.js","troop-types-common.js","common-items.js"];
   const books=files.filter(f=>!common.includes(f));
   ok(books.every(f=>window.BOOK_INDEX.some(b=>b.file==="data/"+f)), "registry: every data/ book file is listed in books.js");
 }
@@ -1091,6 +1093,51 @@ console.log("Game mode: renders every book's full roster; character rows are the
   const html=document.getElementById("gameView").innerHTML;
   ok(/★ General/.test(html) && /Overseer/.test(html), "game card names the profile and marks the General");
   __closeGame();
+}
+
+console.log("Troop types: rulebook text, per-unit troop lines, mounted characters…");
+{
+  const T=window.COMMON_TROOP_TYPES;
+  ["Infantry","Monstrous Infantry","Cavalry","Monstrous Cavalry","Swarms","War Beasts","Monstrous Beasts",
+   "Monstrous Creatures","Monsters","Chariots","Shrines","War Machines"].forEach(k=>ok(T[k] && /Unit Strength/.test(T[k]), "troop type text: "+k));
+  ok(__troopBase("War Beast (Equine)")==="War Beasts" && __troopBase("Monster (Draconid)")==="Monsters"
+     && __troopBase("Swarm (Chiropter)")==="Swarms" && __troopBase("Infantry (Character, Dark Elf)")==="Infantry"
+     && __troopBase("Monstrous Infantry (Ghoul)")==="Monstrous Infantry" && __troopBase("War Machine")==="War Machines",
+     "troopBase maps the army-book singular onto the rulebook heading");
+  // books transcribed from their PDFs: every unitInfo entry (units + mounts) has a resolvable troop line
+  ["chaos-dwarfs","dark-elves","vampire-counts","wood-elves"].forEach(id=>{
+    __switch(id,false); const D=__D(); const bad=[];
+    for(const k in D.unitInfo){ const t=D.unitInfo[k].troop; if(!t||!__troopBase(t)) bad.push(k); }
+    ok(bad.length===0, id+": every unit has a troop type"+(bad.length?" (missing: "+bad.slice(0,6).join(", ")+")":""));
+    const mb=[];
+    ["characters","core","special","rare"].forEach(cat=>(D.units[cat]||[]).forEach(u=>(u.options||[]).filter(o=>o.type==="mount").forEach(o=>o.choices.forEach(c=>{
+      const md=__mountChoiceData(c); if(!md||!__troopBase(md.troop)) mb.push(u.id+"/"+c.label); }))));
+    ok(mb.length===0, id+": every mount resolves a troop type"+(mb.length?" ("+mb.slice(0,5).join("; ")+")":""));
+  });
+  // mounted character: War Beast → Cavalry, Monstrous Creature → itself, on foot → own type
+  __setState([]); __setGen(null); __switch("dark-elves",false); __addUnit("characters","commanders");
+  const e=__getState()[0], u=__findUnit("characters","commanders"), mo=u.options.find(o=>o.type==="mount");
+  ok(__entryTroop(e,u).base==="Infantry" && !__entryTroop(e,u).mounted, "on foot: Infantry");
+  e.opts.mount=mo.choices.findIndex(c=>c.label==="Dark Steed");
+  ok(__entryTroop(e,u).base==="Cavalry" && __entryTroop(e,u).mounted, "on a Dark Steed (War Beast): counts as Cavalry");
+  e.opts.mount=mo.choices.findIndex(c=>c.label==="Manticore");
+  ok(__entryTroop(e,u).base==="Monstrous Creatures", "on a Manticore: counts as a Monstrous Creature");
+  const h=__troopToHTML("Infantry (Character, Dark Elf)");
+  ok(/ruleword/.test(h) && /\(Character, Dark Elf\)/.test(h), "troop line: base type clickable, parenthetical kept");
+  ok(__ruleDef("troop:Cavalry").name==="Cavalry", "troop link resolves to the rulebook text");
+  __openUnitDetail("characters","commanders",0,e);
+  ok(/Troop type/.test(document.getElementById("modalBody").innerHTML) && /counts as/.test(document.getElementById("modalBody").innerHTML), "unit detail shows the troop type and the mounted type");
+  __openGame(); ok(/Troop/.test(document.getElementById("gameView").innerHTML), "game card shows the troop type"); __closeGame();
+}
+
+console.log("Points limit: the number input only shows for a Custom limit…");
+{
+  const inp=document.getElementById("limit"), p=document.getElementById("limitPreset");
+  inp.value="2000"; __syncLimitPreset(true); ok(inp.hidden===true && p.value==="2000", "preset limit hides the input");
+  inp.value="2250"; __syncLimitPreset(true); ok(inp.hidden===false && p.value==="", "custom limit shows the input");
+  inp.value="1500"; p.value="1500"; p.onchange(); ok(inp.hidden===true, "picking a preset hides it again");
+  p.value=""; p.onchange(); ok(inp.hidden===false, "picking Custom shows it even at a preset value");
+  inp.value="2000"; __syncLimitPreset(true);
 }
 
 console.log(`\n${fails? "FAIL":"PASS"}: ${checks-fails}/${checks} checks passed.`);

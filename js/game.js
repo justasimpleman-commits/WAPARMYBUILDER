@@ -77,6 +77,7 @@ function gameCardHTML(e){
   const bought=lo.equip.filter(s=>!/^Mount: /.test(s));
   let h=`<div class="ghead"><span class="gnm">${esc(nm)}${ct}</span>${tags.join("")}<span class="gpts">${pts}</span></div>`;
   h+=gameTable(rows);
+  if(inf.troop) h+=gameLine("Troop", troopHTML(inf.troop, entryTroop(e,u), "__gw"));
   h+=gameLine("Equipment", [inf.eq && inf.eq!=="—" ? eqToHTML(inf.eq,"__gw") : "", bought.length ? loadoutHTML(bought,"equip","__gw","__giw") : ""].filter(Boolean).join(", "));
   h+=gameLine("Rules", rulesToHTML(inf.rules,"__gw"));
   if(mount){
