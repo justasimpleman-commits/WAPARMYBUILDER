@@ -75,12 +75,12 @@
       /* drawers */
       '.m-drawer{position:fixed;top:0;bottom:0;width:min(88vw,380px);z-index:90;display:flex;flex-direction:column;',
       '  background:var(--panel,#1a1511);box-shadow:0 0 28px rgba(0,0,0,.65);transition:transform .28s ease;}',
-      '.m-drawer.left{left:0;transform:translateX(-105%);border-right:2px solid var(--gold,#c9a24a);}',
-      '.m-drawer.right{right:0;transform:translateX(105%);border-left:2px solid var(--gold,#c9a24a);}',
+      '.m-drawer.left{left:0;transform:translateX(-105%);border-right:1px solid var(--gold-lo,#4f3d20);}',
+      '.m-drawer.right{right:0;transform:translateX(105%);border-left:1px solid var(--gold-lo,#4f3d20);}',
       '.m-drawer.m-open{transform:translateX(0);}',
       '.m-drawer-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex:0 0 auto;',
       '  padding:calc(10px + env(safe-area-inset-top)) 14px 10px;border-bottom:1px solid var(--line,#332a21);',
-      '  background:linear-gradient(180deg,rgba(255,255,255,.06),transparent 50%),linear-gradient(90deg,#5a150e,#2d0d08);box-shadow:0 1px 0 var(--gold,#c9a24a);}',
+      '  background:var(--iron-bg,#15120f);box-shadow:0 1px 0 var(--gold-lo,#4f3d20),0 3px 0 var(--blood,#4e0f0b);}',
       '.m-drawer-head h3{margin:0;font-size:15px;letter-spacing:1.5px;font-family:var(--font-display,serif);color:var(--gold-hi,#f1d98f);text-transform:uppercase;}',
       '.m-drawer-body{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;',
       '  padding:12px 14px;padding-bottom:calc(16px + env(safe-area-inset-bottom));}',
@@ -89,7 +89,7 @@
 
       /* hamburger sheet (drops from the top-left) */
       '.m-menu{position:fixed;left:8px;right:8px;top:0;z-index:95;background:linear-gradient(180deg,#261c14,#16100c);',
-      '  border:1px solid var(--gold,#c9a24a);border-top:none;border-radius:0 0 6px 6px;box-shadow:0 12px 28px rgba(0,0,0,.6);',
+      '  border:1px solid var(--gold-lo,#4f3d20);border-top:none;border-radius:0 0 6px 6px;box-shadow:0 12px 28px rgba(0,0,0,.6);',
       '  transform:translateY(-115%);transition:transform .26s ease;',
       '  padding:calc(8px + env(safe-area-inset-top)) 12px 12px;display:flex;flex-direction:column;gap:8px;}',
       '.m-menu.m-open{transform:translateY(0);}',

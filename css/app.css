@@ -1,12 +1,14 @@
 /* Warhammer Army Builder — app styles */
 :root{
-  --bg:#0c0907; --panel:#1a130e; --panel2:#251b13; --line:#3e2f20;
-  --ink:#e8dcc4; --muted:#9c8b73; --fire:#9e2a1c; --fire2:#dcb867;
-  --ok:#5f9a4f; --warn:#d0a23a; --err:#c9432e; --accent:#c9a24a;
-  --gold:#c9a24a; --gold-hi:#f1d98f; --gold-lo:#7a5a1e; --blood:#7d1a12; --blood-hi:#b3301f;
-  --iron:#2b2622; --head:#3a120c;
-  --font-display:"Cinzel","Trajan Pro","Palatino Linotype",Georgia,serif;
-  --font-body:"Alegreya Sans","Segoe UI",system-ui,sans-serif;
+  --bg:#090807; --panel:#15120f; --panel2:#1f1a15; --line:#352b21;
+  --ink:#d9ccb2; --muted:#8f8069; --fire:#6e1a12; --fire2:#c4a66a;
+  --ok:#6d8a4f; --warn:#b98f36; --err:#a8342a; --accent:#a88a4c;
+  --gold:#a88a4c; --gold-hi:#d9c28a; --gold-lo:#4f3d20; --blood:#4e0f0b; --blood-hi:#7c1c14;
+  --iron:#1b1916; --head:#2a0c08;
+  --parch:#d5c49d; --parch-ink:#2a1c11; --parch-mut:#6a553a; --parch-line:#a18b64;
+  --font-title:"UnifrakturMaguntia","Old English Text MT",var(--font-display);
+  --font-display:"IM Fell English SC","Cormorant SC","Palatino Linotype",Georgia,serif;
+  --font-body:"EB Garamond","Garamond","Palatino Linotype",Georgia,serif;
 }
 *{box-sizing:border-box}
 body{margin:0;font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
@@ -268,198 +270,223 @@ body.gaming{overflow:hidden}
   .gameview .gline{font-size:13px}
 }
 
+
 /* =====================================================================
-   FANTASY WARFARE THEME — forged iron, gilt trim, blood-red banners.
-   Layered over the base styles above; the fonts come from Google Fonts
-   and fall back to Georgia / system fonts when offline (file://).
+   GRIMDARK RENAISSANCE THEME — soot and blackened iron for the frame,
+   aged parchment and sepia ink for unit cards, rule windows and the
+   game-mode cards; blackletter title, Fell/Garamond type, tarnished
+   brass and dried blood. Layered over the base styles above. Fonts come
+   from Google Fonts and fall back to Palatino/Georgia offline (file://).
    ===================================================================== */
-body{font-family:var(--font-body);font-size:15px;font-variant-numeric:lining-nums;
+:root{
+  --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .4 0 0 0 0 .3 0 0 0 .11 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.035' numOctaves='4' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .22 0 0 0 0 .08 0 0 0 -.75 .40'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 .3 0 0 0 0 .2 0 0 0 0 .1 0 0 0 .16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+  --parch-bg:var(--grain),linear-gradient(180deg,#dccca6,#cdb98e);
+  --iron-bg:linear-gradient(180deg,rgba(255,255,255,.035),transparent 45%),var(--noise),linear-gradient(180deg,#1f1c19,#110f0d 75%,#0a0908);
+}
+body{font-family:var(--font-body);font-size:15.5px;font-variant-numeric:lining-nums;
   background-color:var(--bg);
   background-image:
-    radial-gradient(ellipse 90% 60% at 50% 115%,rgba(158,42,28,.22),transparent 70%),
-    radial-gradient(ellipse 60% 40% at 50% -10%,rgba(201,162,74,.10),transparent 70%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .42 0 0 0 0 .28 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    radial-gradient(ellipse 120% 80% at 50% 50%,transparent 55%,rgba(0,0,0,.75)),
+    radial-gradient(ellipse 80% 45% at 50% 112%,rgba(110,26,18,.20),transparent 70%),
+    var(--noise);
   background-attachment:fixed}
-button,input,select,textarea{font-family:inherit}
-::selection{background:var(--blood-hi);color:#fff}
-*{scrollbar-width:thin;scrollbar-color:var(--gold-lo) transparent}
+button,input,select,textarea{font-family:inherit;font-variant-numeric:lining-nums}
+::selection{background:var(--blood-hi);color:#f1e6cc}
+*{scrollbar-width:thin;scrollbar-color:#4a3d2c transparent}
 ::-webkit-scrollbar{width:9px;height:9px}
-::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--gold-lo),#4a3514);border-radius:6px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb{background:#3d3226;border-radius:5px;border:2px solid transparent;background-clip:padding-box}
 ::-webkit-scrollbar-track{background:transparent}
 
-/* ---- header: a forged iron plate with gilt trim ---- */
-header{
-  background:
-    linear-gradient(180deg,rgba(255,255,255,.05),transparent 40%),
-    repeating-linear-gradient(90deg,rgba(0,0,0,.18) 0 2px,transparent 2px 7px),
-    linear-gradient(180deg,#2e2520,#17110d 70%,#0f0b08);
-  border-bottom:none;
-  box-shadow:0 1px 0 var(--gold-lo),0 3px 0 var(--blood),0 4px 0 var(--gold),0 10px 24px rgba(0,0,0,.65);
-  padding:10px 18px}
-header h1{display:flex;align-items:center;gap:10px;margin:0}
-header h1 .crest{width:44px;height:44px;flex:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.8))}
-header h1 .ttl{font-family:"Cinzel Decorative",var(--font-display);font-size:23px;font-weight:700;letter-spacing:1px;line-height:1.05;
-  background:linear-gradient(180deg,var(--gold-hi) 10%,var(--gold) 55%,#8a6424 95%);-webkit-background-clip:text;background-clip:text;color:transparent;
-  filter:drop-shadow(0 2px 1px rgba(0,0,0,.9))}
-header h1 small{font-family:var(--font-display);-webkit-text-fill-color:#b9a27a;color:#b9a27a;font-size:10.5px;letter-spacing:3px;margin-top:3px;font-weight:700}
-.limit label{font-family:var(--font-display);font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#b9a27a}
+/* ---- header: blackened iron, a brass rule and a band of dried blood ---- */
+header{background:var(--iron-bg);border-bottom:none;padding:10px 18px;
+  box-shadow:0 1px 0 #000,0 2px 0 var(--gold-lo),0 5px 0 var(--blood),0 6px 0 #000,0 12px 26px rgba(0,0,0,.8)}
+header h1{display:flex;align-items:center;gap:11px;margin:0}
+header h1 .crest{width:44px;height:48px;flex:none;filter:drop-shadow(0 2px 3px #000)}
+header h1 .ttl{font-family:var(--font-title);font-weight:400;font-size:29px;letter-spacing:.5px;line-height:1;color:#c9b07a;
+  text-shadow:0 1px 0 #000,0 -1px 0 rgba(255,235,190,.12),0 3px 6px rgba(0,0,0,.9)}
+header h1 small{font-family:var(--font-display);color:#8f7e62;font-size:12px;letter-spacing:3px;margin-top:4px}
+.limit label{font-family:var(--font-display);font-size:14px;letter-spacing:1.5px;color:#9d8a68}
 
-/* inputs / selects: dark wells with bronze rims */
+/* wells (inputs) on the dark frame */
 select,.stepper input,.limit input,.limit select.preset,.catsearch,.pickbtn,textarea,.shareurl{
-  background:linear-gradient(180deg,#0a0705,#15100b);border:1px solid #4f3b24;color:var(--ink);
-  box-shadow:inset 0 1px 3px rgba(0,0,0,.8);font-family:var(--font-body)}
+  background:#0b0a09;border:1px solid #3b3126;color:var(--ink);border-radius:2px;box-shadow:inset 0 1px 4px rgba(0,0,0,.9)}
 select:focus,.stepper input:focus,.limit input:focus,.catsearch:focus,textarea:focus,.shareurl:focus{
-  outline:none;border-color:var(--gold);box-shadow:inset 0 1px 3px rgba(0,0,0,.8),0 0 0 2px rgba(201,162,74,.25)}
-header #armySel{font-family:var(--font-display);font-weight:700;font-size:13.5px;color:var(--gold-hi);padding:6px 8px;border-color:var(--gold-lo)}
-.pickbtn:hover{border-color:var(--gold)}
-.pickbtn.empty{font-style:italic}
+  outline:none;border-color:var(--gold);box-shadow:inset 0 1px 4px rgba(0,0,0,.9),0 0 0 2px rgba(168,138,76,.2)}
+header #armySel{font-family:var(--font-display);font-size:15px;color:var(--gold-hi);border-color:var(--gold-lo)}
+.catsearch{font-style:italic}
 
-/* points total: a gilded plaque */
-.total>div:last-child{position:relative;padding:3px 14px 4px;text-align:center;border:1px solid var(--gold-lo);border-radius:4px;
-  background:linear-gradient(180deg,#3a120c,#1c0905);box-shadow:inset 0 0 0 2px #1c0905,inset 0 0 0 3px rgba(201,162,74,.45),0 3px 8px rgba(0,0,0,.6)}
-.total .big{font-family:var(--font-display);font-weight:900;font-size:26px;line-height:1.05;color:var(--gold-hi);text-shadow:0 0 12px rgba(241,217,143,.25),0 2px 1px #000}
-.total .big.over{color:#ff7a5c;text-shadow:0 0 14px rgba(255,80,50,.5),0 2px 1px #000}
-.total .note{color:#c7ad80}
+/* points total: a blood-red wax seal */
+.total>div:last-child{min-width:78px;padding:4px 12px 5px;text-align:center;border-radius:40% 45% 42% 48% / 50% 46% 52% 48%;
+  background:radial-gradient(circle at 38% 30%,#9a2a1e,#5a120c 55%,#2c0705);box-shadow:inset 0 -3px 6px rgba(0,0,0,.55),inset 0 2px 3px rgba(255,160,140,.15),0 3px 8px rgba(0,0,0,.8)}
+.total .big{font-family:var(--font-body);font-weight:700;font-size:25px;line-height:1.05;color:#f0d9b0;text-shadow:0 1px 0 #2a0503,0 -1px 0 rgba(255,200,170,.2)}
+.total .big.over{color:#ffb08f;text-decoration:underline wavy #ffb08f 1px}
+.total .note{color:#d9ae9c;font-style:italic}
 
-/* forged buttons */
-.histbtn,.btn,.stepper button,.modal .rbtn,.m-iconbtn{
-  background:linear-gradient(180deg,#3b3029,#231b15 55%,#1a140f);border:1px solid #5a4630;color:var(--ink);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 2px 3px rgba(0,0,0,.5);transition:border-color .15s,filter .15s,transform .05s}
-.histbtn:hover:not(:disabled),.btn:hover,.stepper button:hover,.modal .rbtn:hover:not(:disabled){border-color:var(--gold);filter:brightness(1.18)}
+/* iron buttons */
+.histbtn,.btn,.stepper button,.m-iconbtn{background:linear-gradient(180deg,#2b2723,#191613 60%,#12100e);border:1px solid #433729;color:var(--ink);border-radius:2px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 2px 3px rgba(0,0,0,.6);transition:border-color .15s,filter .15s,transform .05s}
+.histbtn:hover:not(:disabled),.btn:hover,.stepper button:hover{border-color:var(--gold);filter:brightness(1.2)}
 .btn:active,.histbtn:active:not(:disabled),.stepper button:active{transform:translateY(1px)}
-.btn{font-family:var(--font-display);font-weight:700;font-size:12px;letter-spacing:.8px;padding:8px 13px}
-.btn.primary,.modal .rbtn.on{background:linear-gradient(180deg,var(--blood-hi),var(--blood) 60%,#4d0f09);border:1px solid var(--gold);color:var(--gold-hi);
-  text-shadow:0 1px 1px #000;box-shadow:inset 0 1px 0 rgba(255,220,160,.25),0 2px 6px rgba(0,0,0,.6)}
-.histbtn.gamebtn{font-family:var(--font-display);font-weight:700;letter-spacing:.8px;color:var(--gold-hi);
-  background:linear-gradient(180deg,var(--blood-hi),var(--blood) 60%,#4d0f09);border-color:var(--gold)}
+.btn{font-family:var(--font-display);font-size:14.5px;letter-spacing:.8px;padding:6px 13px}
+.btn.primary,.histbtn.gamebtn{background:linear-gradient(180deg,#8a2218,#5c130d 60%,#360906);border:1px solid #8c6d3a;color:#efdcb4;
+  text-shadow:0 1px 1px #000;box-shadow:inset 0 1px 0 rgba(255,200,160,.18),0 2px 5px rgba(0,0,0,.7)}
+.histbtn.gamebtn{font-family:var(--font-display);font-size:15px;letter-spacing:.8px}
 
-/* ---- category bars: engraved channels filled with molten gold ---- */
-.bars{background:linear-gradient(180deg,#130d09,#0e0a07);border-bottom:1px solid #2a1f15;box-shadow:inset 0 6px 8px -6px rgba(0,0,0,.9);padding:12px 18px 10px}
-.bar .lab{font-family:var(--font-display);font-size:11px;font-weight:700;letter-spacing:.8px;color:#a8946f}
+/* ---- category bars: engraved channels, tarnished brass ---- */
+.bars{background:linear-gradient(180deg,#0e0c0a,#0a0908);border-bottom:1px solid #1f1a14;box-shadow:inset 0 7px 8px -6px #000;padding:13px 18px 10px}
+.bar .lab{font-family:var(--font-display);font-size:13px;letter-spacing:.6px;color:#8f7e62}
 .bar .lab b{color:var(--gold-hi);font-family:var(--font-body)}
-.track{height:10px;background:#070504;border:1px solid #3d2e1c;border-radius:2px;box-shadow:inset 0 2px 3px rgba(0,0,0,.9)}
-.fill{background:linear-gradient(180deg,var(--gold-hi),var(--gold) 45%,#7a5a1e);box-shadow:0 0 8px rgba(241,217,143,.35)}
-.fill.good{background:linear-gradient(180deg,#a6d98e,var(--ok) 45%,#2f5626);box-shadow:0 0 8px rgba(120,200,100,.3)}
-.fill.bad{background:linear-gradient(180deg,#ff9c7c,var(--err) 45%,#6e1a0e);box-shadow:0 0 10px rgba(255,80,50,.45)}
+.track{height:8px;background:#050404;border:1px solid #2e261c;border-radius:1px;box-shadow:inset 0 2px 3px #000}
+.fill{background:linear-gradient(180deg,#cdb27a,#8e7240 50%,#4f3d20)}
+.fill.good{background:linear-gradient(180deg,#9fb47c,#5f7a41 50%,#2f3f1f)}
+.fill.bad{background:linear-gradient(180deg,#c9594a,#8a1f16 50%,#420b07)}
 
 /* ---- the three columns ---- */
 .col{scrollbar-gutter:stable}
-.catalog{border-right:none;background:linear-gradient(90deg,rgba(0,0,0,.25),rgba(0,0,0,.05));box-shadow:inset -1px 0 0 #2f2418,inset -3px 0 0 #0a0705,inset -4px 0 0 rgba(201,162,74,.22)}
-.validation{border-left:none;background:linear-gradient(270deg,rgba(0,0,0,.3),rgba(0,0,0,.08));box-shadow:inset 1px 0 0 #2f2418,inset 3px 0 0 #0a0705,inset 4px 0 0 rgba(201,162,74,.22)}
+.catalog{border-right:none;background:linear-gradient(90deg,rgba(0,0,0,.35),rgba(0,0,0,.1));box-shadow:inset -1px 0 0 #000,inset -2px 0 0 #2a2219}
+.validation{border-left:none;background:linear-gradient(270deg,rgba(0,0,0,.4),rgba(0,0,0,.12));box-shadow:inset 1px 0 0 #000,inset 2px 0 0 #2a2219}
 
-/* section headings: Cinzel with a fading gilt rule and a diamond */
-h2.sec{font-family:var(--font-display);font-weight:700;font-size:13px;letter-spacing:2.5px;color:var(--gold);
-  border-bottom:1px solid transparent;border-image:linear-gradient(90deg,var(--gold),rgba(201,162,74,.35) 60%,transparent) 1;
-  padding-bottom:6px;text-shadow:0 1px 2px #000}
-h2.sec:not(.cathead)::before{content:"◆";font-size:9px;color:var(--blood-hi);margin-right:8px;vertical-align:2px}
-h2.sec.cathead .cv{color:var(--blood-hi)}
-h2.sec.cathead .cpts{font-family:var(--font-body);color:#b39b74;font-size:12px}
-h2.sec.cathead:hover{color:var(--gold-hi)}
+/* section headings: Fell small caps with a fleuron and a hairline */
+h2.sec{font-family:var(--font-display);font-weight:400;font-size:16px;letter-spacing:2px;color:var(--gold-hi);text-transform:none;
+  border-bottom:1px solid transparent;border-image:linear-gradient(90deg,var(--gold),rgba(168,138,76,.25) 55%,transparent) 1;padding-bottom:4px;text-shadow:0 1px 2px #000}
+h2.sec:not(.cathead)::before{content:"❦";color:var(--blood-hi);margin-right:8px;font-size:15px}
+h2.sec.cathead .cv{color:#8c2a1f}
+h2.sec.cathead .cpts{font-family:var(--font-body);font-style:italic;color:#8f7e62;font-size:13px}
+h2.sec.cathead:hover{color:#efdcb4}
 
 /* catalogue rows */
-.catitem{border:1px solid transparent;border-radius:3px;padding:6px 8px;margin:1px 0}
-.catitem:hover{background:linear-gradient(90deg,rgba(158,42,28,.18),rgba(201,162,74,.06));border-color:rgba(201,162,74,.25)}
-.catitem .cname>div:first-child,.catitem .cname{font-weight:500}
-.catitem .add{background:linear-gradient(180deg,var(--blood-hi),var(--blood));color:var(--gold-hi);border:1px solid var(--gold);border-radius:3px;
-  box-shadow:0 1px 3px rgba(0,0,0,.6);text-shadow:0 1px 0 #000}
-.catitem .add:hover:not(:disabled){filter:brightness(1.25)}
-.cbadge{color:var(--gold-hi)}
+.catitem{border-radius:2px;padding:5px 8px;border-bottom:1px solid rgba(80,64,44,.25)}
+.catitem:hover{background:linear-gradient(90deg,rgba(110,26,18,.22),transparent)}
+.catitem .cname{font-size:16px}
+.catitem .pts{font-style:italic;color:#8a7a60}
+.catitem .add{background:linear-gradient(180deg,#8a2218,#4e0f0b);color:#efdcb4;border:1px solid #7a5f33;border-radius:2px;box-shadow:0 1px 3px #000}
+.catitem .add:hover:not(:disabled){filter:brightness(1.3)}
+.cbadge{color:var(--gold-hi);font-family:var(--font-body)}
 
-/* ---- roster entries: a regimental banner on a leather card ---- */
-.entry{position:relative;background:linear-gradient(180deg,#1f1711,#16100c);border:1px solid #4a3822;border-radius:4px;
-  box-shadow:inset 0 0 0 1px #0b0806,inset 0 0 0 2px rgba(201,162,74,.12),0 4px 14px rgba(0,0,0,.55);margin-bottom:14px}
-.entry::before,.entry::after{content:"";position:absolute;width:12px;height:12px;border:2px solid var(--gold);pointer-events:none;opacity:.75}
-.entry::before{left:-2px;bottom:-2px;border-right:none;border-top:none}
-.entry::after{right:-2px;bottom:-2px;border-left:none;border-top:none}
-.entry.invalid{border-color:var(--err);box-shadow:inset 0 0 0 1px #0b0806,0 0 0 1px rgba(201,67,46,.35),0 4px 14px rgba(0,0,0,.55)}
-.ehead{background:
-    linear-gradient(180deg,rgba(255,255,255,.07),transparent 50%),
-    linear-gradient(90deg,#5a150e,#3a0f0a 45%,#22110b);
-  border-radius:3px 3px 0 0;border-bottom:1px solid var(--gold-lo);box-shadow:0 1px 0 rgba(0,0,0,.6)}
-.ehead .nm{font-family:var(--font-display);font-weight:700;font-size:16px;letter-spacing:.5px;color:#f5e6c4;text-shadow:0 1px 2px #000}
-.ehead .cat{font-family:var(--font-display);font-weight:700;color:#d9c08a;border-color:rgba(201,162,74,.45);background:rgba(0,0,0,.3)}
-.ehead .ept{font-family:var(--font-display);font-weight:900;font-size:18px;color:var(--gold-hi);text-shadow:0 1px 2px #000}
+/* ---- roster entries: a parchment muster-roll leaf under an iron band ---- */
+.entry{--ink:var(--parch-ink);--muted:var(--parch-mut);--line:var(--parch-line);--panel2:rgba(110,80,40,.12);--fire:#6e1a12;--fire2:#7a1a12;--accent:#6e1a12;
+  position:relative;color:var(--parch-ink);background:var(--parch-bg);background-color:var(--parch);border:1px solid #0d0b09;border-radius:1px;margin-bottom:16px;
+  box-shadow:inset 0 0 28px rgba(92,58,24,.55),inset 0 0 3px rgba(60,35,10,.7),0 5px 16px rgba(0,0,0,.75)}
+.entry.invalid{box-shadow:inset 0 0 28px rgba(92,58,24,.55),inset 0 0 0 2px rgba(138,31,22,.8),0 5px 16px rgba(0,0,0,.75);border-color:#3d0a06}
+.ehead{background:var(--iron-bg);border-radius:0;border-bottom:2px solid var(--blood);box-shadow:0 1px 0 var(--gold-lo)}
+.ehead .nm{font-family:var(--font-display);font-weight:400;font-size:19px;letter-spacing:.5px;color:#e6d4ac;text-shadow:0 1px 2px #000}
+.ehead .cat{font-family:var(--font-display);font-size:12px;letter-spacing:1px;text-transform:none;color:#9d8a68;border-color:#433729;border-radius:1px}
 .ehead .cnt{color:var(--gold-hi)}
-.ehead .del{color:#c9b28a}
-.ehead .del:hover{color:#ff7a5c}
-.cvbtn{color:var(--gold)}
-.row>label.t{font-family:var(--font-display);font-size:11.5px;font-weight:700;letter-spacing:.6px;color:#a8946f}
-.chk,.pickchip{background:linear-gradient(180deg,#261d15,#1b140f);border-color:#4a3822;border-radius:3px}
-.chk:hover,.pickchip:hover{border-color:var(--gold)}
-.chk input{accent-color:var(--blood-hi)}
-.opt-cost{color:#b39b74}
-.magic{border-top:1px solid transparent;border-image:linear-gradient(90deg,transparent,rgba(201,162,74,.45),transparent) 1}
-.magic .mt{font-family:var(--font-display);font-weight:700;color:var(--gold)}
-.entry.dragging{border-color:var(--gold)}
+.ehead .ept{min-width:44px;text-align:center;font-family:var(--font-body);font-weight:700;font-size:16px;color:#f0d9b0;padding:3px 9px;
+  border-radius:44% 50% 46% 52% / 52% 46% 54% 48%;background:radial-gradient(circle at 38% 30%,#9a2a1e,#5a120c 55%,#2c0705);
+  box-shadow:inset 0 -2px 4px rgba(0,0,0,.55),0 2px 4px rgba(0,0,0,.7);text-shadow:0 1px 0 #2a0503}
+.ehead .del{color:#8f7e62} .ehead .del:hover{color:#e0604c}
+.ehead .cvbtn{color:var(--gold)}
+.ehead .info{border-color:#5a4a34;color:var(--gold-hi);background:#12100e}
+.ebody{padding:12px 14px 14px}
+.entry .row>label.t{font-family:var(--font-display);font-size:14px;letter-spacing:.3px;color:#5e4a30}
+.entry select,.entry .stepper input,.entry .pickbtn{background:rgba(255,248,228,.45);border:1px solid #9b845e;color:var(--parch-ink);border-radius:1px;box-shadow:inset 0 1px 2px rgba(80,50,20,.3)}
+.entry select:focus,.entry .stepper input:focus{border-color:#6e1a12;box-shadow:0 0 0 2px rgba(110,26,18,.2)}
+.entry .pickbtn:hover{border-color:#6e1a12;background:rgba(255,248,228,.65)}
+.entry .pickbtn.empty{color:#7d6849;font-style:italic}
+.entry .stepper button{background:linear-gradient(180deg,#e7dab9,#c4ad80);border:1px solid #8c7450;color:var(--parch-ink);box-shadow:0 1px 2px rgba(60,35,10,.35);border-radius:1px}
+.entry .chk,.entry .pickchip{background:rgba(255,248,228,.3);border:1px solid #a18b64;border-radius:1px;color:var(--parch-ink)}
+.entry .chk:hover,.entry .pickchip:hover{border-color:#6e1a12;background:rgba(255,248,228,.55)}
+.chk input{accent-color:#7c1c14}
+.entry .opt-cost,.entry .note{color:#6f5a3e}
+.entry .budget b{color:var(--parch-ink)}
+.entry .size-warn{color:#8a4b08}
+.entry .magic{border-top:none;background:linear-gradient(90deg,transparent,rgba(110,80,40,.5),transparent) top/100% 1px no-repeat;padding-top:10px}
+.entry .magic .mt{font-family:var(--font-display);font-size:14px;letter-spacing:1px;text-transform:none;color:#6e1a12}
+.entry .magic .mt::before{content:"❧ ";color:#8a6a3a}
+.entry .info{border-color:#8c7450;color:#6e1a12;background:rgba(255,248,228,.35);font-family:var(--font-body)}
+.entry .info:hover{background:rgba(255,248,228,.7);border-color:#6e1a12}
+.entry .del{color:#6f5a3e} .entry .del:hover{color:#8a1f16}
+.entry .spellrow.on{border-color:#6e1a12}
+.entry.dragging{box-shadow:inset 0 0 28px rgba(92,58,24,.55),0 18px 36px #000}
 .entry.drop-before{box-shadow:0 -3px 0 0 var(--gold-hi)}
 .entry.drop-after{box-shadow:0 3px 0 0 var(--gold-hi)}
+.spellrow .slvl{background:#4e0f0b;color:#efdcb4;border-radius:1px}
+.spellrow .scast{color:#7c1c14}
 
-/* info button: a small gilt seal */
-.info{border-color:var(--gold-lo);color:var(--gold-hi);background:radial-gradient(circle at 35% 30%,#3a2a16,#140e09);font-family:Georgia,serif}
-.info:hover{border-color:var(--gold-hi);background:radial-gradient(circle at 35% 30%,#5a3f1c,#1c130b)}
+/* info button on the dark frame */
+.info{border-color:#4a3d2c;color:var(--gold-hi);background:#0e0c0a;font-family:var(--font-body)}
+.info:hover{border-color:var(--gold);background:#1f1a14}
 
 /* summary + validation */
-.summary .scat{font-family:var(--font-display);font-weight:700;color:var(--gold)}
-.summary .srow:hover{background:rgba(201,162,74,.08)}
+.summary .scat{font-family:var(--font-display);font-size:13.5px;letter-spacing:1px;text-transform:none;color:var(--gold)}
+.summary .srow{font-size:14.5px}
+.summary .srow:hover{background:rgba(110,26,18,.18)}
 .summary .srow .ct{color:var(--gold-hi)}
-.summary .grand{font-family:var(--font-display);font-size:16px;color:var(--gold-hi);border-top:1px solid transparent;
-  border-image:linear-gradient(90deg,var(--gold),transparent) 1}
-.vmsg{border-radius:3px;border-left-width:4px;box-shadow:0 2px 6px rgba(0,0,0,.4)}
-.vmsg.err{background:linear-gradient(90deg,rgba(125,26,18,.45),rgba(40,14,10,.6))}
-.vmsg.warn{background:linear-gradient(90deg,rgba(120,90,20,.35),rgba(38,30,12,.6))}
-.vmsg.ok{background:linear-gradient(90deg,rgba(60,110,45,.35),rgba(20,32,15,.6))}
-.empty:not(button){font-family:var(--font-display);color:#8a7a62;letter-spacing:.5px}
+.summary .grand{font-family:var(--font-display);font-size:18px;color:var(--gold-hi);border-top:1px solid transparent;border-image:linear-gradient(90deg,var(--gold),transparent) 1}
+.vmsg{border-radius:1px;border-left-width:3px;font-size:14px}
+.vmsg.err{background:linear-gradient(90deg,rgba(90,18,12,.55),rgba(25,10,8,.6))}
+.vmsg.warn{background:linear-gradient(90deg,rgba(90,66,20,.4),rgba(25,20,10,.6))}
+.vmsg.ok{background:linear-gradient(90deg,rgba(55,75,35,.45),rgba(18,22,12,.6))}
+.empty:not(button){font-style:italic;color:#7e705c}
 .saveStatus{font-style:italic}
 
-/* ---- modals: an ornate gilt-framed tome ---- */
-.modal-bg{background:radial-gradient(ellipse at center,rgba(20,8,4,.55),rgba(0,0,0,.85));backdrop-filter:blur(2px)}
-.modal{background:linear-gradient(180deg,#1e1611,#150f0b);border:1px solid var(--gold);border-radius:4px;
-  box-shadow:inset 0 0 0 3px #0e0906,inset 0 0 0 4px rgba(201,162,74,.35),0 20px 60px rgba(0,0,0,.8),0 0 40px rgba(158,42,28,.15)}
-.modal .mhead{background:linear-gradient(180deg,rgba(255,255,255,.06),transparent 50%),linear-gradient(90deg,#5a150e,#2d0d08);
-  border-radius:3px 3px 0 0;border-bottom:1px solid var(--gold)}
-.modal .mhead h3{font-family:var(--font-display);font-weight:700;color:var(--gold-hi);letter-spacing:.8px;text-shadow:0 1px 2px #000}
-.modal .mhead .x{color:#d9c08a}
-.modal .lbl{font-family:var(--font-display);font-weight:700;color:var(--gold)}
-.modal table.prof th{font-family:var(--font-display);background:linear-gradient(180deg,#5a150e,#3a0f0a);color:var(--gold-hi);letter-spacing:.5px}
-.modal table.prof th,.modal table.prof td{border-color:#4a3822}
-.modal table.prof tr:nth-child(even) td{background:rgba(201,162,74,.04)}
-.modal .rule b{color:var(--gold-hi)}
-.modal .rule .ruleword{color:var(--gold-hi)}
-.modal .mirow .nm{font-family:var(--font-display);font-weight:700;letter-spacing:.3px}
-.modal .mirow .cost{color:var(--gold-hi)}
-.modal .mirow.pick:hover:not(.disabled),.modal .mirow.pick.sel,.modal .mirow.sel,.modal .rrow.sel{background:linear-gradient(90deg,rgba(158,42,28,.22),rgba(201,162,74,.05))}
-.modal .mirow.pick .pkmark{border-color:var(--gold-lo);border-radius:2px}
-.modal .mirow.pick.sel .pkmark{background:linear-gradient(180deg,var(--blood-hi),var(--blood));border-color:var(--gold);color:var(--gold-hi)}
-.modal .pkfoot{background:linear-gradient(180deg,rgba(21,15,11,.9),#150f0b)}
-.spellrow .slvl{background:linear-gradient(180deg,#5a150e,#3a0f0a);color:var(--gold-hi)}
-.spellrow .scast{color:var(--gold-hi)}
-.spellrow.on{border-color:var(--gold)}
-.librow{border-color:#4a3822;border-radius:3px;background:linear-gradient(180deg,#221912,#18110c)}
-.librow .libname{font-family:var(--font-display)}
-.toast,.restore-note{background:linear-gradient(180deg,#2a1d14,#1a120c);border-color:var(--gold);box-shadow:0 8px 24px rgba(0,0,0,.7)}
-.toast .tbtn{border-color:var(--gold);color:var(--gold-hi)}
-.toast .tbtn:hover{background:var(--gold);color:#1a120c}
+/* ---- modals: a parchment leaf in a blackened iron frame ---- */
+.modal-bg{background:radial-gradient(ellipse at center,rgba(10,6,4,.6),rgba(0,0,0,.9))}
+.modal{--ink:var(--parch-ink);--muted:var(--parch-mut);--line:var(--parch-line);--panel2:rgba(110,80,40,.12);--fire:#6e1a12;--fire2:#7a1a12;--accent:#6e1a12;
+  color:var(--parch-ink);background:var(--parch-bg);background-color:var(--parch);border:3px solid #0d0b09;border-radius:1px;outline:1px solid var(--gold-lo);outline-offset:-6px;
+  box-shadow:inset 0 0 40px rgba(92,58,24,.6),0 24px 70px #000}
+.modal .mhead{background:var(--iron-bg);border-radius:0;border-bottom:2px solid var(--blood);z-index:2}
+.modal .mhead h3{font-family:var(--font-display);font-weight:400;font-size:22px;color:#e6d4ac;letter-spacing:.5px;text-shadow:0 1px 2px #000}
+.modal .mhead .x{color:#9d8a68} .modal .mhead .x:hover{color:#e0604c}
+.modal .lbl{font-family:var(--font-display);font-size:14px;letter-spacing:1px;text-transform:none;color:#6e1a12}
+.modal .rule{font-size:15px;line-height:1.5}
+.modal .rule b{color:#5a130d}
+.modal .rule .ruleword{color:#7c1c14;text-decoration-color:#7c1c14}
+.modal table.prof{font-size:14px}
+.modal table.prof th{font-family:var(--font-display);font-weight:400;font-size:13px;background:#2a0c08;color:#e6d4ac}
+.modal table.prof th,.modal table.prof td{border-color:#9b845e}
+.modal table.prof tr:nth-child(even) td{background:rgba(110,80,40,.08)}
+.modal .mirow{border-bottom-color:#b19b72}
+.modal .mirow .nm{font-family:var(--font-display);font-weight:400;font-size:16px}
+.modal .mirow .cost{color:#7c1c14}
+.modal .mirow .d{font-size:14.5px}
+.modal .mirow .etype{border-color:#9b845e;color:#6a553a}
+.modal .mirow.pick:hover:not(.disabled),.modal .mirow.pick.sel,.modal .mirow.sel,.modal .rrow.sel{background:rgba(124,28,20,.10)}
+.modal .mirow.pick .pkmark{border-color:#6a553a;border-radius:1px;background:rgba(255,248,228,.4)}
+.modal .mirow.pick.sel .pkmark{background:#6e1a12;border-color:#3d0a06;color:#efdcb4}
+.modal .pkfoot{background:#cfbd93;border-top-color:#9b845e}
+.modal .pkfoot .rem b{color:var(--parch-ink)}
+.modal .btn,.modal .rbtn{background:linear-gradient(180deg,#e7dab9,#c4ad80);border:1px solid #8c7450;color:var(--parch-ink);box-shadow:0 1px 2px rgba(60,35,10,.35);border-radius:1px}
+.modal .btn:hover,.modal .rbtn:hover:not(:disabled){border-color:#6e1a12;filter:none;background:linear-gradient(180deg,#efe4c6,#cdb78b)}
+.modal .btn.primary,.modal .rbtn.on{background:linear-gradient(180deg,#8a2218,#5c130d 60%,#360906);border-color:#3d0a06;color:#efdcb4}
+.modal .note{color:#6f5a3e}
+.modal textarea,.modal .shareurl,.modal #promptInput,.modal select{background:rgba(255,248,228,.5) !important;border:1px solid #9b845e !important;color:var(--parch-ink) !important;box-shadow:inset 0 1px 3px rgba(80,50,20,.3);border-radius:1px !important}
+.modal .info{border-color:#8c7450;color:#6e1a12;background:rgba(255,248,228,.35)}
+.librow{border:1px solid #a18b64 !important;border-radius:1px !important;background:rgba(255,248,228,.25) !important}
+.librow .libname{font-family:var(--font-display);font-weight:400;font-size:17px}
+.toast,.restore-note{background:var(--iron-bg);border-color:var(--gold-lo);color:var(--ink);box-shadow:0 8px 24px #000}
+.toast{border-radius:2px}
+.toast .tbtn{border-color:var(--gold);color:var(--gold-hi);border-radius:1px}
+.toast .tbtn:hover{background:var(--gold);color:#120f0c}
 
-/* ---- game mode ---- */
-.gameview{background-color:var(--bg);background-image:inherit}
-.gameview .gbar{background:
-    linear-gradient(180deg,rgba(255,255,255,.05),transparent 40%),
-    repeating-linear-gradient(90deg,rgba(0,0,0,.18) 0 2px,transparent 2px 7px),
-    linear-gradient(180deg,#2e2520,#17110d 70%,#0f0b08);
-  border-bottom:none;box-shadow:0 1px 0 var(--gold-lo),0 3px 0 var(--blood),0 4px 0 var(--gold),0 10px 24px rgba(0,0,0,.65)}
-.gameview .gtitle b{font-family:var(--font-display);font-size:18px;color:var(--gold-hi)}
-.gameview .gjump{border-radius:3px;border-color:#4a3822;background:linear-gradient(180deg,#261d15,#1b140f)}
+/* ---- game mode: parchment cards on the soot ---- */
+.gameview{background-color:var(--bg);background-image:radial-gradient(ellipse 120% 80% at 50% 50%,transparent 55%,rgba(0,0,0,.75)),var(--noise)}
+.gameview .gbar{background:var(--iron-bg);border-bottom:none;box-shadow:0 1px 0 #000,0 2px 0 var(--gold-lo),0 5px 0 var(--blood),0 6px 0 #000,0 12px 26px rgba(0,0,0,.8)}
+.gameview .gtitle b{font-family:var(--font-title);font-weight:400;font-size:24px;color:#c9b07a}
+.gameview .gtitle span{font-style:italic}
+.gameview .gjump{border-radius:1px;border-color:#433729;background:#15120f;font-size:14px}
 .gameview .gjump:hover{border-color:var(--gold)}
-.gameview .gcard{background:linear-gradient(180deg,#1f1711,#16100c);border-color:#4a3822;border-radius:4px;border-top:3px solid var(--blood-hi);
-  box-shadow:inset 0 0 0 1px #0b0806,0 4px 12px rgba(0,0,0,.5)}
-.gameview .gcard.flash{border-color:var(--gold-hi)}
-.gameview .gnm{font-family:var(--font-display);font-size:15.5px;color:#f5e6c4}
-.gameview .gct,.gameview .gline b,.gameview .gcast{color:var(--gold-hi)}
-.gameview .gl{font-family:var(--font-display);font-weight:700;color:var(--gold)}
-.gameview .gtag.gen{color:var(--gold-hi);border-color:var(--gold)}
-.gameview table.gprof th{font-family:var(--font-display);background:linear-gradient(180deg,#5a150e,#3a0f0a);color:var(--gold-hi)}
-.gameview table.gprof th,.gameview table.gprof td{border-color:#4a3822}
-.gameview .ruleword{text-decoration-color:var(--gold)}
-.gameview .ruleword:hover{color:var(--gold-hi)}
+.gameview .gcard{--line:var(--parch-line);color:var(--parch-ink);background:var(--parch-bg);background-color:var(--parch);border:1px solid #0d0b09;border-radius:1px;
+  border-top:4px solid var(--blood);box-shadow:inset 0 0 24px rgba(92,58,24,.55),0 5px 14px rgba(0,0,0,.7);padding:10px 12px}
+.gameview .gcard.flash{border-color:#b8952f}
+.gameview .gnm{font-family:var(--font-display);font-weight:400;font-size:18px}
+.gameview .gct,.gameview .gcast,.gameview .gline b{color:#7c1c14}
+.gameview .gpts{color:#6f5a3e;font-style:italic}
+.gameview .gtag{border-color:#9b845e;color:#6a553a}
+.gameview .gtag.gen{color:#7c1c14;border-color:#7c1c14}
+.gameview .gl{font-family:var(--font-display);font-size:12.5px;letter-spacing:.5px;text-transform:none;color:#6e1a12}
+.gameview .gline{font-size:14px}
+.gameview table.gprof{font-size:13.5px}
+.gameview table.gprof th{font-family:var(--font-display);font-weight:400;background:#2a0c08;color:#e6d4ac}
+.gameview table.gprof th,.gameview table.gprof td{border-color:#9b845e}
+.gameview .ruleword{color:var(--parch-ink);text-decoration-color:#7c1c14}
+.gameview .ruleword:hover{color:#7c1c14}
 
+@media(max-width:600px){ .entry .row>label.t{min-width:104px} }
 @media (prefers-reduced-motion:reduce){*{transition:none !important}}
+/* numbers stay in Garamond lining figures (Fell's are old-style) */
+.summary .scat b,.summary .grand span:last-child,.bar .lab span span{font-family:var(--font-body);font-weight:700}
+.gameview .gct,.ehead .cnt,.gameview .gsec .cpts,h2.sec.cathead .cpts{font-family:var(--font-body);font-weight:700}
+.gameview .gsec .cpts{font-size:13px;letter-spacing:0}
