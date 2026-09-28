@@ -9,6 +9,48 @@ change bumps the **middle** number and resets the last to 0 (`1.4.0 → 1.5.0`);
 which kind each time. (2.0.0 was a one-off bump of the first number for the move to
 a web-only app.)
 
+## [2.0.1] — 2026-09-28
+
+Dark Elves and Vampire Counts updated to the v3.1 army books. Every points value,
+profile, option, item and rule was checked against the v3.1 PDFs.
+
+### Changed
+- **Dark Elves v3.1.**
+  - Supreme Sorceress 195 pts with a new profile.
+  - Disciple of Khaine 105 pts and gains Magic Resistance (1).
+  - Dark Riders 15, Doomfire Warlocks 25, Cauldron of Blood 165. The Cauldron costs
+    160 as a mount and only a Hag Queen may ride it.
+  - Death Hag magic allowance 50 (was 100).
+  - Beastmaster, Khainite Assassin and Disciple weapon/armour options re-costed.
+  - Corsairs are Skirmishers by default and may buy Ambushers instead.
+  - Soulstone and Orb of Ghrond (now common) are Arcane Items. Several talismans,
+    Crystal Heart, the Draich of Dark Power and the Standard of Har Ganeth re-costed.
+  - Gifts of Khaine re-costed and re-worded: Cry of War and Hand of Khaine swapped
+    effects, and Khainite Pendant is a one-use Disciple gift.
+  - Nagaelythe the Chillwind is Level 1 (5+) and Power of Darkness Level 2 (8+).
+  - Malekith and Hellebron have Inspiring Presence (6).
+  - New profiles for Krethusa and the Cold One Knight rider.
+  - Shadowstalkers are Khainite (no longer Loner).
+- **Vampire Counts v3.1.**
+  - New Core units: Ghoul Prowlers and Sylvanian Bowmen.
+  - Sylvanian Levy lose their bow options. Crypt Ghouls are 15–45 with BS 3 and no
+    Skirmishers option.
+  - Skeleton Warriors 3.5 pts with cheaper options. Dire Wolves 6.
+  - Six new Wight-only items, including the Stormsword of Medhe and Hide of
+    Retribution.
+  - Flayed Hauberk 50, Balefire Spike 20, Asp Bow is a shortbow. Seven items are now
+    common (*).
+  - Blood Dragons may buy heavy armour again (+18), may ride monsters as a Lord only,
+    and lose the Lore of Shadow.
+  - Nightmare costs 15 for every character.
+  - Summon Ghouls power removed. Strength of Steel costs 15.
+  - Sekhar 200, Ushoran 570.
+
+### Fixed
+- **Slaves (Dark Elves)** now charge their required Slavemasters (25 pts per 20
+  Slaves); before, only the note mentioned them.
+- **Witchbrew** was restricted to the Disciple of Khaine although its text says Hags.
+
 ## [2.0.0] — 2026-09-26
 
 A big release: the app is now a web-only page (no installers), with a new game-day
