@@ -1,6 +1,6 @@
 /* core.js — global state, the army-book registry + lazy loader, roster-entry
    creation, and the single mutation path (update → undo/redo history). */
-const APP_VERSION = "1.5.0";   // kept in sync with package.json by scripts/set-version.js
+const APP_VERSION = "2.0.0";   // kept in sync with package.json by scripts/set-version.js
 
 /* ---------- army books ----------
    data/books.js lists every book (id, name, file). Data files register themselves
