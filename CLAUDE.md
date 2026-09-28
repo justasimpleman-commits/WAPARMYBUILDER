@@ -29,8 +29,8 @@ forbids it) plus choice-gated mounts (`requiresChoice` on a mount choice — a m
 that only unlocks under its honour) are engine features toggled by data fields, see
 SCHEMA.md. Don't key engine logic on a book's option ids or unit ids.)
 
-Visual theme ("grimdark Renaissance": soot-and-iron frame, smoky-grey unit cards,
-rule windows and game-mode cards (seamless gradient fade, no tiled texture) with dark ink, red info seals, blackletter title beside an inline-SVG Old World hammer-axe crest, IM Fell English SC
+Visual theme ("grimdark Renaissance": soot-and-iron frame, dark smoky-grey unit cards,
+rule windows and game-mode cards (seamless charcoal gradient fade, no tiled texture) with light ink and red accents, red info seals, blackletter title beside an inline-SVG Old World hammer-axe crest, IM Fell English SC
 display + EB Garamond body from Google Fonts with Palatino/Georgia fallbacks offline)
 is the block at the end of `css/app.css`, driven by the `:root` tokens (`--gold*`,
 `--blood*`, `--parch*`, `--font-title/display/body`). `.entry`, `.modal` and
