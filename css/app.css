@@ -406,7 +406,9 @@ h2.sec.cathead:hover{color:var(--owb-btn)}
 .modal .rule .ruleword:hover,.gameview .ruleword:hover{color:var(--owb-btn);text-decoration-color:var(--owb-btn)}
 /* profile tables: OWB stat blocks (italic header, tan cells) */
 .modal table.prof,.gameview table.gprof{border-collapse:separate;border-spacing:0}
-.modal table.prof th,.gameview table.gprof th{background:none;color:var(--owb-font);font-style:italic;font-weight:700;border:none}
+.modal table.prof th,.gameview table.gprof th{background:var(--owb-header);color:var(--owb-white);font-style:normal;font-weight:700;
+  letter-spacing:.04em;border:1px solid var(--owb-header);border-bottom:2px solid var(--owb-menu);padding-top:6px;padding-bottom:6px}
+.modal table.prof th:first-child,.gameview table.gprof th:first-child{text-align:left}
 .modal table.prof td,.gameview table.gprof td{background:var(--owb-list);border:1px solid var(--owb-bg);color:var(--owb-font)}
 .modal .mirow{border-bottom:2px solid var(--owb-list)}
 .modal .mirow .nm{font-weight:700}
