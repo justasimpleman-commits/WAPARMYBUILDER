@@ -30,7 +30,7 @@ that only unlocks under its honour) are engine features toggled by data fields, 
 SCHEMA.md. Don't key engine logic on a book's option ids or unit ids.)
 
 Visual theme ("grimdark Renaissance": soot-and-iron frame, aged-parchment unit cards,
-rule windows and game-mode cards with sepia ink, blackletter title, IM Fell English SC
+rule windows and game-mode cards with sepia ink, blackletter title beside an inline-SVG Old World hammer-axe crest, IM Fell English SC
 display + EB Garamond body from Google Fonts with Palatino/Georgia fallbacks offline)
 is the block at the end of `css/app.css`, driven by the `:root` tokens (`--gold*`,
 `--blood*`, `--parch*`, `--font-title/display/body`). `.entry`, `.modal` and
