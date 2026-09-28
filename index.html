@@ -4,11 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Army Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Cinzel+Decorative:wght@700&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap">
 <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
 <header>
-  <h1>⚒ Army Builder<small id="titleSub">WARHAMMER</small></h1>
+  <h1><svg class="crest" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="crestGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3dc9a"/><stop offset=".5" stop-color="#c9a24a"/><stop offset="1" stop-color="#7a5a1e"/></linearGradient></defs><path d="M10 8 L54 56 M54 8 L10 56" stroke="#8c8c8c" stroke-width="4" stroke-linecap="round"/><path d="M7 5l7 2-5 5zM57 5l-7 2 5 5z" fill="url(#crestGold)"/><path d="M32 12 L50 18 V33 C50 45 42 52 32 57 C22 52 14 45 14 33 V18 Z" fill="#6e1610" stroke="url(#crestGold)" stroke-width="3"/><path d="M32 22 L36 31 L45 31 L38 37 L41 46 L32 40 L23 46 L26 37 L19 31 L28 31 Z" fill="url(#crestGold)"/><path d="M6 52l6 6M58 52l-6 6" stroke="url(#crestGold)" stroke-width="5" stroke-linecap="round"/></svg><span class="ttl">Army Builder<small id="titleSub">WARHAMMER</small></span></h1>
   <div class="limit"><label>Army</label><select id="armySel"></select></div>
   <div class="limit"><label>Points limit</label><input id="limit" type="number" value="2000" min="0" step="50"><select id="limitPreset" class="preset" title="Common game sizes"></select></div>
   <div class="total">

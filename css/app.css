@@ -1,8 +1,12 @@
 /* Warhammer Army Builder — app styles */
 :root{
-  --bg:#120f0c; --panel:#1a1511; --panel2:#221b16; --line:#332a21;
-  --ink:#d8cebf; --muted:#897b6c; --fire:#a35f2c; --fire2:#bd8b50;
-  --ok:#5a8f52; --warn:#b89a3c; --err:#b54d3a; --accent:#a8853f;
+  --bg:#0c0907; --panel:#1a130e; --panel2:#251b13; --line:#3e2f20;
+  --ink:#e8dcc4; --muted:#9c8b73; --fire:#9e2a1c; --fire2:#dcb867;
+  --ok:#5f9a4f; --warn:#d0a23a; --err:#c9432e; --accent:#c9a24a;
+  --gold:#c9a24a; --gold-hi:#f1d98f; --gold-lo:#7a5a1e; --blood:#7d1a12; --blood-hi:#b3301f;
+  --iron:#2b2622; --head:#3a120c;
+  --font-display:"Cinzel","Trajan Pro","Palatino Linotype",Georgia,serif;
+  --font-body:"Alegreya Sans","Segoe UI",system-ui,sans-serif;
 }
 *{box-sizing:border-box}
 body{margin:0;font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
@@ -263,3 +267,199 @@ body.gaming{overflow:hidden}
   .gameview table.gprof{font-size:11.5px}
   .gameview .gline{font-size:13px}
 }
+
+/* =====================================================================
+   FANTASY WARFARE THEME — forged iron, gilt trim, blood-red banners.
+   Layered over the base styles above; the fonts come from Google Fonts
+   and fall back to Georgia / system fonts when offline (file://).
+   ===================================================================== */
+body{font-family:var(--font-body);font-size:15px;font-variant-numeric:lining-nums;
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(ellipse 90% 60% at 50% 115%,rgba(158,42,28,.22),transparent 70%),
+    radial-gradient(ellipse 60% 40% at 50% -10%,rgba(201,162,74,.10),transparent 70%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .42 0 0 0 0 .28 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-attachment:fixed}
+button,input,select,textarea{font-family:inherit}
+::selection{background:var(--blood-hi);color:#fff}
+*{scrollbar-width:thin;scrollbar-color:var(--gold-lo) transparent}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--gold-lo),#4a3514);border-radius:6px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ---- header: a forged iron plate with gilt trim ---- */
+header{
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.05),transparent 40%),
+    repeating-linear-gradient(90deg,rgba(0,0,0,.18) 0 2px,transparent 2px 7px),
+    linear-gradient(180deg,#2e2520,#17110d 70%,#0f0b08);
+  border-bottom:none;
+  box-shadow:0 1px 0 var(--gold-lo),0 3px 0 var(--blood),0 4px 0 var(--gold),0 10px 24px rgba(0,0,0,.65);
+  padding:10px 18px}
+header h1{display:flex;align-items:center;gap:10px;margin:0}
+header h1 .crest{width:44px;height:44px;flex:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.8))}
+header h1 .ttl{font-family:"Cinzel Decorative",var(--font-display);font-size:23px;font-weight:700;letter-spacing:1px;line-height:1.05;
+  background:linear-gradient(180deg,var(--gold-hi) 10%,var(--gold) 55%,#8a6424 95%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 2px 1px rgba(0,0,0,.9))}
+header h1 small{font-family:var(--font-display);-webkit-text-fill-color:#b9a27a;color:#b9a27a;font-size:10.5px;letter-spacing:3px;margin-top:3px;font-weight:700}
+.limit label{font-family:var(--font-display);font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#b9a27a}
+
+/* inputs / selects: dark wells with bronze rims */
+select,.stepper input,.limit input,.limit select.preset,.catsearch,.pickbtn,textarea,.shareurl{
+  background:linear-gradient(180deg,#0a0705,#15100b);border:1px solid #4f3b24;color:var(--ink);
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.8);font-family:var(--font-body)}
+select:focus,.stepper input:focus,.limit input:focus,.catsearch:focus,textarea:focus,.shareurl:focus{
+  outline:none;border-color:var(--gold);box-shadow:inset 0 1px 3px rgba(0,0,0,.8),0 0 0 2px rgba(201,162,74,.25)}
+header #armySel{font-family:var(--font-display);font-weight:700;font-size:13.5px;color:var(--gold-hi);padding:6px 8px;border-color:var(--gold-lo)}
+.pickbtn:hover{border-color:var(--gold)}
+.pickbtn.empty{font-style:italic}
+
+/* points total: a gilded plaque */
+.total>div:last-child{position:relative;padding:3px 14px 4px;text-align:center;border:1px solid var(--gold-lo);border-radius:4px;
+  background:linear-gradient(180deg,#3a120c,#1c0905);box-shadow:inset 0 0 0 2px #1c0905,inset 0 0 0 3px rgba(201,162,74,.45),0 3px 8px rgba(0,0,0,.6)}
+.total .big{font-family:var(--font-display);font-weight:900;font-size:26px;line-height:1.05;color:var(--gold-hi);text-shadow:0 0 12px rgba(241,217,143,.25),0 2px 1px #000}
+.total .big.over{color:#ff7a5c;text-shadow:0 0 14px rgba(255,80,50,.5),0 2px 1px #000}
+.total .note{color:#c7ad80}
+
+/* forged buttons */
+.histbtn,.btn,.stepper button,.modal .rbtn,.m-iconbtn{
+  background:linear-gradient(180deg,#3b3029,#231b15 55%,#1a140f);border:1px solid #5a4630;color:var(--ink);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 2px 3px rgba(0,0,0,.5);transition:border-color .15s,filter .15s,transform .05s}
+.histbtn:hover:not(:disabled),.btn:hover,.stepper button:hover,.modal .rbtn:hover:not(:disabled){border-color:var(--gold);filter:brightness(1.18)}
+.btn:active,.histbtn:active:not(:disabled),.stepper button:active{transform:translateY(1px)}
+.btn{font-family:var(--font-display);font-weight:700;font-size:12px;letter-spacing:.8px;padding:8px 13px}
+.btn.primary,.modal .rbtn.on{background:linear-gradient(180deg,var(--blood-hi),var(--blood) 60%,#4d0f09);border:1px solid var(--gold);color:var(--gold-hi);
+  text-shadow:0 1px 1px #000;box-shadow:inset 0 1px 0 rgba(255,220,160,.25),0 2px 6px rgba(0,0,0,.6)}
+.histbtn.gamebtn{font-family:var(--font-display);font-weight:700;letter-spacing:.8px;color:var(--gold-hi);
+  background:linear-gradient(180deg,var(--blood-hi),var(--blood) 60%,#4d0f09);border-color:var(--gold)}
+
+/* ---- category bars: engraved channels filled with molten gold ---- */
+.bars{background:linear-gradient(180deg,#130d09,#0e0a07);border-bottom:1px solid #2a1f15;box-shadow:inset 0 6px 8px -6px rgba(0,0,0,.9);padding:12px 18px 10px}
+.bar .lab{font-family:var(--font-display);font-size:11px;font-weight:700;letter-spacing:.8px;color:#a8946f}
+.bar .lab b{color:var(--gold-hi);font-family:var(--font-body)}
+.track{height:10px;background:#070504;border:1px solid #3d2e1c;border-radius:2px;box-shadow:inset 0 2px 3px rgba(0,0,0,.9)}
+.fill{background:linear-gradient(180deg,var(--gold-hi),var(--gold) 45%,#7a5a1e);box-shadow:0 0 8px rgba(241,217,143,.35)}
+.fill.good{background:linear-gradient(180deg,#a6d98e,var(--ok) 45%,#2f5626);box-shadow:0 0 8px rgba(120,200,100,.3)}
+.fill.bad{background:linear-gradient(180deg,#ff9c7c,var(--err) 45%,#6e1a0e);box-shadow:0 0 10px rgba(255,80,50,.45)}
+
+/* ---- the three columns ---- */
+.col{scrollbar-gutter:stable}
+.catalog{border-right:none;background:linear-gradient(90deg,rgba(0,0,0,.25),rgba(0,0,0,.05));box-shadow:inset -1px 0 0 #2f2418,inset -3px 0 0 #0a0705,inset -4px 0 0 rgba(201,162,74,.22)}
+.validation{border-left:none;background:linear-gradient(270deg,rgba(0,0,0,.3),rgba(0,0,0,.08));box-shadow:inset 1px 0 0 #2f2418,inset 3px 0 0 #0a0705,inset 4px 0 0 rgba(201,162,74,.22)}
+
+/* section headings: Cinzel with a fading gilt rule and a diamond */
+h2.sec{font-family:var(--font-display);font-weight:700;font-size:13px;letter-spacing:2.5px;color:var(--gold);
+  border-bottom:1px solid transparent;border-image:linear-gradient(90deg,var(--gold),rgba(201,162,74,.35) 60%,transparent) 1;
+  padding-bottom:6px;text-shadow:0 1px 2px #000}
+h2.sec:not(.cathead)::before{content:"◆";font-size:9px;color:var(--blood-hi);margin-right:8px;vertical-align:2px}
+h2.sec.cathead .cv{color:var(--blood-hi)}
+h2.sec.cathead .cpts{font-family:var(--font-body);color:#b39b74;font-size:12px}
+h2.sec.cathead:hover{color:var(--gold-hi)}
+
+/* catalogue rows */
+.catitem{border:1px solid transparent;border-radius:3px;padding:6px 8px;margin:1px 0}
+.catitem:hover{background:linear-gradient(90deg,rgba(158,42,28,.18),rgba(201,162,74,.06));border-color:rgba(201,162,74,.25)}
+.catitem .cname>div:first-child,.catitem .cname{font-weight:500}
+.catitem .add{background:linear-gradient(180deg,var(--blood-hi),var(--blood));color:var(--gold-hi);border:1px solid var(--gold);border-radius:3px;
+  box-shadow:0 1px 3px rgba(0,0,0,.6);text-shadow:0 1px 0 #000}
+.catitem .add:hover:not(:disabled){filter:brightness(1.25)}
+.cbadge{color:var(--gold-hi)}
+
+/* ---- roster entries: a regimental banner on a leather card ---- */
+.entry{position:relative;background:linear-gradient(180deg,#1f1711,#16100c);border:1px solid #4a3822;border-radius:4px;
+  box-shadow:inset 0 0 0 1px #0b0806,inset 0 0 0 2px rgba(201,162,74,.12),0 4px 14px rgba(0,0,0,.55);margin-bottom:14px}
+.entry::before,.entry::after{content:"";position:absolute;width:12px;height:12px;border:2px solid var(--gold);pointer-events:none;opacity:.75}
+.entry::before{left:-2px;bottom:-2px;border-right:none;border-top:none}
+.entry::after{right:-2px;bottom:-2px;border-left:none;border-top:none}
+.entry.invalid{border-color:var(--err);box-shadow:inset 0 0 0 1px #0b0806,0 0 0 1px rgba(201,67,46,.35),0 4px 14px rgba(0,0,0,.55)}
+.ehead{background:
+    linear-gradient(180deg,rgba(255,255,255,.07),transparent 50%),
+    linear-gradient(90deg,#5a150e,#3a0f0a 45%,#22110b);
+  border-radius:3px 3px 0 0;border-bottom:1px solid var(--gold-lo);box-shadow:0 1px 0 rgba(0,0,0,.6)}
+.ehead .nm{font-family:var(--font-display);font-weight:700;font-size:16px;letter-spacing:.5px;color:#f5e6c4;text-shadow:0 1px 2px #000}
+.ehead .cat{font-family:var(--font-display);font-weight:700;color:#d9c08a;border-color:rgba(201,162,74,.45);background:rgba(0,0,0,.3)}
+.ehead .ept{font-family:var(--font-display);font-weight:900;font-size:18px;color:var(--gold-hi);text-shadow:0 1px 2px #000}
+.ehead .cnt{color:var(--gold-hi)}
+.ehead .del{color:#c9b28a}
+.ehead .del:hover{color:#ff7a5c}
+.cvbtn{color:var(--gold)}
+.row>label.t{font-family:var(--font-display);font-size:11.5px;font-weight:700;letter-spacing:.6px;color:#a8946f}
+.chk,.pickchip{background:linear-gradient(180deg,#261d15,#1b140f);border-color:#4a3822;border-radius:3px}
+.chk:hover,.pickchip:hover{border-color:var(--gold)}
+.chk input{accent-color:var(--blood-hi)}
+.opt-cost{color:#b39b74}
+.magic{border-top:1px solid transparent;border-image:linear-gradient(90deg,transparent,rgba(201,162,74,.45),transparent) 1}
+.magic .mt{font-family:var(--font-display);font-weight:700;color:var(--gold)}
+.entry.dragging{border-color:var(--gold)}
+.entry.drop-before{box-shadow:0 -3px 0 0 var(--gold-hi)}
+.entry.drop-after{box-shadow:0 3px 0 0 var(--gold-hi)}
+
+/* info button: a small gilt seal */
+.info{border-color:var(--gold-lo);color:var(--gold-hi);background:radial-gradient(circle at 35% 30%,#3a2a16,#140e09);font-family:Georgia,serif}
+.info:hover{border-color:var(--gold-hi);background:radial-gradient(circle at 35% 30%,#5a3f1c,#1c130b)}
+
+/* summary + validation */
+.summary .scat{font-family:var(--font-display);font-weight:700;color:var(--gold)}
+.summary .srow:hover{background:rgba(201,162,74,.08)}
+.summary .srow .ct{color:var(--gold-hi)}
+.summary .grand{font-family:var(--font-display);font-size:16px;color:var(--gold-hi);border-top:1px solid transparent;
+  border-image:linear-gradient(90deg,var(--gold),transparent) 1}
+.vmsg{border-radius:3px;border-left-width:4px;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.vmsg.err{background:linear-gradient(90deg,rgba(125,26,18,.45),rgba(40,14,10,.6))}
+.vmsg.warn{background:linear-gradient(90deg,rgba(120,90,20,.35),rgba(38,30,12,.6))}
+.vmsg.ok{background:linear-gradient(90deg,rgba(60,110,45,.35),rgba(20,32,15,.6))}
+.empty:not(button){font-family:var(--font-display);color:#8a7a62;letter-spacing:.5px}
+.saveStatus{font-style:italic}
+
+/* ---- modals: an ornate gilt-framed tome ---- */
+.modal-bg{background:radial-gradient(ellipse at center,rgba(20,8,4,.55),rgba(0,0,0,.85));backdrop-filter:blur(2px)}
+.modal{background:linear-gradient(180deg,#1e1611,#150f0b);border:1px solid var(--gold);border-radius:4px;
+  box-shadow:inset 0 0 0 3px #0e0906,inset 0 0 0 4px rgba(201,162,74,.35),0 20px 60px rgba(0,0,0,.8),0 0 40px rgba(158,42,28,.15)}
+.modal .mhead{background:linear-gradient(180deg,rgba(255,255,255,.06),transparent 50%),linear-gradient(90deg,#5a150e,#2d0d08);
+  border-radius:3px 3px 0 0;border-bottom:1px solid var(--gold)}
+.modal .mhead h3{font-family:var(--font-display);font-weight:700;color:var(--gold-hi);letter-spacing:.8px;text-shadow:0 1px 2px #000}
+.modal .mhead .x{color:#d9c08a}
+.modal .lbl{font-family:var(--font-display);font-weight:700;color:var(--gold)}
+.modal table.prof th{font-family:var(--font-display);background:linear-gradient(180deg,#5a150e,#3a0f0a);color:var(--gold-hi);letter-spacing:.5px}
+.modal table.prof th,.modal table.prof td{border-color:#4a3822}
+.modal table.prof tr:nth-child(even) td{background:rgba(201,162,74,.04)}
+.modal .rule b{color:var(--gold-hi)}
+.modal .rule .ruleword{color:var(--gold-hi)}
+.modal .mirow .nm{font-family:var(--font-display);font-weight:700;letter-spacing:.3px}
+.modal .mirow .cost{color:var(--gold-hi)}
+.modal .mirow.pick:hover:not(.disabled),.modal .mirow.pick.sel,.modal .mirow.sel,.modal .rrow.sel{background:linear-gradient(90deg,rgba(158,42,28,.22),rgba(201,162,74,.05))}
+.modal .mirow.pick .pkmark{border-color:var(--gold-lo);border-radius:2px}
+.modal .mirow.pick.sel .pkmark{background:linear-gradient(180deg,var(--blood-hi),var(--blood));border-color:var(--gold);color:var(--gold-hi)}
+.modal .pkfoot{background:linear-gradient(180deg,rgba(21,15,11,.9),#150f0b)}
+.spellrow .slvl{background:linear-gradient(180deg,#5a150e,#3a0f0a);color:var(--gold-hi)}
+.spellrow .scast{color:var(--gold-hi)}
+.spellrow.on{border-color:var(--gold)}
+.librow{border-color:#4a3822;border-radius:3px;background:linear-gradient(180deg,#221912,#18110c)}
+.librow .libname{font-family:var(--font-display)}
+.toast,.restore-note{background:linear-gradient(180deg,#2a1d14,#1a120c);border-color:var(--gold);box-shadow:0 8px 24px rgba(0,0,0,.7)}
+.toast .tbtn{border-color:var(--gold);color:var(--gold-hi)}
+.toast .tbtn:hover{background:var(--gold);color:#1a120c}
+
+/* ---- game mode ---- */
+.gameview{background-color:var(--bg);background-image:inherit}
+.gameview .gbar{background:
+    linear-gradient(180deg,rgba(255,255,255,.05),transparent 40%),
+    repeating-linear-gradient(90deg,rgba(0,0,0,.18) 0 2px,transparent 2px 7px),
+    linear-gradient(180deg,#2e2520,#17110d 70%,#0f0b08);
+  border-bottom:none;box-shadow:0 1px 0 var(--gold-lo),0 3px 0 var(--blood),0 4px 0 var(--gold),0 10px 24px rgba(0,0,0,.65)}
+.gameview .gtitle b{font-family:var(--font-display);font-size:18px;color:var(--gold-hi)}
+.gameview .gjump{border-radius:3px;border-color:#4a3822;background:linear-gradient(180deg,#261d15,#1b140f)}
+.gameview .gjump:hover{border-color:var(--gold)}
+.gameview .gcard{background:linear-gradient(180deg,#1f1711,#16100c);border-color:#4a3822;border-radius:4px;border-top:3px solid var(--blood-hi);
+  box-shadow:inset 0 0 0 1px #0b0806,0 4px 12px rgba(0,0,0,.5)}
+.gameview .gcard.flash{border-color:var(--gold-hi)}
+.gameview .gnm{font-family:var(--font-display);font-size:15.5px;color:#f5e6c4}
+.gameview .gct,.gameview .gline b,.gameview .gcast{color:var(--gold-hi)}
+.gameview .gl{font-family:var(--font-display);font-weight:700;color:var(--gold)}
+.gameview .gtag.gen{color:var(--gold-hi);border-color:var(--gold)}
+.gameview table.gprof th{font-family:var(--font-display);background:linear-gradient(180deg,#5a150e,#3a0f0a);color:var(--gold-hi)}
+.gameview table.gprof th,.gameview table.gprof td{border-color:#4a3822}
+.gameview .ruleword{text-decoration-color:var(--gold)}
+.gameview .ruleword:hover{color:var(--gold-hi)}
+
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
