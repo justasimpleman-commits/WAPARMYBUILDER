@@ -81,7 +81,7 @@ KOLOSSUS                                  →  units.rare[].name / .id
 Profile … 250 pts                         →  basePoints:250  (+ unitInfo.profile row)
 TROOP TYPE: Monster (Animated Construct)  →  (informational; "Animated Construct" is a rule)
 BASE SIZE                                 →  not modelled
-TROOP TYPE: (e.g. DE Avatar: "Monster (Animated Construct)") → unitInfo.<id>.troop
+TROOP TYPE: Monster (Animated Construct) →  unitInfo.kolossus.troop
 EQUIPMENT: Bane maces, heavy armour       →  unitInfo.kolossus.eq
 SPECIAL RULES: Animated Construct, Hellbound → unitInfo.kolossus.rules  (each name → glossary/COMMON)
 UPGRADES: Greed Pistons / Breath of … / Overdrive →  glossary entries (the rule text)

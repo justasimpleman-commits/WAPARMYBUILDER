@@ -133,7 +133,7 @@ script in **`build/`**.
   that `ruleDef` resolves), and `entryTroop(e,u)` gives a mounted character's effective
   type (War Beast → Cavalry, Monstrous Beast → Monstrous Cavalry, Monstrous
   Creature/Monster/Chariot/Shrine → the mount's type). Shown on the unit-detail popup,
-  the mount picker entity and the game-mode card. **Only the three books with PDFs in
+  the mount picker entity and the game-mode card. **Only the books with PDFs in
   `reference/Army books/` have `troop` lines so far** — the others still need them
   transcribed from their PDFs (don't guess).
 - **`common-items.js`** — `window.COMMON_ITEM_DESC`: descriptions of the common
@@ -159,7 +159,7 @@ script in **`build/`**.
   goes. Don't touch the data layer without reading it first.
 - **`reference/`** — source material, not shipped in the build (but committed): the
   core rulebook PDF (`reference/Rulebook/`, 9th Ed 3.11) and the army-book PDFs
-  (`reference/Army books/` — so far Dark Elves, Vampire Counts, Wood Elves 3.1) used to
+  (`reference/Army books/` — so far Chaos Dwarfs, Dark Elves, Vampire Counts, Wood Elves 3.1) used to
   audit data, the audit notes, plus
   `reference/Chaos-Dwarfs-Stats-and-Logic.docx`, a printable stats + logic
   reference (title page, logic section, per-unit profiles, magic-item tables).

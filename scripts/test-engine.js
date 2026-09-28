@@ -1074,7 +1074,7 @@ console.log("Troop types: rulebook text, per-unit troop lines, mounted character
      && __troopBase("Monstrous Infantry (Ghoul)")==="Monstrous Infantry" && __troopBase("War Machine")==="War Machines",
      "troopBase maps the army-book singular onto the rulebook heading");
   // books transcribed from their PDFs: every unitInfo entry (units + mounts) has a resolvable troop line
-  ["dark-elves","vampire-counts","wood-elves"].forEach(id=>{
+  ["chaos-dwarfs","dark-elves","vampire-counts","wood-elves"].forEach(id=>{
     __switch(id,false); const D=__D(); const bad=[];
     for(const k in D.unitInfo){ const t=D.unitInfo[k].troop; if(!t||!__troopBase(t)) bad.push(k); }
     ok(bad.length===0, id+": every unit has a troop type"+(bad.length?" (missing: "+bad.slice(0,6).join(", ")+")":""));
