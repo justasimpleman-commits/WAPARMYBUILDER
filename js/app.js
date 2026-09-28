@@ -37,7 +37,7 @@ function switchArmy(id, silent){
 }
 function renderArmySelect(){
   const s=document.getElementById("armySel"); if(!s) return; s.innerHTML="";
-  BOOK_INDEX.forEach(b=>{ const o=document.createElement("option"); o.value=b.id; o.textContent=b.name; s.appendChild(o); });
+  [...BOOK_INDEX].sort((a,b)=>a.name.localeCompare(b.name)).forEach(b=>{ const o=document.createElement("option"); o.value=b.id; o.textContent=b.name; s.appendChild(o); });
   s.onchange=()=>switchArmy(s.value,false);
 }
 

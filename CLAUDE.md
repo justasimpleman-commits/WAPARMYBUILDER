@@ -29,6 +29,14 @@ forbids it) plus choice-gated mounts (`requiresChoice` on a mount choice — a m
 that only unlocks under its honour) are engine features toggled by data fields, see
 SCHEMA.md. Don't key engine logic on a book's option ids or unit ids.)
 
+Visual theme ("grimdark Renaissance": soot-and-iron frame, aged-parchment unit cards,
+rule windows and game-mode cards with sepia ink, blackletter title beside an inline-SVG Old World hammer-axe crest, IM Fell English SC
+display + EB Garamond body from Google Fonts with Palatino/Georgia fallbacks offline)
+is the block at the end of `css/app.css`, driven by the `:root` tokens (`--gold*`,
+`--blood*`, `--parch*`, `--font-title/display/body`). `.entry`, `.modal` and
+`.gameview .gcard` redefine `--ink/--muted/--line/…` for parchment, so styles inside
+them that use those variables stay readable.
+
 Repository layout: `index.html`, `mobile-init.js` and `package.json` at the
 **root**; styles in **`css/`**, the engine in **`js/`**, the data layer in
 **`data/`**, docs in **`docs/`**, dev/test scripts in **`scripts/`**, release
@@ -67,7 +75,7 @@ script in **`build/`**.
     `tokensToHTML`/`loadoutHTML`) so a popup resetting `__rw` can't break them.
   - `app.js` — `switchArmy`, header controls, event wiring, `start()`.
 - **`data/books.js`** — `window.BOOK_INDEX`, the **only list of books**
-  (`{id, name, file}`), in dropdown order. The page loads nothing but this up
+  (`{id, name, file}`), kept alphabetical (the Army dropdown also sorts by name). The page loads nothing but this up
   front; `loadBook(id)` injects the book's `<script>` the first time that army is
   chosen, so a visitor downloads one book, not all sixteen. All books register into
   `window.ARMY_BOOKS` keyed by `id`; the engine selects the active one as `D`
