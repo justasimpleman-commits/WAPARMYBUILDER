@@ -75,7 +75,7 @@ script in **`build/`**.
     `tokensToHTML`/`loadoutHTML`) so a popup resetting `__rw` can't break them.
   - `app.js` — `switchArmy`, header controls, event wiring, `start()`.
 - **`data/books.js`** — `window.BOOK_INDEX`, the **only list of books**
-  (`{id, name, file}`), in dropdown order. The page loads nothing but this up
+  (`{id, name, file}`), kept alphabetical (the Army dropdown also sorts by name). The page loads nothing but this up
   front; `loadBook(id)` injects the book's `<script>` the first time that army is
   chosen, so a visitor downloads one book, not all sixteen. All books register into
   `window.ARMY_BOOKS` keyed by `id`; the engine selects the active one as `D`

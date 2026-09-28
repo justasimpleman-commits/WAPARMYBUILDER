@@ -497,3 +497,16 @@ h2.sec.cathead:hover{color:#efdcb4}
 .summary .scat b,.summary .grand span:last-child,.bar .lab span span{font-family:var(--font-body);font-weight:700}
 .gameview .gct,.ehead .cnt,.gameview .gsec .cpts,h2.sec.cathead .cpts{font-family:var(--font-body);font-weight:700}
 .gameview .gsec .cpts{font-size:13px;letter-spacing:0}
+
+/* info buttons: solid seals so they read clearly on every surface */
+.info{width:22px;height:22px;font-size:13px;font-weight:700;border:1px solid #a88a4c;color:#f1d98f;
+  background:radial-gradient(circle at 35% 30%,#4a3a22,#1c150d);box-shadow:0 1px 2px rgba(0,0,0,.7)}
+.info:hover{border-color:#f1d98f;background:radial-gradient(circle at 35% 30%,#6a5230,#2a1f12)}
+.entry .info,.modal .info{border:1px solid #3d0a06;color:#f5e6c0;
+  background:radial-gradient(circle at 35% 30%,#c0392a,#7c1c14 55%,#4e0f0b);box-shadow:0 1px 2px rgba(40,20,5,.6),inset 0 1px 0 rgba(255,200,170,.25)}
+.entry .info:hover,.modal .info:hover{border-color:#1c0503;background:radial-gradient(circle at 35% 30%,#d9503e,#8e2218 55%,#5a120c)}
+.entry .ehead .info{border:1px solid #2a1d0a;color:#2a1c11;
+  background:radial-gradient(circle at 35% 30%,#f5e4b0,#c9a45a 55%,#8a6a2c);box-shadow:0 0 6px rgba(241,217,143,.35),0 1px 2px #000}
+.entry .ehead .info:hover{background:radial-gradient(circle at 35% 30%,#fff2cc,#dcb96a 55%,#9c7a34)}
+.summary .srow .sinfo{width:20px;height:20px;font-size:12px}
+@media(max-width:600px){.info{width:26px;height:26px;font-size:14px}}
