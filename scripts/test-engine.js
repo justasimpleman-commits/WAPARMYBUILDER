@@ -577,9 +577,9 @@ console.log("Equipment access: magic weapon/armour hidden unless the model can u
   __addUnit("characters","blooddragon"); const bd=__getState()[0];
   ok(__itemAllowed(flayed,bd,__findUnit("characters","blooddragon")), "VC: Blood Dragon (heavy armour) may take Flayed Hauberk");
   ok(__modelAccess(bd,__findUnit("characters","blooddragon")).has("heavy armour"), "VC: Blood Dragon has heavy-armour access from base equipment");
-  // Blood Dragon no longer buys heavy armour (base equipment now)
+  // v3.1: Blood Dragon base equipment is a hand weapon; heavy armour is a +18 option
   const bdu=__findUnit("characters","blooddragon");
-  ok(!(bdu.options||[]).some(o=>o.id==="ha"), "VC: Blood Dragon heavy-armour toggle removed (base equipment)");
+  ok((bdu.options||[]).some(o=>o.id==="ha" && o.cost===18), "VC: Blood Dragon may buy heavy armour (+18, v3.1)");
   __setState([]); __addUnit("characters","necrarch"); const nx=__getState()[0];
   ok(!__itemAllowed(flayed,nx,__findUnit("characters","necrarch")), "VC: Necrarch (no armour access) cannot take Flayed Hauberk");
   // the Flayed Hauberk is filtered out of the Necrarch's Magic Armour picker
@@ -863,6 +863,37 @@ __setState([]); __setGen(null); __switch("wood-elves",false);
   const wh=U("special","warhawkriders"); __addUnit("special","warhawkriders"); const e=__getState()[0]; e.count=3; e.opts.bow=true;
   ok(__entryPoints(e)===3*wh.basePoints, "WE: Warhawk Riders longbows are free");
   ok(__findItem("Wailing Arrows").common===true && __findItem("Silverwood Circlet").cost===30, "WE: Wailing Arrows common, Silverwood Circlet 30");
+}
+
+/* ====== Dark Elves v3.1: new costs, moved items, Slavemasters ====== */
+console.log("Dark Elves v3.1: costs, Soulstone/Orb now Arcane, Slavemasters charged…");
+__setState([]); __setGen(null); __switch("dark-elves",false);
+{
+  const U=(c,id)=>__findUnit(c,id); const D=__D();
+  ok(D.magicItems["Arcane Items"].some(i=>i.name==="Soulstone") && !D.magicItems["Talismans"].some(i=>i.name==="Soulstone"), "DE: Soulstone is an Arcane Item (Charm)");
+  ok(__findItem("Orb of Ghrond").common===true && D.magicItems["Arcane Items"].some(i=>i.name==="Orb of Ghrond"), "DE: Orb of Ghrond is a common Arcane Item");
+  ok(__findItem("Khainite Pendant").cost===10 && __findItem("Witchbrew").cost===25, "DE: Khainite Pendant 10, Witchbrew 25");
+  ok(U("characters","sorceresses").variants[0].points===195 && U("characters","hagsofkhaine").variants[1].magicBudget===50, "DE: Supreme Sorceress 195, Death Hag budget 50");
+  ok(U("rare","cauldron").basePoints===165 && U("core","darkriders").basePoints===15 && U("rare","warlocks").basePoints===25, "DE: Cauldron 165, Dark Riders 15, Warlocks 25");
+  __addUnit("core","slaves"); const sl=__getState()[0]; sl.count=40;
+  ok(__entryPoints(sl)===40*2+2*25, "DE: 40 Slaves include two 25-pt Slavemasters");
+  const nag=D.spellLores.Dark.spells.find(x=>x.name==="Nagaelythe the Chillwind"), pod=D.spellLores.Dark.spells.find(x=>x.name==="Power of Darkness");
+  ok(nag.lvl===1 && nag.cast===5 && pod.lvl===2 && pod.cast===8, "DE: Nagaelythe L1/5+, Power of Darkness L2/8+");
+}
+
+/* ====== Vampire Counts v3.1: new units/items, cost changes ====== */
+console.log("Vampire Counts v3.1: Ghoul Prowlers, Sylvanian Bowmen, Wight items, costs…");
+__setState([]); __setGen(null); __switch("vampire-counts",false);
+{
+  const U=(c,id)=>__findUnit(c,id); const D=__D();
+  ok(U("core","ghoulprowlers").basePoints===8 && U("core","sylvanianbowmen").basePoints===6, "VC: Ghoul Prowlers 8, Sylvanian Bowmen 6");
+  ok(U("core","cryptghouls").unitSize[0]===15 && U("core","direwolves").basePoints===6, "VC: Crypt Ghouls 15-45, Dire Wolves 6");
+  __addUnit("core","skeletonwarriors"); const sk=__getState()[0]; sk.count=20; sk.opts.shield=true;
+  ok(__entryPoints(sk)===20*3.5+20*0.5, "VC: Skeleton Warriors 3.5 + shields 0.5");
+  ok(!D.vampiricPowers.some(p=>p.name==="Summon Ghouls") && D.vampiricPowers.find(p=>p.name==="Strength of Steel").cost===15, "VC: Summon Ghouls removed, Strength of Steel 15");
+  ok(["The Stormsword of Medhe","Hide of Retribution","The Ring of the Cailledh","Charm of Defiance","Sky Chariot","Charm of Destruction"].every(n=>__findItem(n)), "VC: new Wight-only items present");
+  ok(__findItem("The Flayed Hauberk").cost===50 && __findItem("The Balefire Spike").cost===20, "VC: Flayed Hauberk 50, Balefire Spike 20");
+  ok(U("characters","sekhar").variants[0].points===200 && U("characters","ushoran").variants[0].points===570, "VC: Sekhar 200, Ushoran 570");
 }
 
 /* ====== web app: book registry, undo/redo, gating, issues, share links ====== */

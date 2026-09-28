@@ -1,12 +1,103 @@
 # Changelog
 
 All notable changes to **Warhammer Army Builder**. A new entry is added for **every
-installer build**, and the version is stamped into the installer output filenames.
+release**.
 
 **Versioning (this project's convention).** The first number is reserved. A **major**
 change bumps the **middle** number and resets the last to 0 (`1.4.0 → 1.5.0`); a
 **minor** change bumps the **last** number (`1.5.0 → 1.5.1`). The build workflow asks
-which kind each time.
+which kind each time. (2.0.0 was a one-off bump of the first number for the move to
+a web-only app.)
+
+## [2.0.1] — 2026-09-28
+
+Dark Elves and Vampire Counts updated to the v3.1 army books. Every points value,
+profile, option, item and rule was checked against the v3.1 PDFs.
+
+### Changed
+- **Dark Elves v3.1.**
+  - Supreme Sorceress 195 pts with a new profile.
+  - Disciple of Khaine 105 pts and gains Magic Resistance (1).
+  - Dark Riders 15, Doomfire Warlocks 25, Cauldron of Blood 165. The Cauldron costs
+    160 as a mount and only a Hag Queen may ride it.
+  - Death Hag magic allowance 50 (was 100).
+  - Beastmaster, Khainite Assassin and Disciple weapon/armour options re-costed.
+  - Corsairs are Skirmishers by default and may buy Ambushers instead.
+  - Soulstone and Orb of Ghrond (now common) are Arcane Items. Several talismans,
+    Crystal Heart, the Draich of Dark Power and the Standard of Har Ganeth re-costed.
+  - Gifts of Khaine re-costed and re-worded: Cry of War and Hand of Khaine swapped
+    effects, and Khainite Pendant is a one-use Disciple gift.
+  - Nagaelythe the Chillwind is Level 1 (5+) and Power of Darkness Level 2 (8+).
+  - Malekith and Hellebron have Inspiring Presence (6).
+  - New profiles for Krethusa and the Cold One Knight rider.
+  - Shadowstalkers are Khainite (no longer Loner).
+- **Vampire Counts v3.1.**
+  - New Core units: Ghoul Prowlers and Sylvanian Bowmen.
+  - Sylvanian Levy lose their bow options. Crypt Ghouls are 15–45 with BS 3 and no
+    Skirmishers option.
+  - Skeleton Warriors 3.5 pts with cheaper options. Dire Wolves 6.
+  - Six new Wight-only items, including the Stormsword of Medhe and Hide of
+    Retribution.
+  - Flayed Hauberk 50, Balefire Spike 20, Asp Bow is a shortbow. Seven items are now
+    common (*).
+  - Blood Dragons may buy heavy armour again (+18), may ride monsters as a Lord only,
+    and lose the Lore of Shadow.
+  - Nightmare costs 15 for every character.
+  - Summon Ghouls power removed. Strength of Steel costs 15.
+  - Sekhar 200, Ushoran 570.
+
+### Fixed
+- **Slaves (Dark Elves)** now charge their required Slavemasters (25 pts per 20
+  Slaves); before, only the note mentioned them.
+- **Witchbrew** was restricted to the Disciple of Khaine although its text says Hags.
+
+## [2.0.0] — 2026-09-26
+
+A big release: the app is now a web-only page (no installers), with a new game-day
+view, undo/redo, share links and three new army books. The first number goes up to
+mark the move to the web.
+
+### Added
+- **Game mode** (⚔ Game button in the header). A read-only view you can use at the
+  table, with one compact card per unit. Each card shows the chosen profile's
+  statline plus its mount, then equipment, special rules, magic items, the lore
+  attribute and spells with casting values. Tap any rule, weapon, item or spell to
+  read it. Buttons at the top jump to each unit.
+- **Drag-and-drop reordering** of roster cards within a category: drag by the
+  header, or press and hold on a phone. The order carries into the summary, export,
+  share link and game mode.
+- **Undo / redo** for every change: ↶ ↷ buttons, Ctrl/⌘+Z and Ctrl/⌘+Shift+Z, plus
+  an Undo button after removing a unit or clearing the army.
+- **Share link.** The whole army is packed into a link. Nothing is uploaded, and
+  opening the link loads the army.
+- **Catalogue search** and badges: how many of each unit you have, Special/Rare
+  duplicates against the game-size cap, and special characters greyed out once
+  taken.
+- **Clickable validation messages** that jump to the unit concerned.
+- **Points-limit presets** (1000–4000).
+- **Magic weapon/armour type badges** (Heavy armour, Shield, Light lance…). Items a
+  character can't use are shown disabled with the reason ("needs Shield") instead
+  of being hidden.
+- **New army books:** Lizardmen, Estalia and Dwarfs (with a Runic Items engine).
+- **Loadout popup** for each roster entry, showing what that unit has actually
+  bought.
+
+### Changed
+- **Web-only.** The Electron desktop app and the Android build were removed. The
+  site runs from GitHub Pages or straight from `index.html`, with a phone drawer
+  layout on narrow screens. Army books load on demand.
+- **No "are you sure?" prompts.** Switching armies, loading an army and deleting a
+  library army are undoable instead.
+- **Chaos Dwarfs** and **Wood Elves** updated to army book v3.1 (points, unit sizes,
+  options and rule text). Slave Overseers are now added automatically at the
+  required ratio.
+- Equipment-access rules for magic items were extended and re-checked in every book.
+  Armour of Bone needs medium armour, except for Necromancers.
+
+### Fixed
+- Rune costs now add up correctly when the same rune is taken more than once.
+- The Hobgoblins-only item restriction checks the unit keyword.
+- Altar of Hashut rules and glossary entries completed.
 
 ## [1.5.0] — 2026-07-21
 
