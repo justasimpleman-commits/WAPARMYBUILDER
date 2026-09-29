@@ -609,9 +609,14 @@
           { id: "shield", type: "toggle", label: "Shield", cost: 5, per: "flat" },
           { id: "cloak", type: "toggle", label: "Sea Dragon Cloak", cost: 3, per: "flat" },
           { id: "mount", type: "mount", label: "Mount", choices: [
-            { label: "Dark Steed", cost: 15 }, { label: "Cold One", cost: 20 }, { label: "Dark Pegasus", cost: 25 },
-            { label: "Cold One Chariot", cost: 100 },
-            { label: "Manticore", cost: 150, only: "Dreadlord" }, { label: "Black Dragon", cost: 300, only: "Dreadlord" } ] },
+            { label: "Dark Steed", key: "darksteed", cost: 15 }, { label: "Cold One", key: "coldone", cost: 20 }, { label: "Dark Pegasus", key: "pegasus", cost: 25 },
+            { label: "Cold One Chariot", key: "chariot", cost: 100 },
+            { label: "Manticore", key: "manticore", cost: 150, only: "Dreadlord" }, { label: "Black Dragon", key: "dragon", cost: 300, only: "Dreadlord" } ] },
+          { id: "steed_barding", type: "toggle", label: "Barding", cost: 5, per: "flat", requiresMount: ["darksteed","coldone"] },
+          { id: "man_fangs", type: "toggle", label: "Rending Fangs", cost: 5, per: "flat", requiresMount: "manticore" },
+          { id: "man_rage", type: "toggle", label: "Bloodrage", cost: 15, per: "flat", requiresMount: "manticore" },
+          { id: "man_skin", type: "toggle", label: "Iron-hard Skin", cost: 15, per: "flat", requiresMount: "manticore" },
+          { id: "man_tail", type: "toggle", label: "Venom Tail", cost: 15, per: "flat", requiresMount: "manticore" },
           { id: "bsb", type: "toggle", label: "Battle Standard Bearer (one Dreadmaster only)", cost: 25, per: "flat", only: "Dreadmaster", bsb: true }
         ],
         notes: "BSB may carry a Magic Standard with no points limit, in addition to other Magic Items."
@@ -628,8 +633,13 @@
           { id: "wlvl", type: "toggle", label: "Additional Wizard Level", cost: 35, per: "flat" },
           { id: "armour", type: "toggle", label: "Light armour", cost: 3, per: "flat" },
           { id: "mount", type: "mount", label: "Mount", choices: [
-            { label: "Dark Steed", cost: 15 }, { label: "Cold One", cost: 20 }, { label: "Dark Pegasus", cost: 25 },
-            { label: "Manticore", cost: 150, only: "Supreme Sorceress" }, { label: "Black Dragon", cost: 300, only: "Supreme Sorceress" } ] }
+            { label: "Dark Steed", key: "darksteed", cost: 15 }, { label: "Cold One", key: "coldone", cost: 20 }, { label: "Dark Pegasus", key: "pegasus", cost: 25 },
+            { label: "Manticore", key: "manticore", cost: 150, only: "Supreme Sorceress" }, { label: "Black Dragon", key: "dragon", cost: 300, only: "Supreme Sorceress" } ] },
+          { id: "steed_barding", type: "toggle", label: "Barding", cost: 5, per: "flat", requiresMount: ["darksteed","coldone"] },
+          { id: "man_fangs", type: "toggle", label: "Rending Fangs", cost: 5, per: "flat", requiresMount: "manticore" },
+          { id: "man_rage", type: "toggle", label: "Bloodrage", cost: 15, per: "flat", requiresMount: "manticore" },
+          { id: "man_skin", type: "toggle", label: "Iron-hard Skin", cost: 15, per: "flat", requiresMount: "manticore" },
+          { id: "man_tail", type: "toggle", label: "Venom Tail", cost: 15, per: "flat", requiresMount: "manticore" }
         ]
       },
       {
@@ -670,7 +680,11 @@
           { id: "armour", type: "toggle", label: "Light armour", cost: 3, per: "flat" },
           { id: "cloak", type: "toggle", label: "Sea Dragon Cloak", cost: 3, per: "flat" },
           { id: "mount", type: "mount", label: "Mount", choices: [
-            { label: "Scourgerunner Chariot", cost: 50 }, { label: "Manticore", cost: 150 } ] }
+            { label: "Scourgerunner Chariot", key: "scourgerunner", cost: 50 }, { label: "Manticore", key: "manticore", cost: 150 } ] },
+          { id: "man_fangs", type: "toggle", label: "Rending Fangs", cost: 5, per: "flat", requiresMount: "manticore" },
+          { id: "man_rage", type: "toggle", label: "Bloodrage", cost: 15, per: "flat", requiresMount: "manticore" },
+          { id: "man_skin", type: "toggle", label: "Iron-hard Skin", cost: 15, per: "flat", requiresMount: "manticore" },
+          { id: "man_tail", type: "toggle", label: "Venom Tail", cost: 15, per: "flat", requiresMount: "manticore" }
         ]
       },
       {
@@ -724,7 +738,8 @@
         variants: [ { name: "Malekith", points: 495, wizardLevel: 4, magicBudget: 0 } ],
         options: [
           { id: "mount", type: "mount", label: "Mount", choices: [
-            { label: "Cold One", cost: 20 }, { label: "Cold One Chariot", cost: 100 }, { label: "Seraphon (Black Dragon)", cost: 320 } ] } ],
+            { label: "Cold One", key: "coldone", cost: 20 }, { label: "Cold One Chariot", key: "chariot", cost: 100 }, { label: "Seraphon (Black Dragon)", cost: 320 } ] },
+          { id: "steed_barding", type: "toggle", label: "Barding", cost: 5, per: "flat", requiresMount: "coldone" } ],
         notes: "Must be the Army General (Inspiring Presence 6). If Malekith is in the army, Black Guard are taken as Special units instead of Rare." },
       { id: "morathi", name: "Morathi", isCharacter: true, isSpecialChar: true,
       access: [],
@@ -743,7 +758,11 @@
         variants: [ { name: "Crone Hellebron", points: 280, magicBudget: 0 } ],
         options: [
           { id: "mount", type: "mount", label: "Mount", choices: [
-            { label: "Manticore", cost: 150 }, { label: "Cauldron of Blood", cost: 160 } ] } ],
+            { label: "Manticore", key: "manticore", cost: 150 }, { label: "Cauldron of Blood", cost: 160 } ] },
+          { id: "man_fangs", type: "toggle", label: "Rending Fangs", cost: 5, per: "flat", requiresMount: "manticore" },
+          { id: "man_rage", type: "toggle", label: "Bloodrage", cost: 15, per: "flat", requiresMount: "manticore" },
+          { id: "man_skin", type: "toggle", label: "Iron-hard Skin", cost: 15, per: "flat", requiresMount: "manticore" },
+          { id: "man_tail", type: "toggle", label: "Venom Tail", cost: 15, per: "flat", requiresMount: "manticore" } ],
         notes: "Inspiring Presence (6) affecting Khainite units. May upgrade one Witch Elf unit to Sisters of the Singing Doom (+1/model, gain Fear)" },
       { id: "rakarth", name: "Rakarth", isCharacter: true, isSpecialChar: true,
       access: [],
