@@ -1130,6 +1130,20 @@ console.log("Troop types: rulebook text, per-unit troop lines, mounted character
   __openGame(); ok(/Troop/.test(document.getElementById("gameView").innerHTML), "game card shows the troop type"); __closeGame();
 }
 
+console.log("Dark Elf mount upgrades: Manticore upgrades and barding gated on the mount…");
+{
+  __setState([]); __setGen(null); __switch("dark-elves",false); __addUnit("characters","commanders");
+  const e=__getState()[0], u=__findUnit("characters","commanders"), mo=u.options.find(o=>o.type==="mount");
+  const base=__entryPoints(e);
+  ["man_fangs","man_rage","man_skin","man_tail","steed_barding"].forEach(id=>e.opts[id]=true);
+  ok(__entryPoints(e)===base, "mount upgrades uncharged while on foot");
+  e.opts.mount=mo.choices.findIndex(c=>c.label==="Manticore");
+  ok(__entryPoints(e)===base+150+5+15+15+15, "Manticore + all four upgrades = +200");
+  e.opts.mount=mo.choices.findIndex(c=>c.label==="Cold One"); __render();
+  ok(!e.opts.man_tail && e.opts.steed_barding, "switching to a Cold One drops the Manticore upgrades, keeps barding");
+  ok(__entryPoints(e)===base+20+5, "Cold One + barding = +25");
+}
+
 console.log("Points limit: the number input only shows for a Custom limit…");
 {
   const inp=document.getElementById("limit"), p=document.getElementById("limitPreset");
