@@ -80,10 +80,13 @@ function _pkRender(){
       // `it.locked` → display-only row: shown as already-chosen (✓, full opacity)
       // but non-interactive and NOT part of _pk.sel, so it never affects the pick
       // count or budget. Used for always-known spells (lore attribute + signatures).
+      // `it.autoWith:[names]` → ticked only while one of those names is selected
+      // (a mixed lore's attribute/signature come with any spell of that lore).
       if(it.locked){
+        const on=!it.autoWith || it.autoWith.some(n=>_pk.sel.includes(n));
         const row=document.createElement("div");
-        row.className="mirow pick sel"; row.style.cursor="default";
-        const mark=document.createElement("span"); mark.className="pkmark"; mark.textContent="✓";
+        row.className="mirow pick"+(on?" sel":" disabled"); row.style.cursor="default";
+        const mark=document.createElement("span"); mark.className="pkmark"; mark.textContent=on?"✓":"";
         const txt=document.createElement("div"); txt.style.flex="1";
         const descHTML=(it.html!=null)?it.html:`<div class="d">${esc((it.desc!=null&&it.desc!=="")?it.desc:(itemDescOf(it.name)||"(no description)"))}</div>`;
         txt.innerHTML=`<div><span class="nm">${esc(it.name)}</span>${it.reason?` <span style="color:var(--muted)">· ${esc(it.reason)}</span>`:""}</div>${descHTML}`;

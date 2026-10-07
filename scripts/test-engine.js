@@ -76,7 +76,7 @@ const engine=srcs.filter(s=>s.startsWith("js/")).map(load).join("\n");
   __renderCatalog:renderCatalog, __reconcile:reconcileEntry,
   __mountChoiceBlocked:mountChoiceBlocked, __renderOption:renderOption,
   __perNCount:perNCount, __perNMax:perNMax, __optChoiceBlocked:optChoiceBlocked,
-  __availableLores:availableLores, __loreNames:loreNames, __itemAllowed:itemAllowed,
+  __availableLores:availableLores, __mixLores:mixLores, __pickableSpells:pickableSpells, __loresInUse:loresInUse, __spellInfo:spellInfo, __describe:describe, __variantMatch:variantMatch, __loreNames:loreNames, __itemAllowed:itemAllowed,
   __modelAccess:modelAccess, __hasAccess:hasAccess, __itemEquipType:itemEquipType, __itemAccessOK:itemAccessOK, __normAccess:normAccess, __findItem:findItem, __pickerGroups:pickerGroups,
   __runeCatCost:runeCatCost, __runesCost:runesCost, __magicRunesCost:magicRunesCost,
   __runeCatsForChar:runeCatsForChar, __runeAllowed:runeAllowed, __runeDef:runeDef,
@@ -894,6 +894,65 @@ __setState([]); __setGen(null); __switch("vampire-counts",false);
   ok(["The Stormsword of Medhe","Hide of Retribution","The Ring of the Cailledh","Charm of Defiance","Sky Chariot","Charm of Destruction"].every(n=>__findItem(n)), "VC: new Wight-only items present");
   ok(__findItem("The Flayed Hauberk").cost===50 && __findItem("The Balefire Spike").cost===20, "VC: Flayed Hauberk 50, Balefire Spike 20");
   ok(U("characters","sekhar").variants[0].points===200 && U("characters","ushoran").variants[0].points===570, "VC: Sekhar 200, Ushoran 570");
+}
+
+/* ====== Grand Cathay v3.1: alignment lores, mixed Yin/Yang spells, costs ====== */
+console.log("Grand Cathay v3.1: Shugengan alignment lores, mixed lores, Seal of Xing Po, costs…");
+__setState([]); __setGen(null); __switch("grand-cathay",false);
+{
+  const U=(c,id)=>__findUnit(c,id); const D=__D();
+  // Dragon-Blooded Shugengan: no lore until aligned; Yin → Beasts/Death/Metal/Shadow (+Yin spells)
+  __addUnit("characters","shugengan"); const sg=__getState()[0], su=U("characters","shugengan");
+  ok(__availableLores(sg,su).length===4, "GC: a new Shugengan has an alignment (mustChoose) and so a choice of four lores");
+  sg.opts.align=0;   // Yin
+  ok(JSON.stringify(__availableLores(sg,su))===JSON.stringify(["Beasts","Death","Metal","Shadow"]), "GC: Yin Shugengan may use Beasts/Death/Metal/Shadow");
+  sg.lore="Metal"; ok(JSON.stringify(__mixLores(sg,su))===JSON.stringify(["Yin"]), "GC: Yin Shugengan may swap in Lore of Yin spells");
+  ok(__pickableSpells(sg,su).some(r=>r.sp.name==="Cloak of Jet") && !__pickableSpells(sg,su).some(r=>r.sp.name==="Jade Shield"), "GC: Yin pool has Cloak of Jet, not Jade Shield");
+  sg.spells=["Cloak of Jet","Blossom Wind","Ancestral Warriors"]; __reconcile(sg);
+  ok(JSON.stringify(sg.spells)===JSON.stringify(["Cloak of Jet","Blossom Wind"]), "GC: L3 keeps Yin spells up to level 3 (Ancestral Warriors is L4)");
+  sg.opts.align=1; __reconcile(sg);   // Yang: Metal no longer legal
+  ok(sg.lore==="" && JSON.stringify(__availableLores(sg,su))===JSON.stringify(["Fire","Heavens","Light","Life"]), "GC: switching to Yang clears Metal, offers Fire/Heavens/Light/Life");
+  sg.lore="Fire"; sg.magic["Arcane Items:Relic"]="Seal of Xing Po";
+  ok(JSON.stringify(__mixLores(sg,su))===JSON.stringify(["Yang","Yin"]), "GC: Seal of Xing Po adds both Yin and Yang");
+  // mounts gated by alignment; warhorse barding
+  const mo=su.options.find(o=>o.type==="mount");
+  ok(__mountChoiceBlocked(sg,su,mo.choices.find(c=>/Moon Bird/.test(c.label))) && !__mountChoiceBlocked(sg,su,mo.choices.find(c=>/Celestial Lion/.test(c.label))), "GC: Yang Shugengan may ride the Celestial Lion, not the Great Moon Bird");
+  const base=__entryPoints(sg); sg.opts.barding=true; ok(__entryPoints(sg)===base, "GC: barding uncharged without a Warhorse");
+  sg.opts.mount=0; ok(__entryPoints(sg)===base+18+5, "GC: Warhorse 18 + barding 5");
+  // Seal of Xing Po only for Shugengan/Descendant; Scrolls of Astromancy for both Astromancers
+  __addUnit("characters","alchemists"); const al=__getState()[1];
+  ok(!__itemAllowed(__findItem("Seal of Xing Po"),al,U("characters","alchemists")), "GC: Alchemist may not take the Seal of Xing Po");
+  __addUnit("characters","astromancers"); const as=__getState()[2]; as.variant=1;
+  ok(__itemAllowed(__findItem("Scrolls of Astromancy"),as,U("characters","astromancers")), "GC: a (non-Supreme) Astromancer may take the Scrolls of Astromancy");
+  // special characters' mixed lores
+  __addUnit("characters","miaoying"); const my=__getState()[3]; my.lore="Life";
+  ok(JSON.stringify(__mixLores(my,U("characters","miaoying")))===JSON.stringify(["Yin"]), "GC: Miao Ying uses Life + Yin spells");
+  ok(__knownSpells(my).includes("Wrath of the Storm") && __knownSpells(my).includes("The Storm Dragon's Fury"), "GC: Miao Ying always knows her personal spells");
+  my.spells=["Wrath of the Storm"]; __reconcile(my); ok(my.spells.length===0, "GC: personal spells are not stored as picks (outside the cap)");
+  { const box=__renderSpells(my,U("characters","miaoying")); const nd=[]; (function walk(x){ nd.push(x); (x.children||[]).forEach(walk); })(box);
+    ok(/Wrath of the Storm \(personal spell\)/.test(nd.map(x=>(x._html||"")+(x.textContent||"")).join(" ")), "GC: spell chooser lists Miao Ying's personal spells as always known"); }
+  __addUnit("characters","zhaoming"); const zm=__getState()[4];
+  ok(__knownSpells(zm).includes("Master of Alchemy"), "GC: Zhao Ming knows Master of Alchemy even before a lore is chosen");
+  zm.lore="Metal"; ok(__knownSpells(zm).includes("Master of Alchemy") && __knownSpells(zm).includes("Glittering Robe"), "GC: Zhao Ming: Metal signature + Master of Alchemy");
+  // a mixed lore's attribute + signature come with any spell of that lore
+  __setState([]); __addUnit("characters","yuanbo"); const yb=__getState()[0], yu=U("characters","yuanbo"); yb.lore="Heavens";
+  ok(!__pickableSpells(yb,yu).some(r=>r.sp.name==="Shem's Burning Gaze"), "GC: a mixed lore's signature is not a pick");
+  ok(JSON.stringify(__loresInUse(yb,yu))===JSON.stringify(["Heavens"]) && !__knownSpells(yb).includes("Shem's Burning Gaze"), "GC: Yuan Bo without a Light spell does not know Light's signature");
+  yb.spells=["Dazzling Brightness"]; __reconcile(yb);
+  ok(JSON.stringify(__loresInUse(yb,yu))===JSON.stringify(["Heavens","Light"]), "GC: picking a Light spell brings the Lore of Light into use");
+  ok(__knownSpells(yb).includes("Shem's Burning Gaze") && yb.spells.length===1, "GC: …its signature is known free (outside the cap)");
+  { const d=__describe(yb,yu).join(" | "); ok(/Lore: Heavens \+ Light/.test(d) && /Focus Energy/.test(d), "GC: export lists both lores and Light's attribute"); }
+  ok(__spellInfo(yb,"Shem's Burning Gaze").lore==="Light", "GC: game mode resolves the mixed-lore signature");
+  __addUnit("characters","shugengan"); const s2=__getState()[1], s2u=U("characters","shugengan"); s2.opts.align=0; s2.lore="Metal";
+  ok(__loresInUse(s2,s2u).length===1, "GC: Yin Shugengan with no Yin spell has only Metal's attribute");
+  s2.spells=["Cloak of Jet"]; ok(JSON.stringify(__loresInUse(s2,s2u))===JSON.stringify(["Metal","Yin"]) && /Power of Yin/.test(__describe(s2,s2u).join(" ")), "GC: a Yin spell brings the Power of Yin attribute (exported)");
+  ok(__variantMatch(s2,s2u,"Dragon-Blooded Shugengan or Dragon Descendant"), "variantMatch accepts \"A or B\"");
+  ok(!!U("characters","taoyan") && U("characters","taoyan").variants[0].points===180, "GC: Taoyan the Merciless present (180)");
+  // v3.1 costs
+  ok(U("core","peasantmilitia").basePoints===2.5 && U("core","jadewarriors").basePoints===4 && U("special","terracottawarriors").basePoints===3.5 && U("special","mercenaryogres").basePoints===25, "GC: Militia 2.5, Jade Warriors 4, Terracotta 3.5, Ogres 25");
+  ok(D.spellLores.Yin.spells.every(x=>x.lvl>0) && D.spellLores.Yin.spells.find(x=>x.name==="Blossom Wind").effect.includes("Strength 3"), "GC: Lore of Yin has no signature; Blossom Wind is Strength 3");
+  __setState([]); __addUnit("special","warchariot"); const wc=__getState()[0]; wc.count=3; wc.opts.scythes=true;
+  ok(__entryPoints(wc)===3*70+3*5, "GC: War Chariot scythes cost +5 per chariot");
 }
 
 /* ====== web app: book registry, undo/redo, gating, issues, share links ====== */

@@ -32,19 +32,13 @@ function gameProfileRows(e,u){
   const kept=rows.filter(r=>!others.has(r[0]));
   return kept.length ? kept : rows;
 }
-/* a known spell's data by name: the wizard's own lore, else the eight Winds'
-   signatures (Arcane Familiar picks) */
-function gameSpell(e,name){
-  const lore=e.lore?loreData(e.lore):null;
-  const sp=lore && lore.spells.find(s=>s.name===name);
-  if(sp) return {lore:e.lore, sp};
-  const w=windSignatures().find(x=>x.name===name);
-  return w ? {lore:w.lore, sp:w.sp} : null;
-}
+/* a known spell's data by name (engine spellInfo: lores in use, personal spells,
+   mixed-lore picks, the eight Winds' signatures) */
+function gameSpell(e,name){ return spellInfo(e,name); }
 function openGameSpell(i){
   const s=window.__gsp[i]; if(!s) return;
   const sp=s.sp, tag=sp.lvl===0?"Signature":"Level "+sp.lvl;
-  openModal2(sp.name, `<div class="rule"><b>${esc(String(sp.cast))}+</b> <span style="color:var(--muted)">Lore of ${esc(s.lore)} · ${esc(tag)} · ${esc(sp.type)} · ${esc(sp.range)}</span></div><div class="rule">${esc(sp.effect)}</div>`);
+  openModal2(sp.name, `<div class="rule"><b>${esc(String(sp.cast))}+</b> <span style="color:var(--muted)">${s.personal?"Personal spell":"Lore of "+esc(s.lore)} · ${esc(tag)} · ${esc(sp.type)} · ${esc(sp.range)}</span></div><div class="rule">${esc(sp.effect)}</div>`);
 }
 function openGameAttr(i){
   const s=window.__gsp[i]; if(!s) return;
@@ -85,15 +79,16 @@ function gameCardHTML(e){
     h+=gameLine("Mount", `<b>${esc(mount.label)}</b>${mr?` — ${mr}`:""}`);
   }
   if(lo.magic.length) h+=gameLine("Magic", loadoutHTML(lo.magic,"item","__gw","__giw"));
-  if(lo.lore){
-    const lore=loreData(lo.lore), sp=[];
-    if(lore && lore.attribute){ const i=window.__gsp.push({name:lore.attribute.name, text:lore.attribute.text, lore:lo.lore})-1;
-      sp.push(`<span class="ruleword" onclick="openGameAttr(${i})">${esc(lore.attribute.name)}</span> <span class="note">(attribute)</span>`); }
+  if(lo.lore || lo.spells.length){
+    const sp=[];
+    (lo.lores||[]).forEach(nm=>{ const lore=loreData(nm); if(!lore || !lore.attribute) return;
+      const i=window.__gsp.push({name:lore.attribute.name, text:lore.attribute.text, lore:nm})-1;
+      sp.push(`<span class="ruleword" onclick="openGameAttr(${i})">${esc(lore.attribute.name)}</span> <span class="note">(attribute)</span>`); });
     lo.spells.forEach(n=>{ const s=gameSpell(e,n);
       if(!s){ sp.push(esc(n)); return; }
       const i=window.__gsp.push(s)-1;
       sp.push(`<span class="ruleword" onclick="openGameSpell(${i})">${esc(n)}</span> <span class="gcast">${esc(String(s.sp.cast))}+</span>`); });
-    h+=gameLine(`Lore of ${esc(lo.lore)}`, sp.join(", "));
+    h+=gameLine(lo.lore?`Lore of ${esc((lo.lores&&lo.lores.length?lo.lores:[lo.lore]).join(" + "))}`:"Spells", sp.join(", "));
   }
   return `<div class="gcard" id="game-${e.uid}">${h}</div>`;
 }

@@ -263,8 +263,8 @@ function entryLoadout(e,u){
   if(e.magicStd) magic.push("Standard: "+e.magicStd);
   if(e.runes){ for(const cat in e.runes){ const list=e.runes[cat]; if(list && list.length){
     const g=runeGroup(list); Object.keys(g).forEach(n=>magic.push(g[n]>1?`${n} ×${g[n]}`:n)); } } }
-  const spells = e.lore ? knownSpells(e) : [];
-  return {equip, magic, spells, lore:e.lore};
+  const spells = (e.lore || fixedSpells(e).length) ? knownSpells(e) : [];
+  return {equip, magic, spells, lore:e.lore, lores:loresInUse(e,u)};
 }
 /* ---------- mount profile lookup ----------
    A mount's characteristics come from the book's unitInfo: many mounts are also
@@ -289,13 +289,19 @@ function mountProfile(label){
   return null;
 }
 
-/* all spells a wizard knows = signature(s) of its lore + chosen spells
+/* a unit's personal spells (`fixedSpells:[{name,lvl,cast,type,range,effect}]`):
+   always known whatever lore it uses, free, outside the pick cap (Miao Ying's
+   Wrath of the Storm, Zhao Ming's Master of Alchemy) */
+function fixedSpells(e){ const u=findUnit(e.cat,e.id); return (u && u.fixedSpells && wizardActive(e,u)) ? u.fixedSpells : []; }
+/* all spells a wizard knows = signature(s) of every lore in use (its lore, plus a
+   mixed lore once one of its spells is chosen) + personal spells + chosen spells
    (+ any extra signatures from an Arcane Familiar, trimmed to the item bonus) */
 function knownSpells(e){
   const extraSig=(e.sigSpells||[]).slice(0,bonusSignatures(e));
-  const lore=e.lore?loreData(e.lore):null; if(!lore) return [...(e.spells||[]), ...extraSig];
-  const sigs=lore.spells.filter(sp=>sp.lvl===0).map(sp=>sp.name);
-  return [...sigs, ...(e.spells||[]), ...extraSig];
+  const own=fixedSpells(e).map(sp=>sp.name);
+  const u=findUnit(e.cat,e.id);
+  const sigs=[]; (u?loresInUse(e,u):[]).forEach(nm=>loreData(nm).spells.forEach(sp=>{ if(sp.lvl===0 && !sigs.includes(sp.name)) sigs.push(sp.name); }));
+  return [...sigs, ...own, ...(e.spells||[]), ...extraSig];
 }
 /* resolve a lore's spell data: book-specific lores win, then the shared 8 rulebook lores */
 function loreData(name){ return (D.spellLores && D.spellLores[name]) || (window.COMMON_LORES && window.COMMON_LORES[name]) || null; }
@@ -317,6 +323,52 @@ function loreEntryAvailable(e,u,le){
   return true;
 }
 function availableLores(e,u){ return loreEntries(u).filter(le=>loreEntryAvailable(e,u,le)).map(le=>le.name); }
+/* ---- mixed lores ----
+   Some wizards use one lore but "may replace any number of spells from that lore
+   with spells from" another (Grand Cathay: a Yin-aligned Shugengan swaps in Lore of
+   Yin spells; the Seal of Xing Po adds both Yin and Yang). `mixLores` lists those
+   extra lores — on the unit (plain names or entries gated like `lores`, e.g.
+   {name:"Yin", requiresChoice:{id:"align",is:"Yin"}}) or on a carried magic item.
+   Their spells join the pick pool under the same cap; the chosen lore itself is
+   never repeated. Returns lore names that have spell data. */
+function mixLores(e,u){
+  if(!e.lore) return [];
+  const out=[];
+  const add=nm=>{ if(nm && nm!==e.lore && !out.includes(nm) && loreData(nm)) out.push(nm); };
+  (u.mixLores||[]).map(l=>(typeof l==="string")?{name:l}:l).forEach(le=>{ if(loreEntryAvailable(e,u,le)) add(le.name); });
+  const fromItem=nm=>{ const it=nm?findItem(nm):null; if(it && it.mixLores) it.mixLores.forEach(add); };
+  if(e.magic) Object.values(e.magic).forEach(fromItem);
+  (e.gifts||[]).forEach(fromItem);
+  fromItem(e.magicStd);
+  return out;
+}
+/* every spell the wizard may choose (the non-signature spells of its lore and of
+   its mixed lores) as [{lore, sp}] */
+function pickableSpells(e,u){
+  const res=[]; const lore=e.lore?loreData(e.lore):null; if(!lore) return res;
+  lore.spells.filter(sp=>sp.lvl!==0).forEach(sp=>res.push({lore:e.lore, sp}));
+  mixLores(e,u).forEach(nm=>loreData(nm).spells.forEach(sp=>{ if(sp.lvl!==0 && !res.some(r=>r.sp.name===sp.name)) res.push({lore:nm, sp}); }));
+  return res;
+}
+/* Knowing one spell of a lore brings its attribute and signature spell(s) with it.
+   For the main lore that is always the case; a mixed lore joins once at least one
+   of its spells is chosen. Returns the lores whose attribute + signatures the
+   wizard knows: the main lore first, then mixed lores in use. */
+function loresInUse(e,u){
+  if(!e.lore || !loreData(e.lore)) return [];
+  const chosen=e.spells||[];
+  return [e.lore, ...mixLores(e,u).filter(nm=>loreData(nm).spells.some(sp=>sp.lvl!==0 && chosen.includes(sp.name)))];
+}
+/* a known spell's data by name: a lore in use (incl. mixed-lore signatures), a
+   personal spell, a mixed-lore pick, or one of the eight Winds' signatures */
+function spellInfo(e,name){
+  const u=findUnit(e.cat,e.id); if(!u) return null;
+  for(const nm of loresInUse(e,u)){ const sp=loreData(nm).spells.find(s=>s.name===name); if(sp) return {lore:nm, sp}; }
+  const own=fixedSpells(e).find(s=>s.name===name); if(own) return {lore:null, sp:own, personal:true};
+  const mx=pickableSpells(e,u).find(r=>r.sp.name===name); if(mx) return mx;
+  const w=windSignatures().find(x=>x.name===name);
+  return w ? {lore:w.lore, sp:w.sp} : null;
+}
 /* mount profile/rules for one mount choice: its own prof/rules/eq, else matched
    from unitInfo by name (same resolution as openMountInfo). */
 function mountChoiceData(c){
@@ -357,7 +409,7 @@ function entryTroop(e,u){
   return {troop:own, base:ownBase, mounted:false};
 }
 /* ---------- helpers for variant/wizard/magic ---------- */
-function variantMatch(e,u,only){ if(!u.isCharacter) return true; return u.variants[e.variant].name===only; }
+function variantMatch(e,u,only){ if(!u.isCharacter) return true; return String(only).split(/\s+or\s+/).map(s=>s.trim()).includes(u.variants[e.variant].name); }
 function wizardActive(e,u){ return wizardLevel(e,u)>0; }
 function magicBudget(e,u){ if(!u.isCharacter) return 0; let b=u.variants[e.variant].magicBudget||0; return b; }
 function isBSB(e,u){ return u.isCharacter && (u.options||[]).some(o=>o.bsb) && e.opts.bsb; }
@@ -444,7 +496,8 @@ function reconcileSpells(e,u){
   if(e.lore && !availableLores(e,u).includes(e.lore)){ e.lore=""; e.spells=[]; }
   const lore=e.lore?loreData(e.lore):null; if(!lore) return;
   const lvl=wizardLevel(e,u), cap=lvl+bonusSpells(e);
-  e.spells=(e.spells||[]).filter(nm=>lore.spells.some(sp=>sp.name===nm && sp.lvl!==0 && sp.lvl<=lvl)).slice(0,cap);
+  const pool=pickableSpells(e,u);
+  e.spells=(e.spells||[]).filter(nm=>pool.some(r=>r.sp.name===nm && r.sp.lvl<=lvl)).slice(0,cap);
   const winds=windSignatures();
   e.sigSpells=(e.sigSpells||[]).filter(nm=>winds.some(w=>w.name===nm)).slice(0,bonusSignatures(e));
 }
@@ -562,16 +615,27 @@ function itemAllowedIgnoringAccess(it,e,u){
 function armyHas(idOrArr){ const ids=Array.isArray(idOrArr)?idOrArr:[idOrArr]; return state.some(x=>ids.includes(x.id)); }
 function optionAvailable(o){ if(!o||!o.requires) return true; if(o.requires.unit) return armyHas(o.requires.unit); return true; }
 function giftsCost(e){ return (e.gifts||[]).reduce((s,nm)=>s+(nm?itemCost(nm):0),0); }
+// every character variant name in the active book (cached per book)
+let _bvnBook=null, _bvn=null;
+function bookVariantNames(){
+  if(_bvnBook!==D){ _bvn=new Set(); ((D.units||{}).characters||[]).forEach(c=>(c.variants||[]).forEach(v=>_bvn.add(v.name))); _bvnBook=D; }
+  return _bvn;
+}
 function restrictOK(e,u,only){
   if(only==="Daemonsmith") return u.id==="daemonsmith";
   if(only==="Hobgoblins") return u.keyword==="hobgoblin"; // Hobgoblin units only (as a magic standard); characters can't take it in their item budget
   // Variant-gated restriction: if `only` names one (or "A or B") of THIS unit's own
   // variants, enforce it (e.g. "Level 3 Wizard — Count only", "Baron or Paladin").
-  // Otherwise we don't model the keyword, so don't hide it.
+  // If it names another character's variant, hide it from this (non-special) model.
+  // Any other keyword isn't modelled, so it stays descriptive and is shown.
   if(u.isCharacter && Array.isArray(u.variants)){
     const names=u.variants.map(v=>v.name);
     const wanted=String(only).split(/\s+or\s+/).map(s=>s.trim());
     if(wanted.some(w=>names.includes(w))) return wanted.includes(u.variants[e.variant].name);
+    // names another character of this book (e.g. Grand Cathay's Seal of Xing Po:
+    // "Dragon-Blooded Shugengan or Dragon Descendant") → this model isn't one of them.
+    // Special characters are left alone: some are themselves of that kind (a named Hunter).
+    if(!u.isSpecialChar && wanted.some(w=>bookVariantNames().has(w))) return false;
   }
   return true;
 }
@@ -756,8 +820,10 @@ function describe(e,u){
     else if(o.type==="multi"){ if(o.repeatable){ if(e.opts[o.id])d.push(`${e.opts[o.id]}× ${o.choices[0].label}`); } else (e.opts[o.id]||[]).forEach(i=>d.push(o.choices[i].label)); }
   });
   if(u.attachedPerN){ const n=attachedCount(e,u); if(n) d.push(`${n}× ${u.attachedPerN.name} (required)`); }
-  if(e.lore){ d.push("Lore: "+e.lore);
-    const lore=loreData(e.lore); if(lore && lore.attribute) d.push("Lore Attribute: "+lore.attribute.name); }
+  if(e.lore){ const inUse=loresInUse(e,u);
+    d.push("Lore: "+(inUse.length>1 ? inUse.join(" + ") : e.lore));
+    const attrs=inUse.map(nm=>loreData(nm).attribute).filter(Boolean).map(a=>a.name);
+    if(attrs.length) d.push("Lore Attribute"+(attrs.length>1?"s":"")+": "+attrs.join(", ")); }
   { const ks=knownSpells(e); if(ks.length) d.push("Spells: "+ks.join(", ")); }
   Object.entries(e.magic).forEach(([cat,nm])=>{ if(nm)d.push(nm); });
   (e.gifts||[]).forEach(nm=>d.push(nm));

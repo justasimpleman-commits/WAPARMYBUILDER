@@ -1,5 +1,5 @@
 /* ============================================================================
-   GRAND CATHAY — army data (Warhammer Armies, Mathias Eliasson v3.0,
+   GRAND CATHAY — army data (Warhammer Armies, Mathias Eliasson v3.1,
    9th Edition 3.0 ruleset). Encoded for the Army Builder engine.
 
    This file is pure DATA. See SCHEMA.md for the full field reference.
@@ -7,7 +7,7 @@
 (window.ARMY_BOOKS = window.ARMY_BOOKS || {})["grand-cathay"] = {
   id: "grand-cathay",
   name: "Grand Cathay",
-  author: "Mathias Eliasson v3.0 (unofficial) — 9th Edition 3.0",
+  author: "Mathias Eliasson v3.1 (unofficial) — 9th Edition 3.0",
   composition: {
     charactersMax: 0.35,
     coreMin: 0.25,
@@ -58,7 +58,7 @@
       { name: "Jade Armour of Beichai", cost: 55, requiresAccess: "heavy armour" },
       { name: "Quicksilver Armour", cost: 35, requiresAccess: "medium armour" },
       { name: "Scales of the Celestial Court", cost: 35, requiresAccess: "medium armour" },
-      { name: "Armour of the Warbird", cost: 30, requiresAccess: "medium armour" },
+      { name: "Armour of the Warbird", cost: 30, requiresAccess: "medium armour", restrict: "infantry" },
       { name: "Ascendant Celestial Armour", cost: 25, requiresAccess: "heavy armour" },
       { name: "Laminate Shield", cost: 10, requiresAccess: "shield" },
       { name: "Mantle of Heaven", cost: 10 },
@@ -79,11 +79,11 @@
       { name: "Cloak of Po Mei", cost: 40 },
       { name: "Clockwork Compass", cost: 35 },
       { name: "Jade Amulet", cost: 35 },
-      { name: "Scrolls of Astromancy", cost: 35, only: "Supreme Astromancer" },
+      { name: "Scrolls of Astromancy", cost: 35, only: "Supreme Astromancer or Astromancer" },
       { name: "Staff of Wu Xing", cost: 25 },
       { name: "Scrolls of Wei-Jin", cost: 20 },
       { name: "Maw Shard", cost: 15 },
-      { name: "Seal of Xing Po", cost: 5, common: true, only: "Dragon-Blooded Shugengan" }
+      { name: "Seal of Xing Po", cost: 5, common: true, only: "Dragon-Blooded Shugengan or Dragon Descendant", mixLores: ["Yin", "Yang"] }
     ],
     "Enchanted Items": [
       { name: "Alchemist's Mask", cost: 35 },
@@ -94,7 +94,7 @@
       { name: "Spirit Lantern", cost: 30 },
       { name: "Catalytic Kiln", cost: 25 },
       { name: "Astromancer's Spyglass", cost: 20 },
-      { name: "Fan of the Magister", cost: 20, only: "Lord Magistrate" },
+      { name: "Fan of the Magister", cost: 20, only: "Lord Magistrate or Magistrate" },
       { name: "Fires of Nan-Gau", cost: 15, common: true },
       { name: "Golden Lion", cost: 15, common: true },
       { name: "Vermillion Quills", cost: 15, common: true },
@@ -221,466 +221,238 @@
   },
 
   glossary: {
-    /* auto-mapped from army-book PDF (unit UPGRADE / option rules) */
+    /* ---- army special rules (p.3) ---- */
+    "Celestial Forged Armour": `Models with this special rule gain a Magical Ward (6+).`,
+    "Harmony": `Most of Grand Cathay's units are divided into two categories, Yin and/or Yang as described in the army list. Unless specified, models armed with missile weapons count as Yin, and models armed with only close combat weapons count as Yang.
+
+A Yin unit counts as being in Harmony if it is within 3" of non-fleeing Yang units with a combined Unit Strength of 5 or more. A Yang unit counts as being in Harmony if it is within 3" of non-fleeing Yin units with a combined Unit Strength of 5 or more.
+
+Yin units in Harmony may re-roll 1's To Hit with missile weapons. Yang units in Harmony may re-roll 1's To Wound in close combat.`,
+    "Yin": `This unit counts as Yin for the Harmony special rule (see Harmony): Yin units in Harmony may re-roll 1's To Hit with missile weapons.`,
+    "Yang": `This unit counts as Yang for the Harmony special rule (see Harmony): Yang units in Harmony may re-roll 1's To Wound in close combat.`,
+    "Yin/Yang": `This unit counts as Yin or Yang for the Harmony special rule depending on its equipment: unless specified, models armed with missile weapons count as Yin, and models armed with only close combat weapons count as Yang.`,
+    "Mastery of the Elemental Winds": `Models with this special rule gain a +1 casting bonus if there is one or more other friendly non-fleeing models with this special rule within 12".`,
+    "Will of the Dragons": `A unit with this special rule may re-roll failed Panic tests caused by friendly units breaking from combat or getting destroyed within 6" of them, or when it is fled through by a friendly unit.`,
+    "Celestial Blade": `Range: Combat. Strength: As user. Special Rules: Parry (6+).
+
+A Celestial Blade gives the wielder +1 To Wound.`,
+    "Crane Gun": `Range: 18/36". Strength: 6. Special Rules: Move or Fire*, Ponderous.
+
+*Does not apply if mounted on a Chariot.`,
+    "Crane Guns": `Range: 18/36". Strength: 6. Special Rules: Move or Fire*, Ponderous.
+
+*Does not apply if mounted on a Chariot.`,
+    "Dragon Fire Pistol": `Range: 8/12". Strength: 5. Special Rules: Armour Piercing (1), Flaming Attacks, Quick Shot.`,
+    "Dragon Fire Pistols": `Range: 8/12". Strength: 5. Special Rules: Armour Piercing (1), Flaming Attacks, Quick Shot.`,
+    "Dragon Fire Bombs": `Range: 6/9". Strength: 5. Special Rules: Armour Piercing (1), Flaming Attacks (non-physical), March & Shoot, Quick Shot.
+
+Each Hit from a dragon fire bomb is multiplied into D3 Hits.`,
+    "Repeater Crossbow": `Range: 12/18". Strength: 2. Special Rules: Multiple Shots (3), Rapid Fire.`,
+    "Repeater Crossbows": `Range: 12/18". Strength: 2. Special Rules: Multiple Shots (3), Rapid Fire.`,
+    "Three-Eyed Gun": `Range: 9/18". Strength: 5. Special Rules: Multiple Shots (3), Ponderous, Rapid Fire.`,
+    "Three-eyed guns": `Range: 9/18". Strength: 5. Special Rules: Multiple Shots (3), Ponderous, Rapid Fire.`,
+
+    /* ---- character & mount rules ---- */
+    "Transformation of the Dragon": `A model with this special rule may transform into their Dragon Form at the start of any of your turns, as long as it has physical space to do so. If they are in a unit, they must immediately leave it and be placed within 1" of that unit, facing the same direction. If they are engaged in combat, they must remain in base contact with the enemy unit if possible.
+
+When transforming, they become a Monster (Draconid) with the Dragon Form profile above and gain the Breath Weapon (Strength 4, Flaming Attacks), Fly (7) and Natural Armour (3+) special rules. However, they cannot use any weapons or armour and counts as Level 1 Wizards. They may choose to transform back into their Human form at the start of any of your turns. Any Wounds suffered in Dragon Form are carried over into their Human form and vice versa (to a minimum of 1 Wounds) and are not restored upon transforming.`,
+    "Bastion's Defenders": `If a unit that is joined by a Gate Master/Gate Keeper gets charged in the flank or rear, they cannot be Disrupted, enemy units do not gain flank or rear bonuses against them, they do not lose Parry and can make supporting attacks in all directions.`,
+    "Harmony of Stone & Steel": `A Gate Master/Gate Keeper and any unit they join gain the Disciplined special rule.`,
+    "Tactician": `Unless the Magistrate is fleeing, one friendly Human unit with the Yin and/or Yang special rule within 12" may be given one of the following bonuses at the start of each of your turns by passing a Leadership test. Each bonus lasts until the start of your next turn. A unit can only benefit from one of these bonuses at a time.
+
+**Inspired Assault:** The unit gains the Devastating Charge special rule.
+
+**Inspired Defence:** Enemy units charging this unit to the front counts as making a disordered charge.
+
+**Inspired Marksmanship:** The unit ignores all negative shooting modifiers not caused by spells or magic items.`,
+    "Duellist": `A Blademaster must always attempt to issue and accept challenges. While fighting in a challenge, they may re-roll all failed rolls To Hit and To Wound.`,
+    "Impale": `Mounts with this special rule gain the Mighty Blow (1) special rule when they charge.`,
+
+    /* ---- unit rules & equipment ---- */
+    "Dragon Crossbow": `Range: 16/24". Strength: 3. Special Rules: Multiple Shots (2), Rapid Fire.`,
+    "Dragon crossbows": `Range: 16/24". Strength: 3. Special Rules: Multiple Shots (2), Rapid Fire.`,
+    "Fire Lance": `A Fire Lance may be used in the first round of combat as an additional Strength 4 Attack with the Armour Piercing (1) and Flaming Attacks special rules.`,
     "Fire lances": `A Fire Lance may be used in the first round of combat as an additional Strength 4 Attack with the Armour Piercing (1) and Flaming Attacks special rules.`,
-    "Granite Sentinel": `The Sentinel gains +1 armour and the Immunity (Multiple Wounds) special rule.`,
+    "Martial Arts Fighting Styles": `At the start of each round of combat in which a unit of Dragon Monk fights, they must choose one of the following Fighting Styles to perform. They may not use the same Fighting Style in two consecutive turns of the same combat engagement.
+
+**Black Tiger:** The Dragon Monks gain +1 Attack.
+
+**White Crane:** The Dragon Monks gain the Always Strikes First special rule.
+
+**Fanged Snake:** The Dragon Monks gain the Killing Blow special rule.
+
+**Great Dragon:** The Dragon Monks gain +1 Strength.
+
+**Praying Mantis:** The Dragon Monks gain the Dodge (5+) special rule.`,
+    "Tower Shield": `Tower Shields add +3 to the model's armour save against missile attacks to its front.`,
+    "Sky Rockets": `Range: 12/24". Strength: 3. Special Rules: Flaming Attacks, Multiple Shots (D6), Ponderous.`,
+    "Replace grenades with sky rockets": `Sky rockets have the following profile — Range: 12/24". Strength: 3. Special Rules: Flaming Attacks, Multiple Shots (D6), Ponderous.`,
+    "Flamethrower": `Flamethrowers are fire throwers with the following profile — Range: n/a. Strength: 3. Special Rules: Cumbersome, Flaming Attacks.`,
+    "Heavenly Beacon": `Friendly units within 12" of this model gain +1 Leadership when making Rally tests.`,
+    "Sky Bombs": `During the Remaining Moves sub-phase, models with this upgrade may drop a bomb unless they are fleeing or have declared a charge that turn. To make a bombing run, select one unengaged enemy unit that the Sky-junk moved over in that turn and place the large round template anywhere over the target unit; it scatters D3". If a natural 1 is rolled, use the Bomb Misfire chart below. Sky bombs have the following profile:
+
+Range: n/a. Strength: 4(6). Special Rules: Multiple Wounds (D3). Note that Multiple Wounds (D3) only applies to the model under the central hole.
+
+**Bomb Misfire Table (D6):**
+
+**1 — Premature Detonation:** The Sky Lantern suffers a Strength 6 hit with the Multiple Wounds (D3) special rule.
+
+**2-3 — Jammed Release:** Centre the 3" template over the Sky Lantern before scattering it and resolving damage as normal.
+
+**4-6 — Dud:** Only the model under the template's central hole is hit, suffering a single Strength 4 hit.`,
+    "Gut-plate": `A model with a gut-plate gains a 6+ armour save against attacks to the front.`,
+    "Ogre Charge": `Each model with this special rule that successfully charges an enemy has the Impact Hits (1) special rule. Models with this special rule that are part of a unit with ranks add their current Rank Bonus to the Strength of the Impact Hits they inflict. In addition, they count as having one more rank than their actual number for the purpose of determining Steadfast in any turn that they charge.`,
+    "Eyes of the Empress": `At the start of each of your turns, a unit of Onyx Crowmen with Line of Sight of any enemy unit within 12" may choose to force the opponent to reveal all magic items and Hidden units they might have.`,
+    "Bastion Rocket": `Instead of firing normally, a Fire Rain Rocket may fire a bastion rocket. Bastion rockets are rocket launchers that do not fire indirectly by default, and use the small template with the following profile — Range: 12-48". Strength: 4(8). Special Rules: Flaming Attacks, Multiple Wounds (D3).`,
+    "Ogre Loader": `An Ogre Loader has the Fear and Natural Armour (6+) special rule. In addition, it increases the Unit Strength of the war machine by 3 rather than 1 and gives it Line of Sight (2).`,
+    "Grand Cannon": `A grand cannon is a cannon with the following profile — Range: 12-72". Strength: 10. Special Rules: Flaming Attacks, Multiple Wounds (D6).
+
+Place the small round template with the centre where the cannon ball lands before the bounce. All models touched by the template that are not struck by the cannon ball suffer a Strength 3 Hit.`,
+    "Icon of the Great Cities": `All friendly units within 12" of one or more Zhangu War Drums gain +1 to their Leadership.`,
+    "War Drum": `At the start of each of your shooting phases, the Zhangu War Drum may choose one of the following:
+
+**Disdain of the Dragon Emperor:** All friendly units within 12" of one or more Zhangu War Drums gain the Fight in Extra Ranks (1) and Immunity (Psychology) special rules until the start of your next Shooting phase.
+
+**Bastion of the Great Cities:** All friendly units within 12" of one or more Zhangu War Drums gain +1 to their armour saves until the start of your next Shooting phase.`,
+    "Nexus of Elemental Winds": `Arcane Item. Relic. A Wu Xing War Compass can cast the following Bound Spells (Level 4, cast on 15+):
+
+**Celestial Comet:** Celestial Comet is a direct damage area spell with a range of 24" that uses the small round template. Any models under the template suffer a Strength 5 Hit. The model under the hole suffers Multiple Wounds (D6).
+
+**Celestial Lightning:** Celestial Lightning is a direct damage spell with a range of 24". It causes 2D6 Strength 5 hits that have the Lightning Attacks special rule.`,
+    "Rocket Salvo": `Range: 12/24". Strength: 5. Special Rules: Flaming Attacks, Multiple Shots (5), Rapid Fire.`,
+    "Moon Flare": `If a Great Moon Bird moves over an enemy unit in the Remaining Moves sub-phase, that unit suffers D6 Strength 3 hits (resolved as attacks against the rear). In addition, it suffers -2 to its Movement until the start of your next turn.`,
+    "Granite Sentinel": `The Sentinel gains the Immunity (Multiple Wounds) and Natural Armour (6+) special rules.`,
     "Jade Sentinel": `The Sentinel gains the Earthblood spell from the Lore of Life as a Bound Spell.`,
     "Obsidian Sentinel": `The Sentinel gains the Magic Resistance (2) special rule. In addition, enemy Wizards within 12" suffer a -1 casting penalty.`,
-    "Ogre Loader": `An Ogre Loader has the Fear and Natural Armour (6+) special rule. In addition, it increases the Unit Strength of the war machine by 3 rather than 1 and gives it Line of Sight (2).`,
+    "Warpstone Sentinel": `The Sentinel gains the Magical Attacks special rule, and models in base contact with one or more Warpstone Sentinels suffer -1 to their Toughness (to a minimum of 1).`,
+    "Jade Lion": `Jade Lions have the Yang special rule and generate one Power Dice to your power pool each Magic Phase. In addition, they know the Dragon's Breath spell from the Lore of Yang as a Bound Spell.`,
+    "Jet Lion": `Jet Lions have the Yin special rule and generate one Dispel Dice to your power pool each Magic Phase. In addition, they know the Missile Mirror spell from the Lore of Yin as a Bound Spell.`,
 
-    /* auto-mapped from army-book PDF (unit-profile special rules) */
-    "Beloved General": `All friendly models with the Yin or Yang special rule within 12" of Hua Gongzhu may re- roll failed Panic tests and Rally tests.`,
+    /* ---- special characters: rules ---- */
     "Disdain of the Dragons": `All enemy units in base contact with Miao Ying suffer -1 to their Weapon Skill.`,
     "Eye of the Storm": `While in Dragon Form, Miao Ying gains the Lightning Attacks special rule.`,
-    "Fiery Breath": `Cheng Long has a Strength 3 Breath Weapon with the Flaming Attacks special rule.`,
-    "Flaming Ammunition": `All shots from a Grand Cannon have the Flaming Attacks special rule.`,
-    "Grand General": `All friendly units with the Yin or Yang special rules within 12" of Liu Yun have the Disciplined special rule.`,
-    "Grand Strategist": `Zhuge Yi's Tactician special rule has a range of 18". In addition, he may use all three bonuses in each of your turns.`,
-    "Grandmaster": `A unit of Celestial Dragon Monks joined by Cheng Long becomes Stubborn as long as he remains with it. However, he must always accept challenges when possible, and may not be the Army General.`,
+    "Supreme Matriarch of Nan-Gau": `Miao Ying must always be the Army General.`,
+    "Wrath of the Storm": `Spell known by Miao Ying. Level 2, cast on 7+. Wrath of the Storm is an augment spell with a range of 24". The target unit gains the Immunity (Psychology) and Magical Attacks special rules until the start of your next Magic phase.`,
+    "The Storm Dragon's Fury": `Spell known by Miao Ying. Level 3, cast on 10+. The Storm Dragon's Fury is a magic missile with a range of 24" that causes 2D3 Strength 5 Hits with the Lightning Attacks special rule.`,
     "Hardened Scale": `While in Dragon Form, Zhao Ming may re-roll failed armour saves.`,
     "Lord of Shang-Yang": `Zhao Ming must always be the Army General.`,
-    "Lord of the Jade Court": `Yuan Bo must always be the Army General.`,
-    "Master of the Heavens": `Tian Shi may re-roll one Power dice on each casting attempt.`,
-    "Master of the Stone Legions": `Saytang and any friendly Animated Constructs within 12" gain a Magical Ward (6+) and suffer 1 Wound less from Unstable than normal.`,
-    "Sky Bombs": `During the Remaining Moves sub-phase, models with this upgrade may drop a bomb unless they are fleeing or have declared a charge that turn. To make a bombing run, select one unengaged enemy unit that the Sky-junk moved over in that turn and place the large round template anywhere over the target unit; it scatters D3". If a natural 1 is rolled, use the Bomb Misfire chart below. Sky bombs have the following profile:`,
-    "Supreme Martial Arts Fighting Styles": `At the start of each round of combat in which Cheng Long fights, he must choose one of the following Fighting Styles to perform. He may not use the same Fighting Style in two consecutive turns of the same combat engagement.`,
-    "Supreme Matriarch of Nan-Gau": `Miao Ying must always be the Army General.`,
-    "The Emperor's Executioner": `While fighting in a challenge, Yuan Bo gains the Heroic Killing Blow special rule.`,
-    "Thunderous Impact": `Place the small round template with the centre where the cannon ball lands before the bounce. All models touched by the template that are not struck by the cannon ball suffer a Strength 3 Hit.`,
-    "Tower Shield": `Tower Shields add +3 to the model's armour save against missile attacks to its front.`,
-    "Trickster": `The Monkey King may never be the Army General, and he may only join units of Monkey Warriors. In addition, enemies within charge distance of him counts as being subject to the Berserk Rage part of the Frenzy special rule, unless they have the Immunity (Psychology) special rule (not including Frenzied models).`,
-    "War Drum": `At the start of each of your shooting phases, the Zhangu War Drum may choose one of the following:`,
     "Warding Iron": `Zhao Ming and any unit joined by him gains a Magical Ward (6+).`,
+    "Master of Alchemy": `Spell known by Zhao Ming. Level 1, cast on 6+. Master of Alchemy is an augment spell with a range of 24". The target unit gains the Armour Piercing (1) and Magical Attacks special rules until the start of your next Magic phase.`,
+    "The Emperor's Executioner": `While fighting in a challenge, Yuan Bo gains the Heroic Killing Blow special rule.`,
+    "Lord of the Jade Court": `Yuan Bo must always be the Army General.`,
+    "Grand General": `All friendly units with the Yin or Yang special rules within 12" of Liu Yun have the Disciplined special rule.`,
+    "Beloved General": `All friendly models with the Yin or Yang special rule within 12" of Hua Gongzhu may re-roll failed Panic tests and Rally tests.`,
+    "Fuelled by Vengeance": `Each time Taoyan the Merciless suffers an unsaved Wound, she gains the Hatred special rule for the remainder of the game.`,
+    "Ultimate Verdict": `Whenever Taoyan the Merciless is fighting in a challenge, she gains the Killing Blow special rule.`,
+    "Captain of the Celestial Dragon Guard": `Guan Fei must be accompanied by a unit of Celestial Dragon Guard or Celestial Dragon Lancers, and he may not leave this unit. He and his unit have the Cold-blooded special rule.`,
+    "Master of the Heavens": `Tian Shi may re-roll one Power dice on each casting attempt.`,
+    "Grand Strategist": `Zhuge Yi's Tactician special rule has a range of 18". In addition, he may use all three bonuses in each of your turns.`,
+    "Supreme Martial Arts Fighting Styles": `At the start of each round of close combat in which Cheng Long fights, he must choose one of the following Fighting Styles to perform. He may not use the same Fighting Style in two consecutive turns of the same combat engagement.
 
-    "Warpstone Sentinel": `The Sentinel gains the Magical Attacks special rule, and models in base contact with one or more Warpstone Sentinels suffer -1 Toughness (to a minimum of 1).`,
-    "Celestial Forged Armour": `Models with this special rule gain a Magical Ward (6+).`,
-    "Harmony": `Most Grand Cathay units are Yin and/or Yang. Models with missile weapons count as Yin; models with only close combat weapons count as Yang. When a Yin unit is within 3" of non-fleeing Yang units with combined Unit Strength 5+, they may re-roll 1's To Hit with missile weapons. When a Yang unit is within 3" of non-fleeing Yin units with combined Unit Strength 5+, the Yang unit may re-roll 1's To Wound in close combat.`,
-    "Mastery of the Elemental Winds": `Models with this special rule gain a +1 casting bonus if there is one or more friendly non-fleeing models with this special rule within 12".`,
-    "Will of the Dragons": `A unit with this special rule may re-roll failed Panic tests caused by friendly units breaking from combat or getting destroyed within 6", or when fled through by a friendly unit.`,
-    "Yin": `This unit counts as Yin for the Harmony special rule. Unless armed with only close combat weapons.`,
-    "Yang": `This unit counts as Yang for the Harmony special rule. Unless armed with missile weapons.`,
-    "Yin/Yang": `This unit counts as both Yin and Yang for the Harmony special rule, depending on its equipment.`,
-    "Transformation of the Dragon": `At the start of any of your turns, the model may transform into Dragon Form (if space allows). If in a unit, leaves it immediately and is placed within 1" of that unit. In Dragon Form: Monster (Draconid), gains Breath Weapon (Strength 4, Flaming Attacks), Fly (7) and Natural Armour (3+). Cannot use weapons or armour and counts as Level 1 Wizard. May revert to Human Form at the start of any of your turns.`,
-    "Impale": `Mounts with this special rule gain the Mighty Blow (1) special rule when they charge.`,
-    "Weapon Team": `A two-model crew that acts as a single weapon; Unit Strength 2.`,
-    "Animated Construct": `Standard rules for Animated Constructs (Immunity to Psychology, Unstable etc. as defined in rulebook).`,
-    "Ogre Charge": `Each model with this special rule that successfully charges an enemy has Impact Hits (1). Models in a unit with ranks add their current Rank Bonus to the Strength of the Impact Hits. They count as having one more rank than their actual number for Steadfast purposes in any turn they charge.`,
-    "Bastion's Defenders": `If a unit joined by a Gate Master gets charged in the flank or rear, they cannot be Disrupted, enemy units do not gain flank or rear bonuses, they do not lose Parry and can make supporting attacks in all directions.`,
-    "Harmony of Stone & Steel": `A Gate Master and any unit they join gain the Disciplined special rule.`,
-    "Tactician": `Unless fleeing, one friendly Human unit with Yin and/or Yang within 12" may be given one of the following bonuses each turn by passing a Leadership test: Inspired Assault (Devastating Charge), Inspired Defence (enemy charging to front lose charge bonuses), Inspired Marksmanship (ignore all negative shooting modifiers not caused by spells or magic items).`,
-    "Duellist": `A Blademaster must always attempt to issue and accept challenges. While fighting in a challenge, they may re-roll all failed rolls To Hit and To Wound.`,
-    "Martial Arts Fighting Styles": `At the start of each combat round, choose one style (not same as previous turn): Black Tiger (+1 Attack), White Crane (Always Strikes First), Fanged Snake (Killing Blow), Great Dragon (+1 Strength), Praying Mantis (Dodge 5+).`,
-    "Celestial Blade": `Combat weapon: As user Strength, Parry (6+), +1 To Wound.`,
-    "Crane Gun": `Range 18/36", Strength 6, Move or Fire*, Ponderous. *Does not apply if mounted on a Chariot.`,
-    "Great Cannon": `A great cannon uses the Cannon profile: Range 12-60", Strength 10, Special Rules: Cumbersome, Multiple Wounds (D6/D3). The Grand Cannon's shots have Flaming Attacks (Flaming Ammunition) and place the small round template on the landing point for Thunderous Impact (Strength 3 hit to nearby models).`,
-    "Bastion Rocket": `Instead of firing normally, a Fire Rain Rocket may fire a bastion rocket. Bastion rockets are rocket launchers that do not fire indirectly by default and use the small round template, with the following profile: Range 12-48", Strength 4(8), Special Rules: Flaming Attacks, Multiple Wounds (D3).`,
-    "Rocket Salvo": `Rocket salvo uses the following profile: Range 24", Strength 5, Special Rules: Flaming Attacks, Multiple Shots (5), Rapid Fire.`,
-    "Wind Bow": `Magic Weapon. A bolt thrower with the following profile: Range 32/48", Strength 6, Special Rules: Ignores Armour Saves, Multiple Wounds (D3).`,
-    "Dragon Fire Pistols": `Range 8/12", Strength 5, Armour Piercing (1), Flaming Attacks, Quick Shot.`,
-    "Dragon Fire Bombs": `Range 6/9", Strength 5, Armour Piercing (1), Flaming Attacks (non-physical), March & Shoot, Quick Shot. Each Hit is multiplied into D3 Hits.`,
-    "Repeater Crossbow": `Range 12/18", Strength 2, Multiple Shots (3), Rapid Fire.`,
-    "Three-Eyed Gun": `Range 9/18", Strength 5, Multiple Shots (3), Ponderous, Rapid Fire.`,
-    "Icon of the Great Cities": `All friendly units within 12" of one or more Zhangu War Drums gain +1 Leadership.`,
-    "Nexus of Elemental Winds": `Arcane Item. The Wu Xing War Compass can cast two Bound Spells (Level 4, cast on 15+): Celestial Comet (direct damage area, 24", small template, Strength 5, Multiple Wounds D6 under hole) and Celestial Lightning (direct damage, 24", 2D6 Strength 5 hits with Lightning Attacks).`,
-    "Heavenly Beacon": `Friendly units within 12" of this model gain +1 Leadership when making Rally tests.`,
-    "Moon Flare": `If a Great Moon Bird moves over an enemy unit in the Remaining Moves sub-phase, that unit suffers D6 Strength 3 hits and -2 to its Movement until the start of your next turn.`,
-    "Eyes of the Empress": `A unit of Onyx Crowmen with Line of Sight to any enemy unit within 12" may force the opponent to reveal all magic items and Hidden units they might have.`
+**Black Tiger:** Cheng Long gains +D3 Attacks.
+
+**White Crane:** Cheng Long gains the Always Strikes First special rule and +1 To Hit in close combat.
+
+**Fanged Snake:** Cheng Long gains the Heroic Killing Blow special rule.
+
+**Great Dragon:** Cheng Long gains +2 Strength.
+
+**Praying Mantis:** Cheng Long gains the Dodge (3+) special rule.`,
+    "Fiery Breath": `Cheng Long has a Strength 3 Breath Weapon with the Flaming Attacks special rule.`,
+    "Grandmaster": `A unit of Celestial Dragon Monks joined by Cheng Long becomes Stubborn as long as he remains with it. However, he must always accept challenges when possible, and may not be the Army General.`,
+    "Master of the Stone Legions": `Saytang and any friendly Animated Constructs within 12" gain a Magical Ward (6+) and suffer 1 Wound less from Unstable than normal.`,
+    "Trickster": `The Monkey King may never be the Army General, and he may only join units of Monkey Warriors. In addition, enemies within charge distance of him counts as being subject to the Berserk Rage part of the Frenzy special rule, unless they have the Immunity (Psychology) special rule (not including Frenzied models).`,
+
+    /* ---- special characters: their fixed magic items (clickable on the Equipment line) ---- */
+    "Storm Wind Coronal": `Magic Armour. The Storm Wind Coronal gives the wearer a 6+ armour save, +1 Power dice each Magic phase and a Magical Ward (5+).`,
+    "Vambraces of Yin": `Talisman. All enemy attacks against the bearer suffer -1 to their Strength.`,
+    "Horns of Shang-Yang": `Magic Armour. The Horns of Shang-Yang give the wearer a 6+ armour save and the Magic Resistance (2) special rule.`,
+    "The Burning Vambraces": `Talisman. The Burning Vambraces gives the wearer +1 Toughness.`,
+    "The Dragon's Fang": `Magic Weapon. The Dragon's Fang gives the wielder +1 Strength and the Armour Piercing (2) special rule.`,
+    "Armour of the Dragon's Gaze": `Magic Armour. Light armour. The Armour of the Dragon's Gaze gives the wearer a Magical Ward (6+). In addition, all friendly units within 6" gain the Immunity (Psychology) special rule.`,
+    "Fierce Dragon": `Magic Weapon. Light lance/spear. Fierce Dragon adds +1 Strength to the wielder's Attacks. Instead of attacking normally, they may make a special attack; if this attack hits, resolve it in the same manner as a hit from a Bolt Thrower.`,
+    "Dragon Scale Armour": `Magic Armour. Heavy armour. The Dragon Scale Armour gives the wearer +1 Toughness, and any successful To Wound rolls against them must be re-rolled.`,
+    "Blade of the Two Moons": `Magic Weapon. Celestial blade. This weapon gives Hua Gongzhu the Parry (6+) special rule. For each successful Parry she makes, she may make a single attack back against the model that struck the blow.`,
+    "Amulet of the Emperor's Favour": `Enchanted Item. This Amulet causes the bearer and any unit they join to count their Unit Strength as double its actual value for all purposes.`,
+    "Tyrant's Talon": `Magic Weapon. Polearm. This weapon gives the wielder the Armour Piercing (1) and Multiple Wounds (D6) special rule.`,
+    "Green Dragon Glaive": `Magic Weapon. Polearm. Each successful Hit in close combat is multiplied into D3 Hits, and all attacks have the Armour Piercing (1) special rule. In addition, he gains the Parry (5+) special rule.`,
+    "Staff of Overwhelming Thunder": `Arcane Item. Staff. The bearer of the Staff of Overwhelming Thunder may re-roll the number of Hits caused by Urannon's Thunderbolt and Chain Lightning.`,
+    "Celestial Robe": `Arcane Item. Relic. The Celestial Robe generates D3 Power Dice in the Magic Phase. Once per battle, the bearer may elect to cast a single spell automatically without any Power dice at its lowest power level. After this ability is used however, the Robe has no further effect and will not generate any additional Power dice for the remainder of the battle.`,
+    "Lotus Needle": `Magic Weapon. Range: 16/24". Strength: 3. Special Rules: Multiple Shots (3), Poisoned Attacks, Rapid Fire.`,
+    "Phoenix Feather Fan": `Talisman. At the beginning of the Close Combat phase, select one enemy model in base contact with Zhuge Yi. This model loses 1 Attack and is subject to the Always Strikes Last special rule for the duration of the turn.`,
+    "Guqin of Everlasting Repose": `Enchanted Item. The Guqin may be played at the start of any of your turns. When it is played, one unengaged enemy unit within 12" must pass a Psychology test or be unable to voluntarily move, cast spells or shoot until the start of your next turn.`,
+    "Wind Bow": `Magic Weapon. Bolt thrower. Range: 32/48". Strength: 6. Special Rules: Cumbersome, Ignores Armour Saves, Multiple Wounds (D3).`,
+    "Ideal Golden-bound Cudgel": `Magic Weapon. The Ideal Golden-Bound Cudgel gives the Monkey King +2 Strength. In addition, models attacking him in close combat suffer -1 To Hit.`
   },
 
   unitInfo: {
-    mount_jadelongma:{profile:[["Jade Longma",8,4,0,4,4,2,4,2,7]],eq:"—",rules:"Fear, Fly (9), Natural Armour (6+)."},
-    mount_greatspiritlongma:{profile:[["Great Spirit Longma",8,5,0,4,4,3,5,3,7]],eq:"—",rules:"Fear, Fly (9), Impale, Natural Armour (5+)."},
-    celestialcommanders: {
-      profile: [
-        ["Celestial General", 4, 6, 5, 4, 4, 3, 6, 4, 9],
-        ["Celestial Captain", 4, 5, 5, 4, 4, 2, 5, 3, 8]
-      ],
-      eq: "Hand weapon",
-      rules:"Celestial Forged Armour, Will of the Dragons, Yin/Yang"
-    },
-    shugengan: {
-      profile: [
-        ["Dragon-Blooded Shugengan", 4, 5, 4, 4, 4, 3, 5, 3, 9]
-      ],
-      eq: "Hand weapon",
-      rules:"Celestial Forged Armour, Mastery of the Elemental Winds, Will of the Dragons, Yin/Yang. Wizard Level 3 (Yin alignment: Beasts/Death/Metal/Shadow + Yin; Yang alignment: Fire/Heavens/Light/Life + Yang)."
-    },
-    dragondescendant: {
-      profile: [
-        ["Human Form", 4, 7, 4, 5, 5, 3, 7, 5, 10],
-        ["Dragon Form", 6, 7, 0, 6, 6, 6, 3, 5, 10]
-      ],
-      eq: "Hand weapon, light armour",
-      rules:"Celestial Forged Armour, Mastery of the Elemental Winds, Transformation of the Dragon, Will of the Dragons, Yin/Yang. Wizard Level 3."
-    },
-    alchemists: {
-      profile: [
-        ["Grand Alchemist", 4, 4, 3, 3, 3, 3, 4, 2, 8],
-        ["Alchemist", 4, 3, 3, 3, 3, 2, 3, 1, 7]
-      ],
-      eq: "Hand weapon",
-      rules:"Mastery of the Elemental Winds, Will of the Dragons, Yin. Grand Alchemist: Wizard L3, Lore of Metal. Alchemist: Wizard L1, Lore of Metal."
-    },
-    astromancers: {
-      profile: [
-        ["Supreme Astromancer", 4, 4, 3, 3, 3, 3, 4, 2, 8],
-        ["Astromancer", 4, 3, 3, 3, 3, 2, 3, 1, 7]
-      ],
-      eq: "Hand weapon",
-      rules:"Mastery of the Elemental Winds, Will of the Dragons, Yang. Supreme Astromancer: Wizard L3, Lore of Heavens. Astromancer: Wizard L1, Lore of Heavens."
-    },
-    gatemasters: {
-      profile: [
-        ["Gate Master", 4, 5, 5, 4, 4, 3, 5, 3, 9],
-        ["Gate Keeper", 4, 4, 4, 4, 4, 2, 4, 2, 8]
-      ],
-      eq: "Hand weapon",
-      rules:"Will of the Dragons, Yin/Yang; Bastion's Defenders; Harmony of Stone & Steel"
-    },
-    magistrates: {
-      profile: [
-        ["Lord Magistrate", 4, 4, 4, 4, 4, 3, 4, 2, 9],
-        ["Magistrate", 4, 3, 3, 3, 3, 2, 3, 1, 8]
-      ],
-      eq: "Hand weapon",
-      rules:"Inspiring Presence (6), Will of the Dragons, Yin/Yang; Tactician"
-    },
-    blademaster: {
-      profile: [
-        ["Blademaster", 4, 6, 5, 4, 4, 2, 6, 3, 8]
-      ],
-      eq: "Hand weapon",
-      rules:"Dodge (5+), Killing Blow, Will of the Dragons, Yang; Duellist. May never be the Army General."
-    },
-    peasantmilitia: {
-      profile: [
-        ["Peasant Militiaman", 4, 2, 3, 3, 3, 1, 3, 1, 6]
-      ],
-      eq: "Hand weapon",
-      rules:"Expendable, Will of the Dragons, Yang"
-    },
-    peasantbowmen: {
-      profile: [
-        ["Peasant Bowmen", 4, 2, 3, 3, 3, 1, 3, 1, 6]
-      ],
-      eq: "Hand weapon, shortbow",
-      rules:"Expendable, Will of the Dragons, Yin"
-    },
-    peasanthorsemen: {
-      profile: [
-        ["Peasant Horseman", 4, 2, 3, 3, 3, 1, 3, 1, 6],
-        ["Warhorse", 8, 3, 0, 3, 3, 1, 3, 1, 5]
-      ],
-      eq: "Hand weapon",
-      rules:"Expendable, Fast Cavalry, Will of the Dragons, Yin/Yang"
-    },
-    jadewarriors: {
-      profile: [
-        ["Jade Warrior", 4, 3, 3, 3, 3, 1, 3, 1, 7]
-      ],
-      eq: "Hand weapon, light armour",
-      rules:"Will of the Dragons, Yang"
-    },
-    jadebowmen: {
-      profile: [
-        ["Jade Bowman", 4, 3, 3, 3, 3, 1, 3, 1, 7]
-      ],
-      eq: "Hand weapon, shortbow, light armour",
-      rules:"Will of the Dragons, Yin"
-    },
-    jadehorsemen: {
-      profile: [
-        ["Jade Horseman", 4, 3, 3, 3, 3, 1, 3, 1, 7],
-        ["Warhorse", 8, 3, 0, 3, 3, 1, 3, 1, 5]
-      ],
-      eq: "Hand weapon, light armour",
-      rules:"Fast Cavalry, Will of the Dragons, Yin/Yang"
-    },
-    ironhailgunners: {
-      profile: [
-        ["Iron Hail Gunner", 4, 3, 3, 3, 3, 1, 3, 1, 7]
-      ],
-      eq: "Hand weapon, blunderbuss, light armour",
-      rules:"Will of the Dragons, Yin"
-    },
-    hilltribesmen: {
-      profile: [
-        ["Hill Tribesman", 4, 3, 3, 3, 3, 1, 3, 1, 6]
-      ],
-      eq: "Hand weapon",
-      rules:"Expendable, Independent"
-    },
-    monkeywarriors: {
-      profile: [
-        ["Monkey Warrior", 5, 3, 3, 3, 3, 1, 4, 1, 6]
-      ],
-      eq: "Hand weapon",
-      rules:"Dodge (6+), Expendable, Forest Strider, Independent, Obstacle Strider, Skirmishers"
-    },
-    celestialdragonguard: {
-      profile: [
-        ["Celestial Dragon Guard", 4, 4, 4, 3, 3, 1, 4, 1, 8]
-      ],
-      eq: "Polearm, medium armour; Dragon Crossbow (16/24\", Strength 3, Multiple Shots (2), Rapid Fire)",
-      rules:"Stubborn, Will of the Dragons, Yin/Yang"
-    },
-    celestialdragonlancers: {
-      profile: [
-        ["Celestial Dragon Lancer", 4, 4, 4, 3, 3, 1, 4, 1, 8],
-        ["Warhorse", 8, 3, 0, 3, 3, 1, 3, 1, 5]
-      ],
-      eq: "Light lance, medium armour, shield, barding; Fire Lance (first round: additional Str 4 Attack, Armour Piercing (1), Flaming Attacks)",
-      rules:"Stubborn, Will of the Dragons, Yang"
-    },
-    celestialdragonmonks: {
-      profile: [
-        ["Celestial Dragon Monk", 5, 5, 5, 4, 4, 1, 5, 2, 8]
-      ],
-      eq: "Hand weapon",
-      rules:"Dodge (6+), Immunity (Psychology), Skirmishers, Strider, Yang; Martial Arts Fighting Styles"
-    },
-    cranegunners: {
-      profile: [
-        ["Crane Gunner", 4, 3, 4, 3, 3, 2, 3, 2, 7]
-      ],
-      eq: "Hand weapon, crane gun, light armour, tower shield",
-      rules:"Will of the Dragons, Yin; Tower Shield (+3 armour save vs missile to front); Unit Strength 2"
-    },
-    grenadiers: {
-      profile: [
-        ["Grenadier", 4, 3, 3, 3, 3, 1, 3, 1, 7]
-      ],
-      eq: "Hand weapon, grenades (dragon fire bombs), light armour",
-      rules:"Skirmishers, Will of the Dragons, Yin; Sky Rockets option (12/24\", Str 3, Flaming Attacks, Multiple Shots D6, Ponderous)"
-    },
-    flamethrower: {
-      profile: [
-        ["Flamethrower", 4, 3, 3, 3, 3, 1, 3, 2, 7]
-      ],
-      eq: "Hand weapon, flamethrower (fire thrower: n/a, Str 3, Cumbersome, Flaming Attacks), medium armour",
-      rules:"Weapon Team, Will of the Dragons, Yin. 1–2 Flamethrowers = single Special choice."
-    },
-    warchariot: {
-      profile: [
-        ["War Chariot", 7, "-", "-", 5, 4, 4, "-", "-", "-"],
-        ["Crew", "-", 3, 3, 3, "-", "-", 3, 1, 7],
-        ["Warhorse", "-", 3, 0, 3, "-", "-", 3, 1, 5]
-      ],
-      eq: "Light lance, bow, light armour (crew of 2); drawn by 2 Warhorses",
-      rules:"Will of the Dragons, Yin & Yang"
-    },
-    skylantern: {
-      profile: [
-        ["Sky Lantern", "-", "-", "-", 5, 5, 5, "-", "-", "-"],
-        ["Crew", 4, 3, 4, 3, 3, 1, 3, 1, 7]
-      ],
-      eq: "Hand weapon, crane gun, light armour (crew of 5)",
-      rules:"Fly (6), Will of the Dragons, Yin; Heavenly Beacon; Sky Bombs option. Line of Sight 10."
-    },
-    mercenaryogres: {
-      profile: [
-        ["Ogre", 6, 3, 3, 4, 4, 3, 2, 3, 7]
-      ],
-      eq: "Hand weapons, light armour",
-      rules:"Independent, Natural Armour (6+), Ogre Charge"
-    },
-    templedogs: {
-      profile: [
-        ["Temple Dog", 7, 4, 0, 4, 5, 2, 3, 2, 7]
-      ],
-      eq: "—",
-      rules:"Animated Construct, Fear, Impact Hits (1), Unstable"
-    },
-    terracottawarriors: {
-      profile: [
-        ["Terracotta Warrior", 4, 2, 2, 3, 3, 1, 2, 1, 3]
-      ],
-      eq: "Hand weapon",
-      rules:"Animated Construct, Unstable"
-    },
-    onyxcrowmen: {
-      profile: [
-        ["Onyx Crowman", 4, 4, 0, 3, 3, 1, 4, 2, 7]
-      ],
-      eq: "Hand weapon",
-      rules:"Expendable, Fear, Fly (10), Magical Attacks, Scouts, Yin, Unstable; Eyes of the Empress"
-    },
-    stormhurlercrossbow: {
-      profile: [
-        ["Stormhurler Crossbow", "-", "-", "-", "-", 7, "-", "-", "-", "-"],
-        ["Crew", 4, 3, 3, 3, 3, 1, 3, 1, 7]
-      ],
-      eq: "Hand weapon, repeater bolt thrower (crew of 3)",
-      rules:"Will of the Dragons, Yin"
-    },
-    dragoncannon: {
-      profile: [
-        ["Dragon Cannon", "-", "-", "-", "-", 7, "-", "-", "-", "-"],
-        ["Crew", 4, 3, 3, 3, 3, 1, 3, 1, 7]
-      ],
-      eq: "Hand weapon, cannon (crew of 3)",
-      rules:"Will of the Dragons, Yin"
-    },
-    firerainrocket: {
-      profile: [
-        ["Fire Rain Rocket", "-", "-", "-", "-", 7, "-", "-", "-", "-"],
-        ["Crew", 4, 3, 3, 3, 3, 1, 3, 1, 7],
-        ["Ogre Loader", 6, 3, 3, 4, 4, 3, 2, 3, 7]
-      ],
-      eq: "Hand weapon, rocket launcher, bastion rocket (crew of 3); Ogre Loader optional",
-      rules:"Will of the Dragons, Yin; Bastion Rocket (12-48\", Str 4(8), Flaming Attacks, Multiple Wounds D3)"
-    },
-    longmariders: {
-      profile: [
-        ["Longma Rider", 4, 5, 4, 4, 3, 1, 5, 2, 8],
-        ["Longma", 8, 3, 0, 4, 4, 2, 4, 2, 6]
-      ],
-      eq: "Light lance, medium armour, shield",
-      rules:"Celestial Forged Armour, Fear, Fly (9), Impale, Natural Armour (6+), Stubborn, Will of the Dragons, Yang"
-    },
-    grandcannon: {
-      profile: [
-        ["Grand Cannon", "-", "-", "-", "-", 7, "-", "-", "-", "-"],
-        ["Crew", 4, 3, 3, 3, 3, 1, 3, 1, 7],
-        ["Ogre Loader", 6, 3, 3, 4, 4, 3, 2, 3, 7]
-      ],
-      eq: "Hand weapon, great cannon (crew of 3); Ogre Loader optional",
-      rules:"Will of the Dragons, Yin; Flaming Ammunition; Thunderous Impact"
-    },
-    zhanguwardrum: {
-      profile: [
-        ["Zhangu War Drum", 7, "-", "-", 4, 5, 4, "-", "-", "-"],
-        ["Crew", "-", 3, 3, 3, "-", "-", 3, 1, 7],
-        ["Warhorse", "-", 3, 0, 3, "-", "-", 3, 1, 5]
-      ],
-      eq: "Hand weapon, light armour (crew of 2); drawn by 2 Warhorses",
-      rules:"Will of the Dragons, Yang; Icon of the Great Cities; War Drum (Disdain of the Dragon Emperor or Bastion of the Great Cities)"
-    },
-    wuxingwarcompass: {
-      profile: [
-        ["Wu Xing War Compass", 7, "-", "-", 4, 5, 5, "-", "-", "-"],
-        ["Apprentice Astromancer", "-", 3, 3, 3, "-", "-", 3, 1, 7],
-        ["Warhorse", "-", 3, 0, 3, "-", "-", 3, 1, "-"]
-      ],
-      eq: "Hand weapon (crew of 1 Apprentice Astromancer); drawn by 4 Warhorses",
-      rules:"Will of the Dragons, Yang; Nexus of Elemental Winds (Bound Spells: Celestial Comet and Celestial Lightning, Level 4)"
-    },
-    skyjunk: {
-      profile: [
-        ["Sky-junk", "-", "-", "-", 5, 5, 7, "-", "-", "-"],
-        ["Crew", 4, 3, 4, 3, 3, 1, 3, 1, 7]
-      ],
-      eq: "Hand weapon, crane gun, rocket salvo, light armour (crew of 5)",
-      rules:"Fly (6), Heavenly Beacon, Sky Bombs, Will of the Dragons, Yin. Line of Sight 10."
-    },
-    celestiallion: {
-      profile: [
-        ["Celestial Lion", 6, 5, 0, 5, 5, 4, 5, 4, 7]
-      ],
-      eq: "—",
-      rules:"Fly (8), Mighty Blow (1), Natural Armour (6+), Yang"
-    },
-    greatmoonbird: {
-      profile: [
-        ["Great Moon Bird", 2, 4, 0, 5, 5, 4, 5, 4, 7]
-      ],
-      eq: "—",
-      rules:"Fly (9), Yin; Moon Flare"
-    },
-    terracottasentinel: {
-      profile: [
-        ["Terracotta Sentinel", 6, 4, 0, 6, 7, 6, 1, 5, 10]
-      ],
-      eq: "Polearm, heavy armour",
-      rules:"Animated Construct, Regeneration (6+), Unstable, Yang; upgrade options: Jade, Obsidian, Warpstone or Granite Sentinel"
-    },
-    guardianlion: {
-      profile: [
-        ["Guardian Lion", 7, 4, 0, 6, 7, 6, 1, 5, 10]
-      ],
-      eq: "—",
-      rules:"Animated Construct, Impact Hits (D6), Unstable; must be Jade Lion (Yang, generates Power Dice, Dragon's Breath Bound Spell) or Jet Lion (Yin, generates Dispel Dice, Missile Mirror Bound Spell)"
-    },
-    miaoying: {
-      profile: [
-        ["Human Form", 4, 7, 4, 5, 5, 3, 7, 5, 10],
-        ["Dragon Form", 6, 7, 0, 6, 6, 6, 3, 5, 10]
-      ],
-      eq: "Hand weapon, light armour. Fixed items: Storm Wind Coronal, Vambraces of Yin",
-      rules:"Celestial Forged Armour, Hatred (Daemons/Warriors of Chaos), Mastery of the Elemental Winds, Stubborn, Transformation of the Dragon, Will of the Dragons, Yin; Disdain of the Dragons; Eye of the Storm; Supreme Matriarch of Nan-Gau (must be Army General). Wizard L4 — Lore of Life + Yin."
-    },
-    zhaoming: {
-      profile: [
-        ["Human Form", 4, 7, 4, 5, 5, 3, 7, 5, 10],
-        ["Dragon Form", 6, 7, 0, 6, 6, 6, 3, 5, 10]
-      ],
-      eq: "Hand weapon, light armour. Fixed items: Horns of Shang-Yang, The Burning Vambraces",
-      rules:"Celestial Forged Armour, Mastery of the Elemental Winds, Transformation of the Dragon, Will of the Dragons, Yang; Hardened Scale; Lord of Shang-Yang (must be Army General); Warding Iron. Wizard L4 — Lore of Metal + Yang."
-    },
-    yuanbo: {
-      profile: [
-        ["Human Form", 4, 7, 4, 5, 5, 3, 7, 5, 10],
-        ["Dragon Form", 6, 7, 0, 6, 6, 6, 3, 5, 10]
-      ],
-      eq: "Fixed items: The Dragon's Fang, Armour of the Dragon's Gaze",
-      rules:"Celestial Forged Armour, Mastery of the Elemental Winds, Transformation of the Dragon, Will of the Dragons, Yin & Yang; The Emperor's Executioner (Heroic Killing Blow in challenges); Lord of the Jade Court (must be Army General). Wizard L4 — Lore of Heavens + Lore of Light + Yin/Yang."
-    },
-    liuyun: {
-      profile: [
-        ["Liu Yun", 4, 7, 5, 4, 4, 3, 6, 4, 9]
-      ],
-      eq: "Fixed items: Fierce Dragon, Dragon Scale Armour",
-      rules:"Celestial Forged Armour, Will of the Dragons, Yang; Grand General (friendly Yin/Yang units within 12\" gain Disciplined)."
-    },
-    huagongzhu: {
-      profile: [
-        ["Hua Gongzhu", 4, 6, 5, 4, 4, 3, 6, 4, 9]
-      ],
-      eq: "Medium armour. Fixed items: Blade of the Two Moons, Amulet of the Emperor's Favour",
-      rules:"Celestial Forged Armour, Will of the Dragons, Yang; Beloved General (friendly Yin/Yang within 12\" may re-roll Panic and Rally tests)."
-    },
-    guanfei: {
-      profile: [
-        ["Guan Fei", 4, 6, 5, 4, 4, 2, 5, 3, 8]
-      ],
-      eq: "Medium armour. Fixed item: Green Dragon Glaive",
-      rules:"Celestial Forged Armour, Stubborn, Will of the Dragons, Yang; Captain of the Celestial Dragon Guard (must accompany CDG or CDL unit, cannot leave; unit has Cold-blooded on Break tests)."
-    },
-    tianshi: {
-      profile: [
-        ["Tian Shi", 4, 4, 3, 3, 3, 3, 4, 2, 8]
-      ],
-      eq: "Hand weapon. Fixed items: Staff of Overwhelming Thunder, Celestial Robe",
-      rules:"Loremaster (Lore of Heavens), Mastery of the Elemental Winds, Will of the Dragons, Yang; Master of the Heavens (re-roll one Power dice per casting attempt). Wizard L4."
-    },
-    zhugeyi: {
-      profile: [
-        ["Zhuge Yi", 4, 4, 4, 4, 4, 3, 4, 2, 9]
-      ],
-      eq: "Hand weapon. Fixed items: Lotus Needle, Phoenix Feather Fan, Guqin of Everlasting Repose",
-      rules:"Inspiring Presence (6), Tactician, Will of the Dragons, Yin; Grand Strategist (Tactician range 18\", all three bonuses per turn)."
-    },
-    chenglong: {
-      profile: [
-        ["Cheng Long", 5, 7, 7, 4, 4, 2, 6, 4, 9]
-      ],
-      eq: "Hand weapon",
-      rules:"Dodge (5+), Immunity (Psychology), Strider, Yang; Supreme Martial Arts Fighting Styles; Fiery Breath (Str 3 Breath Weapon, Flaming Attacks); Grandmaster (CDM unit becomes Stubborn; must always accept challenges; may not be Army General)."
-    },
-    saytang: {
-      profile: [
-        ["Saytang the Watcher", 6, 4, 4, 6, 6, 6, 1, 5, 10]
-      ],
-      eq: "Hand weapon, heavy armour; Wind Bow (fixed item)",
-      rules:"Animated Construct, Loner, Fly (7), Regeneration (6+), Unstable, Yin; Master of the Stone Legions (self and friendly Animated Constructs within 12\" gain Magical Ward 6+ and suffer 1 less Wound from Unstable)."
-    },
-    monkeyking: {
-      profile: [
-        ["The Monkey King", 5, 6, 5, 4, 4, 2, 6, 3, 8]
-      ],
-      eq: "Light armour. Fixed item: Ideal Golden-bound Cudgel",
-      rules:"Dodge (6+), Independent, Martial Arts Fighting Styles, Strider; Trickster (may only join Monkey Warriors; may never be Army General; enemies within charge distance are subject to Berserk Rage unless Immune to Psychology)."
-    }
+    /* character mounts (p.17) */
+    mount_warhorse:{troop:"War Beast (Equine)",profile:[["Warhorse",8,3,0,3,3,1,3,1,5]],eq:"—",rules:"—"},
+    mount_jadelongma:{troop:"War Beast (Chimeric)",profile:[["Jade Longma",8,4,0,4,4,2,4,2,7]],eq:"—",rules:"Fear, Fly (9), Natural Armour (6+); Impale"},
+    mount_greatspiritlongma:{troop:"Monstrous Beast (Chimeric)",profile:[["Great Spirit Longma",8,5,0,4,4,3,5,3,7]],eq:"—",rules:"Fear, Fly (9), Impale, Natural Armour (5+)"},
+
+    /* characters */
+    celestialcommanders:{troop:"Infantry (Character, Human)",profile:[["Celestial General",4,6,5,4,4,3,6,4,9],["Celestial Captain",4,5,5,4,4,2,5,3,8]],eq:"Hand weapon",rules:"Celestial Forged Armour, Will of the Dragons, Yin/Yang"},
+    shugengan:{troop:"Infantry (Character, Human)",profile:[["Dragon-Blooded Shugengan",4,5,5,4,4,3,5,3,9]],eq:"Hand weapon",rules:"Celestial Forged Armour, Mastery of the Elemental Winds, Will of the Dragons, Yin/Yang. Wizard Level 3 — Yin: Beasts, Death, Metal or Shadow (+ Lore of Yin spells); Yang: Fire, Heavens, Light or Life (+ Lore of Yang spells)."},
+    dragondescendant:{troop:"Infantry (Character, Human/Dragon)",profile:[["Human Form",4,7,4,5,5,3,7,5,10],["Dragon Form",6,7,0,6,6,6,3,5,10]],eq:"Hand weapon",rules:"Celestial Forged Armour, Mastery of the Elemental Winds, Will of the Dragons, Yin/Yang; Transformation of the Dragon. Wizard Level 3 — Yin: Beasts, Death, Metal or Shadow (+ Lore of Yin spells); Yang: Fire, Heavens, Light or Life (+ Lore of Yang spells)."},
+    alchemists:{troop:"Infantry (Character, Human)",profile:[["Grand Alchemist",4,4,3,3,3,3,4,2,8],["Alchemist",4,3,3,3,3,2,3,1,7]],eq:"Hand weapon",rules:"Mastery of the Elemental Winds, Will of the Dragons, Yin. Grand Alchemist: Wizard Level 3; Alchemist: Wizard Level 1 — Lore of Metal."},
+    astromancers:{troop:"Infantry (Character, Human)",profile:[["Supreme Astromancer",4,4,3,3,3,3,4,2,8],["Astromancer",4,3,3,3,3,2,3,1,7]],eq:"Hand weapon",rules:"Mastery of the Elemental Winds, Will of the Dragons, Yang. Supreme Astromancer: Wizard Level 3; Astromancer: Wizard Level 1 — Lore of Heavens."},
+    gatemasters:{troop:"Infantry (Character, Human)",profile:[["Gate Master",4,5,5,4,4,3,5,3,9],["Gate Keeper",4,4,4,4,4,2,4,2,8]],eq:"Hand weapon",rules:"Will of the Dragons, Yin/Yang; Bastion's Defenders; Harmony of Stone & Steel"},
+    magistrates:{troop:"Infantry (Character, Human)",profile:[["Lord Magistrate",4,4,4,4,4,3,4,2,9],["Magistrate",4,3,3,3,3,2,3,1,8]],eq:"Hand weapon",rules:"Inspiring Presence (6), Will of the Dragons, Yin/Yang; Tactician"},
+    blademaster:{troop:"Infantry (Character, Human)",profile:[["Blademaster",4,6,5,4,4,2,6,3,8]],eq:"Hand weapon",rules:"Dodge (5+), Killing Blow, Will of the Dragons, Yang; Duellist. May never be the Army General."},
+
+    /* core */
+    peasantmilitia:{troop:"Infantry (Human)",profile:[["Peasant Militiaman",4,2,3,3,3,1,3,1,6]],eq:"Hand weapon",rules:"Expendable, Will of the Dragons, Yang"},
+    peasantbowmen:{troop:"Infantry (Human)",profile:[["Peasant Bowmen",4,2,3,3,3,1,3,1,6]],eq:"Hand weapon, shortbow",rules:"Expendable, Will of the Dragons, Yin"},
+    peasanthorsemen:{troop:"Cavalry (Human)",profile:[["Peasant Horseman",4,2,3,3,3,1,3,1,6],["Warhorse",8,3,0,3,3,1,3,1,5]],eq:"Hand weapon",rules:"Expendable, Fast Cavalry, Will of the Dragons, Yin/Yang"},
+    jadewarriors:{troop:"Infantry (Human)",profile:[["Jade Warrior",4,3,3,3,3,1,3,1,7]],eq:"Hand weapon, light armour",rules:"Will of the Dragons, Yang"},
+    jadebowmen:{troop:"Infantry (Human)",profile:[["Jade Bowman",4,3,3,3,3,1,3,1,7]],eq:"Hand weapon, shortbow, light armour",rules:"Will of the Dragons, Yin"},
+    jadehorsemen:{troop:"Cavalry (Human)",profile:[["Jade Horseman",4,3,3,3,3,1,3,1,7],["Warhorse",8,3,0,3,3,1,3,1,5]],eq:"Hand weapon, light armour",rules:"Fast Cavalry, Will of the Dragons, Yin/Yang"},
+    ironhailgunners:{troop:"Infantry (Human)",profile:[["Iron Hail Gunner",4,3,3,3,3,1,3,1,7]],eq:"Hand weapon, blunderbuss, light armour",rules:"Will of the Dragons, Yin"},
+    hilltribesmen:{troop:"Infantry (Human)",profile:[["Hill Tribesman",4,3,3,3,3,1,3,1,6]],eq:"Hand weapon",rules:"Expendable, Independent"},
+    monkeywarriors:{troop:"Infantry (Beastman)",profile:[["Monkey Warrior",5,3,3,3,3,1,4,1,6]],eq:"Hand weapon",rules:"Dodge (6+), Expendable, Forest Strider, Independent, Obstacle Strider, Skirmishers"},
+
+    /* special */
+    celestialdragonguard:{troop:"Infantry (Human)",profile:[["Celestial Dragon Guard",4,4,4,3,3,1,4,1,8]],eq:"Polearm, medium armour; Dragon Crossbow (option)",rules:"Stubborn, Will of the Dragons, Yin/Yang"},
+    celestialdragonlancers:{troop:"Cavalry (Human)",profile:[["Celestial Dragon Lancer",4,4,4,3,3,1,4,1,8],["Warhorse",8,3,0,3,3,1,3,1,5]],eq:"Light lance, medium armour, shield, barding; Fire Lance (option)",rules:"Stubborn, Will of the Dragons, Yang"},
+    celestialdragonmonks:{troop:"Infantry (Human)",profile:[["Celestial Dragon Monk",5,5,5,4,4,1,5,2,8]],eq:"Hand weapon",rules:"Dodge (6+), Immunity (Psychology), Skirmishers, Strider, Yang; Martial Arts Fighting Styles"},
+    cranegunners:{troop:"Infantry (Human)",profile:[["Crane Gunner",4,3,4,3,3,2,3,2,7]],eq:"Hand weapon, crane gun, light armour, tower shield",rules:"Will of the Dragons, Yin. Unit Strength 2."},
+    grenadiers:{troop:"Infantry (Human)",profile:[["Grenadier",4,3,3,3,3,1,3,1,7]],eq:"Hand weapon, grenades, light armour; Sky Rockets (option)",rules:"Skirmishers, Will of the Dragons, Yin"},
+    flamethrower:{troop:"Infantry (Human)",profile:[["Flamethrower",4,3,3,3,3,1,3,2,7]],eq:"Hand weapon, flamethrower, medium armour",rules:"Weapon Team, Will of the Dragons, Yin. 1–2 Flamethrowers = a single Special choice."},
+    warchariot:{troop:"Chariot (Armour Save 6+)",profile:[["War Chariot",7,"-","-",5,4,4,"-","-","-"],["Crew",'-',3,3,3,"-","-",3,1,7],["Warhorse","-",3,0,3,"-","-",3,1,5]],eq:"Light lance, shortbow, light armour",rules:"Will of the Dragons, Yin/Yang. Crew: 2 Crew (Human); drawn by 2 Warhorses (Animal)."},
+    skylantern:{troop:"Chariot (Armour Save 5+)",profile:[["Sky Lantern","-","-","-",5,5,5,"-","-","-"],["Crew",4,3,4,3,3,1,3,1,7]],eq:"Hand weapon, crane gun, light armour",rules:"Fly (6), Will of the Dragons, Yin; Heavenly Beacon; Sky Bombs (upgrade). Crew: 5 Crew (Human). Line of Sight 10."},
+    mercenaryogres:{troop:"Monstrous Infantry (Ogre)",profile:[["Ogre",6,3,3,4,4,3,2,3,7]],eq:"Hand weapons, gut-plate",rules:"Independent, Natural Armour (6+); Gut-plate; Ogre Charge"},
+    templedogs:{troop:"War Beast (Animated Construct)",profile:[["Temple Dog",7,4,0,4,5,2,3,2,7]],eq:"—",rules:"Animated Construct, Fear, Impact Hits (1), Unstable"},
+    terracottawarriors:{troop:"Infantry (Animated Construct)",profile:[["Terracotta Warrior",4,2,2,3,3,1,2,1,3]],eq:"Hand weapon",rules:"Animated Construct, Unstable"},
+    onyxcrowmen:{troop:"Infantry (Elemental)",profile:[["Onyx Crowman",4,4,0,3,3,1,4,2,7]],eq:"Hand weapon",rules:"Expendable, Fear, Fly (10), Magical Attacks, Scouts, Yin, Unstable; Eyes of the Empress"},
+    stormhurlercrossbow:{troop:"War Machine",profile:[["Stormhurler Crossbow","-","-","-","-",7,"-","-","-","-"],["Crew",4,3,3,3,3,1,3,1,7]],eq:"Hand weapon, repeater bolt thrower",rules:"Will of the Dragons, Yin. Crew: 3 Crew (Human)."},
+    dragoncannon:{troop:"War Machine",profile:[["Dragon Cannon","-","-","-","-",7,"-","-","-","-"],["Crew",4,3,3,3,3,1,3,1,7]],eq:"Hand weapon, cannon",rules:"Will of the Dragons, Yin. Crew: 3 Crew (Human)."},
+    firerainrocket:{troop:"War Machine",profile:[["Fire Rain Rocket","-","-","-","-",7,"-","-","-","-"],["Crew",4,3,3,3,3,1,3,1,7],["Ogre Loader",6,3,3,4,4,3,2,3,7]],eq:"Hand weapon, rocket launcher, bastion rocket",rules:"Will of the Dragons, Yin; Ogre Loader (upgrade). Crew: 3 Crew (Human)."},
+
+    /* rare */
+    longmariders:{troop:"Cavalry (Human)",profile:[["Longma Rider",4,5,4,4,3,1,5,2,8],["Longma",8,3,0,4,4,2,4,2,6]],eq:"Light lance, medium armour, shield",rules:"Celestial Forged Armour, Fear, Fly (9), Natural Armour (6+), Stubborn, Will of the Dragons, Yang; Impale"},
+    grandcannon:{troop:"War Machine",profile:[["Grand Cannon","-","-","-","-",7,"-","-","-","-"],["Crew",4,3,3,3,3,1,3,1,7],["Ogre Loader",6,3,3,4,4,3,2,3,7]],eq:"Hand weapon, grand cannon",rules:"Will of the Dragons, Yin; Ogre Loader (upgrade). Crew: 3 Crew (Human)."},
+    zhanguwardrum:{troop:"Chariot (Armour Save 6+, Human)",profile:[["Zhangu War Drum",7,"-","-",4,5,4,"-","-","-"],["Crew","-",3,3,3,"-","-",3,1,7],["Warhorse","-",3,0,3,"-","-",3,1,5]],eq:"Hand weapon, light armour",rules:"Will of the Dragons, Yang; Icon of the Great Cities; War Drum. Crew: 2 Crew (Human); drawn by 2 Warhorses (Equine)."},
+    wuxingwarcompass:{troop:"Chariot (Armour save 6+)",profile:[["Wu Xing War Compass",7,"-","-",4,5,5,"-","-","-"],["Apprentice Astromancer","-",3,3,3,"-","-",3,1,7],["Warhorse","-",3,0,3,"-","-",3,1,"-"]],eq:"Hand weapon",rules:"Will of the Dragons, Yang; Nexus of Elemental Winds. Crew: 1 Apprentice Astromancer (Human); drawn by 4 Warhorses (Equine)."},
+    skyjunk:{troop:"Chariot (Armour Save 4+, Human)",profile:[["Sky-junk","-","-","-",5,5,7,"-","-","-"],["Crew",4,3,4,3,3,1,3,1,7]],eq:"Hand weapon, crane guns, rocket salvo, light armour",rules:"Fly (6), Heavenly Beacon, Sky Bombs, Will of the Dragons, Yin. Crew: 5 Crew (Human). Line of Sight 10."},
+    celestiallion:{troop:"Monstrous Creature (Feline-avian)",profile:[["Celestial Lion",6,5,0,5,5,4,5,4,7]],eq:"—",rules:"Fly (8), Mighty Blow (1), Natural Armour (6+), Yang"},
+    greatmoonbird:{troop:"Monstrous Creature (Avian)",profile:[["Great Moon Bird",2,4,0,5,5,4,5,4,7]],eq:"—",rules:"Fly (9), Yin; Moon Flare"},
+    terracottasentinel:{troop:"Monster (Animated Construct)",profile:[["Terracotta Sentinel",6,4,0,6,7,6,1,5,10]],eq:"Polearm, heavy armour",rules:"Animated Construct, Regeneration (6+), Unstable, Yang"},
+    guardianlion:{troop:"Monster (Animated Construct)",profile:[["Guardian Lion",7,4,0,6,7,6,1,5,10]],eq:"—",rules:"Animated Construct, Impact Hits (D6), Unstable; Jade Lion; Jet Lion"},
+
+    /* special characters */
+    miaoying:{troop:"Infantry (Special Character, Human)",profile:[["Human Form",4,7,4,5,5,3,7,5,10],["Dragon Form",6,7,0,6,6,6,3,5,10]],eq:"Hand weapon, light armour, Storm Wind Coronal (magic item), Vambraces of Yin (magic item)",rules:"Celestial Forged Armour, Hatred (Daemons of Chaos & Warriors of Chaos), Mastery of the Elemental Winds, Stubborn, Transformation of the Dragon, Will of the Dragons, Yin; Disdain of the Dragons; Eye of the Storm; Supreme Matriarch of Nan-Gau; Wrath of the Storm; The Storm Dragon's Fury. Wizard Level 4 — Lore of Life (+ Lore of Yin spells)."},
+    zhaoming:{troop:"Infantry (Special Character, Human)",profile:[["Human Form",4,7,4,5,5,3,7,5,10],["Dragon Form",6,7,0,6,6,6,3,5,10]],eq:"Hand weapon, light armour, Horns of Shang-Yang (magic item), The Burning Vambraces (magic item)",rules:"Celestial Forged Armour, Mastery of the Elemental Winds, Transformation of the Dragon, Will of the Dragons, Yang; Hardened Scale; Lord of Shang-Yang; Warding Iron; Master of Alchemy. Wizard Level 4 — Lore of Metal (+ Lore of Yang spells)."},
+    yuanbo:{troop:"Infantry (Special Character, Human)",profile:[["Human Form",4,7,4,5,5,3,7,5,10],["Dragon Form",6,7,0,6,6,6,3,5,10]],eq:"The Dragon's Fang (magic item), Armour of the Dragon's Gaze (magic item)",rules:"Celestial Forged Armour, Mastery of the Elemental Winds, Transformation of the Dragon, Will of the Dragons, Yin/Yang; The Emperor's Executioner; Lord of the Jade Court. Wizard Level 4 — Lore of Heavens and Lore of Light (+ Lore of Yin and/or Yang spells)."},
+    liuyun:{troop:"Infantry (Special Character, Human)",profile:[["Liu Yun",4,7,5,4,4,3,6,4,9]],eq:"Fierce Dragon (magic item), Dragon Scale Armour (magic item)",rules:"Celestial Forged Armour, Will of the Dragons, Yang; Grand General"},
+    huagongzhu:{troop:"Infantry (Special Character, Human)",profile:[["Hua Gongzhu",4,6,5,4,4,3,6,4,9]],eq:"Medium armour, Blade of the Two Moons (magic item), Amulet of the Emperor's Favour (magic item)",rules:"Celestial Forged Armour, Will of the Dragons, Yang; Beloved General"},
+    taoyan:{troop:"Infantry (Special Character, Human)",profile:[["Taoyan the Merciless",4,6,5,4,4,3,6,4,9]],eq:"Medium armour, Tyrant's Talon (magic item)",rules:"Celestial Forged Armour, Fear, Will of the Dragons, Yang; Fuelled by Vengeance; Ultimate Verdict"},
+    guanfei:{troop:"Infantry (Special Character, Human)",profile:[["Guan Fei",4,6,5,4,4,2,5,3,8]],eq:"Medium armour, Green Dragon Glaive (magic item)",rules:"Celestial Forged Armour, Stubborn, Will of the Dragons, Yang; Captain of the Celestial Dragon Guard"},
+    tianshi:{troop:"Infantry (Special Character, Human)",profile:[["Tian Shi",4,4,3,3,3,3,4,2,8]],eq:"Hand weapon, Staff of Overwhelming Thunder (magic item), Celestial Robe (magic item)",rules:"Loremaster (Lore of Heavens), Mastery of the Elemental Winds, Will of the Dragons, Yang; Master of the Heavens. Wizard Level 4 — Lore of Heavens."},
+    zhugeyi:{troop:"Infantry (Special Character, Human)",profile:[["Zhuge Yi",4,4,4,4,4,3,4,2,9]],eq:"Hand weapon, Lotus Needle (magic item), Phoenix Feather Fan (magic item), Guqin of Everlasting Repose (magic item)",rules:"Inspiring Presence (6), Tactician, Will of the Dragons, Yin; Grand Strategist"},
+    chenglong:{troop:"Infantry (Special Character, Human)",profile:[["Cheng Long",5,7,7,4,4,2,6,4,9]],eq:"Hand weapon",rules:"Dodge (5+), Immunity (Psychology), Strider, Yang; Supreme Martial Arts Fighting Styles; Fiery Breath; Grandmaster"},
+    saytang:{troop:"Monster (Special Character, Animated Construct)",profile:[["Saytang the Watcher",6,4,4,6,6,6,1,5,10]],eq:"Hand weapon, heavy armour, Wind Bow (magic item)",rules:"Animated Construct, Loner, Fly (7), Regeneration (6+), Unstable, Yin; Master of the Stone Legions"},
+    monkeyking:{troop:"Infantry (Special Character, Beastman)",profile:[["The Monkey King",5,6,5,4,4,2,6,3,8]],eq:"Light armour, Ideal Golden-bound Cudgel (magic item)",rules:"Dodge (6+), Independent, Martial Arts Fighting Styles, Strider; Trickster"}
   },
 
   itemDesc: {
@@ -689,7 +461,7 @@
     "Silver Moon Bow": `Longbow. Range 24/36", Strength 4, Armour Piercing (3), Multiple Shots (3).`,
     "Spirit Longma Spear": `Light lance/spear. The wielder gains the Ignores Armour saves special rule.`,
     "Vorpal Shard": `The wielder always Wounds on a 2+.`,
-    "The Brazen Blade": `Multiple Wounds (2). Ward saves (except Dodge and Parry) cannot be taken against Wounds caused by it.`,
+    "The Brazen Blade": `This weapon has the Multiple Wounds (2) special rule. In addition, Magical Ward and Regeneration saves cannot be taken against Wounds caused by it.`,
     "Dawn Glaive": `Polearm. All enemy attacks against the wielder suffer -1 To Hit in close combat.`,
     "The Sword of Reason": `Great weapon with the Killing Blow special rule, which takes effect on a 5+ rather than a 6.`,
     "Ascendant Celestial Blade": `Celestial Blade. The wielder gains +1 Strength.`,
@@ -719,11 +491,11 @@
     "Cloak of Po Mei": `Relic. The bearer gains a +1 casting and dispelling bonus.`,
     "Clockwork Compass": `Charm, one use. At the start of any Magic phase: all Remains in Play spells within 24" are automatically dispelled, and all other spell effects within 24" immediately end.`,
     "Jade Amulet": `Relic. The bearer may re-roll failed channelling attempts.`,
-    "Scrolls of Astromancy": `Relic. Astromancer only. The bearer can re-roll all dice rolled to cast or dispel a spell once per Magic phase. This can cancel a miscast result or cause Ultimate Power or a miscast.`,
+    "Scrolls of Astromancy": `Relic. Astromancer only (Astromancer or Supreme Astromancer). The bearer can re-roll all dice rolled to cast or dispel a spell once per Magic phase. This can cancel a miscast result or cause Ultimate Power or a miscast.`,
     "Staff of Wu Xing": `Staff. The bearer can choose to re-roll all Winds of Magic dice each Magic phase.`,
     "Scrolls of Wei-Jin": `Relic. The bearer gains the Loremaster special rule but may only attempt to cast a number of spells equal to their Wizard Level.`,
     "Maw Shard": `Charm, one use. In any Magic phase, any double (except double 1's) rolled when the bearer casts spells counts towards Ultimate Power this turn.`,
-    "Seal of Xing Po": `Dragon-Blooded Shugengan or Dragon Descendant only. Relic. The bearer may choose spells from both the Lore of Yin and Yang in addition to their other lore. Common.`,
+    "Seal of Xing Po": `Relic. Dragon-Blooded Shugengan or Dragon Descendant only. The bearer of this item may choose spells from both the Lore of Yin and Yang in addition to the spells from their other lore. Common.`,
     "Alchemist's Mask": `Bound spell (Transmutation of Lead, Lore of Metal).`,
     "Icon of the Spirit Dragon": `Bound spell (Ancestral Warriors, Lore of Yin).`,
     "Kite of the Uttermost Airs": `In the Shooting phase, choose one enemy unit with Fly within 12" not in close combat; they suffer D6 Strength 4 automatic hits.`,
@@ -755,7 +527,7 @@
     "Dragon's Eye Banner": `Whenever the unit is the target of an enemy spell, roll a D6. On a 3+ the enemy Wizard must choose another target. If no other target available, the spell cannot be cast.`,
     "Bastion Standard": `The unit suffers only half (rounding up) their normal Leadership penalty on Break tests and may re-roll failed Break tests.`,
     "Standard of Nan-Gau": `The unit gains 6" to the effective range of their missile weapons.`,
-    "Banner of Xen Wun": `Enemy units cannot choose to Stand & Shoot against the unit carrying this banner.`,
+    "Banner of Xen Wun": `Enemy units cannot choose to Stand & Shoot or use Fire & Flee against the unit carrying this banner.`,
     "Giant Blade": `+3 Strength.`,
     "Sword of Bloodshed": `+3 Attacks.`,
     "Sword of Power": `+2 Strength.`,
@@ -841,26 +613,27 @@
   },
 
   spellLores: {
+    /* v3.1: neither lore has a signature spell — every spell is chosen normally */
     "Yin": {
       attribute: { name: "Power of Yin", text: `Whenever a spell from the Lore of Yin is successfully cast, all enemy units within 6" of the caster suffer -1 to their armour saves until the start of the caster's next magic phase.` },
       spells: [
-        { name: "Storm of Shadows", lvl: 0, cast: 6, type: "Hex", range: `24"`, effect: `Target unit suffers -1 to their Movement and has Line of Sight limited to 12" until the start of the caster's next Magic phase.` },
+        { name: "Storm of Shadows", lvl: 1, cast: 6, type: "Hex", range: `24"`, effect: `The target unit suffer -1 to their Movement and have their Line of Sight limited to 12" until the start of the caster's next Magic phase.` },
         { name: "Cloak of Jet", lvl: 1, cast: 6, type: "Augment", range: `18"`, effect: `Until the start of the caster's next Magic phase, no enemy spells can target the unit.` },
-        { name: "Missile Mirror", lvl: 2, cast: 7, type: "Hex", range: `24"`, effect: `Until the start of the caster's next Magic phase, roll a D6 for every shot the target unit fires. On a 4+, that shot is instead resolved against the target unit. Attacks using templates are not affected.` },
-        { name: "Blossom Wind", lvl: 3, cast: 10, type: "Direct damage", range: `24"`, effect: `Causes 2D6 Strength 2 hits with Armour Piercing (1). In addition, the target unit suffers -1 Weapon Skill and -1 Ballistics Skill until the start of the caster's next Magic phase.` },
-        { name: "Talons of Night", lvl: 3, cast: 12, type: "Vortex", range: `—`, effect: `Remains in play. Magical vortex using the small round template. Any model touched suffers a Strength 4 hit with Armour Piercing (1).` },
+        { name: "Missile Mirror", lvl: 2, cast: 7, type: "Hex", range: `24"`, effect: `Until the start of the caster's next Magic phase, roll a D6 for every shot the target unit fires in the Shooting phase. On a 4+, that shot is instead resolved against the target unit, ignoring To Hit penalties for long range or stand & shoot. Attacks that use templates are not affected.` },
+        { name: "Blossom Wind", lvl: 3, cast: 10, type: "Direct damage", range: `24"`, effect: `Causes 2D6 Strength 3 Hits with the Armour Piercing (1) special rule. In addition, the target unit suffer -1 to its Weapon Skill and Ballistics skill until the start of the caster's next Magic phase.` },
+        { name: "Talons of Night", lvl: 3, cast: 12, type: "Magical vortex", range: `—`, effect: `Remains in play. Talons of Night is a magical vortex that uses the small round template. Any model touched by the template suffers a Strength 4 Hit with the Armour Piercing (1) special rule.` },
         { name: "Ancestral Warriors", lvl: 4, cast: 13, type: "Direct damage", range: `18"`, effect: `The target unit suffers 5D6 Attacks with Weapon Skill 4 and Strength 4, resolved as close combat attacks.` }
       ]
     },
     "Yang": {
       attribute: { name: "Strength of Yang", text: `Whenever a spell from the Lore of Yang is successfully cast, all friendly units within 6" of the caster gain the Armour Piercing (1) special rule until the start of the caster's next magic phase.` },
       spells: [
-        { name: "Jade Shield", lvl: 0, cast: 6, type: "Augment", range: `12"`, effect: `The target unit gains Magical Ward (6+) until the start of the caster's next Magic phase.` },
-        { name: "Stone Ground Stance", lvl: 1, cast: 6, type: "Augment", range: `24"`, effect: `Until the start of the caster's next Magic phase, the target unit gains the Stubborn special rule (if already Stubborn, becomes Unbreakable) and enemies charging them lose all charge bonuses.` },
-        { name: "Dragon's Breath", lvl: 2, cast: 7, type: "Direct damage", range: `Breath`, effect: `The caster makes a Breath Weapon Attack. May be cast in close combat. All models hit suffer a Strength 5 hit with Flaming Attacks.` },
-        { name: "Wall of Wind & Fire", lvl: 3, cast: 10, type: "Direct damage", range: `24"`, effect: `Causes 2D6 Strength 3 hits with Flaming Attacks. The target unit also suffers -1 Leadership until the start of the caster's next Magic phase.` },
-        { name: "Might of Heaven & Earth", lvl: 3, cast: 11, type: "Augment", range: `18"`, effect: `The target unit gains +1 Weapon Skill, +1 Strength, Flaming Attacks and Magical Attacks until the start of the caster's next Magic phase.` },
-        { name: "Constellation of the Dragon", lvl: 4, cast: 13, type: "Direct damage", range: `24"`, effect: `Direct damage area spell using the small round template. All models underneath the template suffer a Strength 5 hit with Multiple Wounds (D3).` }
+        { name: "Jade Shield", lvl: 1, cast: 6, type: "Augment", range: `12"`, effect: `The target unit gains a Magical Ward (6+) until the start of the caster's next Magic phase.` },
+        { name: "Stone Ground Stance", lvl: 1, cast: 6, type: "Augment", range: `24"`, effect: `Until the start of the caster's next Magic phase, the target unit gains the Stubborn special rule (if they are already Stubborn, they instead become Unbreakable) and enemies charging them counts as making a disordered charge.` },
+        { name: "Dragon's Breath", lvl: 2, cast: 7, type: "Direct damage", range: `Breath`, effect: `The caster makes a Breath Weapon Attack. This may be cast in close combat, following the normal rules for Breath Weapons. All models Hit suffer a Strength 5 Hit with the Flaming Attacks special rule.` },
+        { name: "Wall of Wind & Fire", lvl: 3, cast: 10, type: "Direct damage", range: `24"`, effect: `Causes 2D6 Strength 3 Hits with the Flaming Attacks special rule. In addition, the target unit suffer -1 to Leadership until the start of the caster's next Magic phase.` },
+        { name: "Might of Heaven & Earth", lvl: 3, cast: 11, type: "Augment", range: `18"`, effect: `The target unit gains +1 Weapon Skill, +1 Strength, Flaming Attacks and Magical Attacks special rules until the start of the caster's next Magic phase.` },
+        { name: "Constellation of the Dragon", lvl: 4, cast: 13, type: "Direct damage area", range: `24"`, effect: `Uses the small round template. All models underneath the template suffer a Strength 5 Hit with the Multiple Wounds (D3) special rule.` }
       ]
     }
   },
@@ -877,9 +650,9 @@
         ],
         options: [
           { id: "wep", type: "choice", label: "Combat weapon", choices: [
+            { label: "Spear", cost: 0 },
             { label: "Additional hand weapon", cost: 5 },
             { label: "Celestial blade", cost: 5 },
-            { label: "Spear", cost: 5 },
             { label: "Light lance", cost: 5 },
             { label: "Polearm", cost: 10 },
             { label: "Great weapon", cost: 15 }
@@ -890,7 +663,7 @@
             { label: "Longbow", cost: 6 },
             { label: "Crossbow", cost: 7 },
             { label: "Handgun", cost: 7 },
-            { label: "Dragon fire pistol", cost: 9 }
+            { label: "Dragon fire pistol", cost: 6 }
           ]},
           { id: "armour", type: "choice", label: "Armour", choices: [
             { label: "Light armour", cost: 3 },
@@ -898,13 +671,14 @@
             { label: "Heavy armour", cost: 18 }
           ]},
           { id: "mount", type: "mount", label: "Mount", choices: [
-            { label: "Warhorse", cost: 14 },
+            { label: "Warhorse", cost: 14, key: "warhorse" },
             { label: "Jade Longma", cost: 40 },
             { label: "Great Spirit Longma", cost: 60 },
             { label: "War Chariot (replacing one crew)", cost: 70 },
             { label: "Great Moon Bird (General/Yin only)", cost: 140, only: "Celestial General" },
             { label: "Celestial Lion (General/Yang only)", cost: 145, only: "Celestial General" }
           ]},
+          { id: "barding", type: "toggle", label: "Barding", cost: 5, per: "flat", requiresMount: "warhorse" },
           { id: "bsb", type: "toggle", label: "Battle Standard Bearer (one Captain only)", cost: 25, per: "flat", only: "Celestial Captain", bsb: true }
         ],
         notes: "BSB may carry a Magic Standard with no points limit, in addition to other Magic Items."
@@ -915,39 +689,81 @@
         variants: [
           { name: "Dragon-Blooded Shugengan", points: 240, wizardLevel: 3, magicBudget: 100 }
         ],
+        /* Must be aligned with Yin or Yang: a Yin Wizard uses Beasts/Death/Metal/Shadow,
+           a Yang Wizard Fire/Heavens/Light/Life, and may replace any number of those
+           spells with spells from the Lore of Yin or Yang respectively. */
+        lores: [
+          { name: "Beasts", requiresChoice: { id: "align", is: "Yin" } },
+          { name: "Death", requiresChoice: { id: "align", is: "Yin" } },
+          { name: "Metal", requiresChoice: { id: "align", is: "Yin" } },
+          { name: "Shadow", requiresChoice: { id: "align", is: "Yin" } },
+          { name: "Fire", requiresChoice: { id: "align", is: "Yang" } },
+          { name: "Heavens", requiresChoice: { id: "align", is: "Yang" } },
+          { name: "Light", requiresChoice: { id: "align", is: "Yang" } },
+          { name: "Life", requiresChoice: { id: "align", is: "Yang" } }
+        ],
+        mixLores: [
+          { name: "Yin", requiresChoice: { id: "align", is: "Yin" } },
+          { name: "Yang", requiresChoice: { id: "align", is: "Yang" } }
+        ],
         options: [
+          { id: "align", type: "mustChoose", label: "Alignment", choices: [
+            { label: "Yin", cost: 0 },
+            { label: "Yang", cost: 0 }
+          ]},
           { id: "wlvl", type: "toggle", label: "Additional Wizard Level", cost: 35, per: "flat" },
           { id: "wep", type: "choice", label: "Combat weapon", choices: [
+            { label: "Spear", cost: 0 },
             { label: "Additional hand weapon", cost: 5 },
             { label: "Celestial blade", cost: 5 },
-            { label: "Spear", cost: 5 },
             { label: "Light lance", cost: 5 },
             { label: "Polearm", cost: 10 },
             { label: "Great weapon", cost: 15 }
           ]},
-          { id: "pistol", type: "toggle", label: "Dragon fire pistol", cost: 9, per: "flat" },
+          { id: "pistol", type: "toggle", label: "Dragon fire pistol", cost: 6, per: "flat" },
           { id: "armour", type: "choice", label: "Armour", choices: [
             { label: "Light armour", cost: 3 },
             { label: "Medium armour", cost: 9 }
           ]},
           { id: "mount", type: "mount", label: "Mount", choices: [
-            { label: "Warhorse", cost: 18 },
+            { label: "Warhorse", cost: 18, key: "warhorse" },
             { label: "Jade Longma", cost: 48 },
             { label: "Great Spirit Longma", cost: 60 },
-            { label: "Great Moon Bird (Yin only)", cost: 140 },
-            { label: "Celestial Lion (Yang only)", cost: 145 }
-          ]}
+            { label: "Great Moon Bird (Yin only)", cost: 140, requiresChoice: { id: "align", is: "Yin" } },
+            { label: "Celestial Lion (Yang only)", cost: 145, requiresChoice: { id: "align", is: "Yang" } }
+          ]},
+          { id: "barding", type: "toggle", label: "Barding", cost: 5, per: "flat", requiresMount: "warhorse" }
         ]
       },
       {
         id: "dragondescendant", name: "Dragon Descendant", isCharacter: true,
-        access: ["light armour","additional hand weapon","halberd","great weapon","celestial blade"],
+        access: ["light armour","spear","additional hand weapon","halberd","great weapon","celestial blade"],
         variants: [
           { name: "Dragon Descendant", points: 340, wizardLevel: 3, magicBudget: 100 }
         ],
+        /* Yin/Yang alignment → lores, exactly as the Dragon-Blooded Shugengan */
+        lores: [
+          { name: "Beasts", requiresChoice: { id: "align", is: "Yin" } },
+          { name: "Death", requiresChoice: { id: "align", is: "Yin" } },
+          { name: "Metal", requiresChoice: { id: "align", is: "Yin" } },
+          { name: "Shadow", requiresChoice: { id: "align", is: "Yin" } },
+          { name: "Fire", requiresChoice: { id: "align", is: "Yang" } },
+          { name: "Heavens", requiresChoice: { id: "align", is: "Yang" } },
+          { name: "Light", requiresChoice: { id: "align", is: "Yang" } },
+          { name: "Life", requiresChoice: { id: "align", is: "Yang" } }
+        ],
+        mixLores: [
+          { name: "Yin", requiresChoice: { id: "align", is: "Yin" } },
+          { name: "Yang", requiresChoice: { id: "align", is: "Yang" } }
+        ],
         options: [
+          { id: "align", type: "mustChoose", label: "Alignment", choices: [
+            { label: "Yin", cost: 0 },
+            { label: "Yang", cost: 0 }
+          ]},
           { id: "wlvl", type: "toggle", label: "Additional Wizard Level", cost: 35, per: "flat" },
           { id: "wep", type: "choice", label: "Combat weapon", choices: [
+            { label: "Spear", cost: 0 },
             { label: "Additional hand weapon", cost: 5 },
             { label: "Celestial blade", cost: 5 },
             { label: "Polearm", cost: 10 },
@@ -968,8 +784,9 @@
           { id: "wlvl", type: "toggle", label: "Additional Wizard Level", cost: 35, per: "flat" },
           { id: "armour", type: "toggle", label: "Light armour", cost: 3, per: "flat" },
           { id: "mount", type: "mount", label: "Mount", choices: [
-            { label: "Warhorse", cost: 15 }
-          ]}
+            { label: "Warhorse", cost: 15, key: "warhorse" }
+          ]},
+          { id: "barding", type: "toggle", label: "Barding", cost: 5, per: "flat", requiresMount: "warhorse" }
         ]
       },
       {
@@ -984,9 +801,10 @@
           { id: "wlvl", type: "toggle", label: "Additional Wizard Level", cost: 35, per: "flat" },
           { id: "armour", type: "toggle", label: "Light armour", cost: 3, per: "flat" },
           { id: "mount", type: "mount", label: "Mount", choices: [
-            { label: "Warhorse", cost: 15 },
+            { label: "Warhorse", cost: 15, key: "warhorse" },
             { label: "Wu Xing War Compass (Supreme Astromancer, replacing Apprentice)", cost: 120, only: "Supreme Astromancer" }
-          ]}
+          ]},
+          { id: "barding", type: "toggle", label: "Barding", cost: 5, per: "flat", requiresMount: "warhorse" }
         ]
       },
       {
@@ -998,7 +816,7 @@
         ],
         options: [
           { id: "wep", type: "choice", label: "Combat weapon", choices: [
-            { label: "Spear", cost: 5 },
+            { label: "Spear", cost: 0 },
             { label: "Light lance", cost: 5 },
             { label: "Polearm", cost: 10 }
           ]},
@@ -1014,8 +832,9 @@
           ]},
           { id: "shield", type: "toggle", label: "Shield", cost: 5, per: "flat" },
           { id: "mount", type: "mount", label: "Mount", choices: [
-            { label: "Warhorse", cost: 15 }
+            { label: "Warhorse", cost: 15, key: "warhorse" }
           ]},
+          { id: "barding", type: "toggle", label: "Barding", cost: 5, per: "flat", requiresMount: "warhorse" },
           { id: "bsb", type: "toggle", label: "Battle Standard Bearer (one Gate Keeper only)", cost: 25, per: "flat", only: "Gate Keeper", bsb: true }
         ],
         notes: "BSB may carry a Magic Standard with no points limit, in addition to other Magic Items."
@@ -1031,9 +850,10 @@
           { id: "bombs", type: "toggle", label: "Dragon fire bombs", cost: 10, per: "flat" },
           { id: "armour", type: "toggle", label: "Light armour", cost: 3, per: "flat" },
           { id: "mount", type: "mount", label: "Mount", choices: [
-            { label: "Warhorse", cost: 15 },
+            { label: "Warhorse", cost: 15, key: "warhorse" },
             { label: "Sky Lantern (replacing one crew)", cost: 85 }
-          ]}
+          ]},
+          { id: "barding", type: "toggle", label: "Barding", cost: 5, per: "flat", requiresMount: "warhorse" }
         ]
       },
       {
@@ -1050,7 +870,7 @@
             { label: "Polearm", cost: 10 },
             { label: "Great weapon", cost: 15 }
           ]},
-          { id: "armour", type: "toggle", label: "Light armour", cost: 2, per: "flat" }
+          { id: "armour", type: "toggle", label: "Light armour", cost: 3, per: "flat" }
         ],
         notes: "May never be the Army General."
       },
@@ -1060,7 +880,11 @@
         id: "miaoying", name: "Miao Ying", isCharacter: true, isSpecialChar: true,
         access: ["light armour"],
         variants: [ { name: "Miao Ying", points: 525, wizardLevel: 4, magicBudget: 0 } ],
-        lores: ["Life", "Yin"],
+        lores: ["Life"], mixLores: ["Yin"],
+        fixedSpells: [
+          { name: "Wrath of the Storm", lvl: 2, cast: 7, type: "Augment", range: `24"`, effect: `The target unit gains the Immunity (Psychology) and Magical Attacks special rules until the start of your next Magic phase.` },
+          { name: "The Storm Dragon's Fury", lvl: 3, cast: 10, type: "Magic missile", range: `24"`, effect: `Causes 2D3 Strength 5 Hits with the Lightning Attacks special rule.` }
+        ],
         options: [],
         notes: "Must always be the Army General. Fixed items: Storm Wind Coronal, Vambraces of Yin."
       },
@@ -1068,7 +892,10 @@
         id: "zhaoming", name: "Zhao Ming", isCharacter: true, isSpecialChar: true,
         access: ["light armour"],
         variants: [ { name: "Zhao Ming", points: 480, wizardLevel: 4, magicBudget: 0 } ],
-        lores: ["Metal", "Yang"],
+        lores: ["Metal"], mixLores: ["Yang"],
+        fixedSpells: [
+          { name: "Master of Alchemy", lvl: 1, cast: 6, type: "Augment", range: `24"`, effect: `The target unit gains the Armour Piercing (1) and Magical Attacks special rules until the start of your next Magic phase.` }
+        ],
         options: [],
         notes: "Must always be the Army General. Fixed items: Horns of Shang-Yang, The Burning Vambraces."
       },
@@ -1076,7 +903,9 @@
         id: "yuanbo", name: "Yuan Bo", isCharacter: true, isSpecialChar: true,
         access: [],
         variants: [ { name: "Yuan Bo", points: 455, wizardLevel: 4, magicBudget: 0 } ],
-        lores: ["Heavens", "Light", "Yin", "Yang"],
+        /* uses the Lore of Heavens AND the Lore of Light: pick one as the main lore,
+           the other (and Yin/Yang) are offered as mixed-in spells */
+        lores: ["Heavens", "Light"], mixLores: ["Heavens", "Light", "Yin", "Yang"],
         options: [],
         notes: "Must always be the Army General. Fixed items: The Dragon's Fang, Armour of the Dragon's Gaze."
       },
@@ -1086,8 +915,9 @@
         variants: [ { name: "Liu Yun", points: 190, magicBudget: 0 } ],
         options: [
           { id: "mount", type: "mount", label: "Mount", choices: [
-            { label: "Warhorse", cost: 15 }
-          ]}
+            { label: "Warhorse", cost: 15, key: "warhorse" }
+          ]},
+          { id: "barding", type: "toggle", label: "Barding", cost: 5, per: "flat", requiresMount: "warhorse" }
         ],
         notes: "Fixed items: Fierce Dragon, Dragon Scale Armour."
       },
@@ -1097,10 +927,18 @@
         variants: [ { name: "Hua Gongzhu", points: 175, magicBudget: 0 } ],
         options: [
           { id: "mount", type: "mount", label: "Mount", choices: [
-            { label: "Warhorse", cost: 15 }
-          ]}
+            { label: "Warhorse", cost: 15, key: "warhorse" }
+          ]},
+          { id: "barding", type: "toggle", label: "Barding", cost: 5, per: "flat", requiresMount: "warhorse" }
         ],
         notes: "Fixed items: Blade of the Two Moons, Amulet of the Emperor's Favour."
+      },
+      {
+        id: "taoyan", name: "Taoyan the Merciless", isCharacter: true, isSpecialChar: true,
+        access: ["medium armour"],
+        variants: [ { name: "Taoyan the Merciless", points: 180, magicBudget: 0 } ],
+        options: [],
+        notes: "Fixed item: Tyrant's Talon."
       },
       {
         id: "guanfei", name: "Guan Fei", isCharacter: true, isSpecialChar: true,
@@ -1108,8 +946,9 @@
         variants: [ { name: "Guan Fei", points: 130, magicBudget: 0 } ],
         options: [
           { id: "mount", type: "mount", label: "Mount", choices: [
-            { label: "Warhorse", cost: 15 }
-          ]}
+            { label: "Warhorse", cost: 15, key: "warhorse" }
+          ]},
+          { id: "barding", type: "toggle", label: "Barding", cost: 5, per: "flat", requiresMount: "warhorse" }
         ],
         notes: "Must be accompanied by a unit of Celestial Dragon Guard or Celestial Dragon Lancers, and may not leave it. Fixed item: Green Dragon Glaive."
       },
@@ -1121,9 +960,10 @@
         options: [
           { id: "armour", type: "toggle", label: "Light armour", cost: 3, per: "flat" },
           { id: "mount", type: "mount", label: "Mount", choices: [
-            { label: "Warhorse", cost: 15 },
+            { label: "Warhorse", cost: 15, key: "warhorse" },
             { label: "Wu Xing War Compass (replacing Apprentice Astromancer)", cost: 120 }
-          ]}
+          ]},
+          { id: "barding", type: "toggle", label: "Barding", cost: 5, per: "flat", requiresMount: "warhorse" }
         ],
         notes: "Fixed items: Staff of Overwhelming Thunder, Celestial Robe."
       },
@@ -1133,9 +973,10 @@
         variants: [ { name: "Zhuge Yi", points: 210, magicBudget: 0 } ],
         options: [
           { id: "mount", type: "mount", label: "Mount", choices: [
-            { label: "Warhorse", cost: 15 },
+            { label: "Warhorse", cost: 15, key: "warhorse" },
             { label: "Sky Lantern (replacing one crew)", cost: 85 }
-          ]}
+          ]},
+          { id: "barding", type: "toggle", label: "Barding", cost: 5, per: "flat", requiresMount: "warhorse" }
         ],
         notes: "Fixed items: Lotus Needle, Phoenix Feather Fan, Guqin of Everlasting Repose."
       },
@@ -1165,16 +1006,16 @@
     /* ------------------------------- CORE ------------------------------- */
     core: [
       {
-        id: "peasantmilitia", name: "Peasant Militia", perModel: true, basePoints: 2, unitSize: [20, 60],
+        id: "peasantmilitia", name: "Peasant Militia", perModel: true, basePoints: 2.5, unitSize: [20, 60],
         expendable: true,
         options: [
           { id: "wep", type: "choice", label: "Weapon", choices: [
-            { label: "Spears", cost: 0.5, per: "model" },
-            { label: "Pikes", cost: 2, per: "model" },
-            { label: "Polearms", cost: 2, per: "model" }
+            { label: "Spears", cost: 0, per: "model" },
+            { label: "Pikes", cost: 1.5, per: "model" },
+            { label: "Polearms", cost: 1.5, per: "model" }
           ]},
           { id: "armour", type: "toggle", label: "Light armour", cost: 0.5, per: "model" },
-          { id: "shield", type: "toggle", label: "Shields (not with pikes)", cost: 1, per: "model" },
+          { id: "shield", type: "toggle", label: "Shields (not with pikes)", cost: 0.5, per: "model" },
           { id: "cmd", type: "command" }
         ]
       },
@@ -1207,15 +1048,15 @@
         ]
       },
       {
-        id: "jadewarriors", name: "Jade Warriors", perModel: true, basePoints: 3.5, unitSize: [15, 45],
+        id: "jadewarriors", name: "Jade Warriors", perModel: true, basePoints: 4, unitSize: [15, 45],
         options: [
           { id: "wep", type: "choice", label: "Weapon", choices: [
-            { label: "Spears", cost: 0.5, per: "model" },
-            { label: "Pikes", cost: 2, per: "model" },
-            { label: "Polearms", cost: 2, per: "model" }
+            { label: "Spears", cost: 0, per: "model" },
+            { label: "Pikes", cost: 1.5, per: "model" },
+            { label: "Polearms", cost: 1.5, per: "model" }
           ]},
           { id: "armour", type: "toggle", label: "Medium armour", cost: 1, per: "model" },
-          { id: "shield", type: "toggle", label: "Shields (not with pikes)", cost: 1, per: "model" },
+          { id: "shield", type: "toggle", label: "Shields (not with pikes)", cost: 0.5, per: "model" },
           { id: "cmd", type: "command", magicStandard: 25 }
         ]
       },
@@ -1333,7 +1174,7 @@
       {
         id: "grenadiers", name: "Grenadiers", perModel: true, basePoints: 9, unitSize: [5, 15],
         options: [
-          { id: "rockets", type: "toggle", label: "Replace gunpowder bombs with sky rockets", cost: 2, per: "model" },
+          { id: "rockets", type: "toggle", label: "Replace grenades with sky rockets", cost: 2, per: "model" },
           { id: "armour", type: "toggle", label: "Medium armour", cost: 1, per: "model" },
           { id: "leader", type: "toggle", label: "Leader", cost: 5, per: "flat" }
         ]
@@ -1347,15 +1188,15 @@
         id: "warchariot", name: "War Chariot", perModel: true, basePoints: 70, unitSize: [1, 3],
         options: [
           { id: "wep", type: "choice", label: "Replace light lances", choices: [
-            { label: "Polearms", cost: 5, per: "flat" }
+            { label: "Polearms", cost: 5, per: "model" }
           ]},
-          { id: "ranged", type: "choice", label: "Replace bows", choices: [
-            { label: "Crossbows", cost: 5, per: "flat" }
+          { id: "ranged", type: "choice", label: "Replace shortbows", choices: [
+            { label: "Crossbows", cost: 5, per: "model" }
           ]},
-          { id: "armour", type: "toggle", label: "Medium armour", cost: 8, per: "flat" },
-          { id: "scythes", type: "toggle", label: "Scythes", cost: 5, per: "flat" },
-          { id: "crew", type: "multi", label: "Additional Crew (up to two)", max: 2, choices: [
-            { label: "+1 Crew", cost: 6, per: "flat" }
+          { id: "armour", type: "toggle", label: "Medium armour", cost: 8, per: "model" },
+          { id: "scythes", type: "toggle", label: "Scythes", cost: 5, per: "model" },
+          { id: "crew", type: "multi", label: "Additional Crew per chariot (up to two)", max: 2, choices: [
+            { label: "+1 Crew", cost: 6, per: "model" }
           ], repeatable: true },
           { id: "horses", type: "toggle", label: "Two additional Warhorses", cost: 6, per: "flat" },
           { id: "standard", type: "toggle", label: "Standard Bearer (one chariot)", cost: 10, per: "flat" }
@@ -1364,20 +1205,20 @@
       {
         id: "skylantern", name: "Sky Lantern", perModel: false, basePoints: 90, unitSize: [1, 1],
         options: [
-          { id: "gun", type: "toggle", label: "Replace crane guns with blunderbusses & gunpowder bombs", cost: 0, per: "flat" },
+          { id: "gun", type: "toggle", label: "Replace crane guns with blunderbusses & grenades", cost: 0, per: "flat" },
           { id: "bombs", type: "toggle", label: "Sky bombs", cost: 15, per: "flat" }
         ],
         notes: "Line of Sight value 10."
       },
       {
-        id: "mercenaryogres", name: "Mercenary Ogres", perModel: true, basePoints: 27, unitSize: [3, 9],
+        id: "mercenaryogres", name: "Mercenary Ogres", perModel: true, basePoints: 25, unitSize: [3, 9],
         options: [
           { id: "wep", type: "choice", label: "Weapon", choices: [
             { label: "Bucklers", cost: 3, per: "model" },
             { label: "Additional hand weapons", cost: 3, per: "model" },
             { label: "Great weapons", cost: 9, per: "model" }
           ]},
-          { id: "armour", type: "toggle", label: "Medium armour", cost: 6, per: "model" },
+          { id: "armour", type: "toggle", label: "Light armour", cost: 3, per: "model" },
           { id: "cmd", type: "command", magicStandard: 25 }
         ]
       },
@@ -1386,15 +1227,15 @@
         options: []
       },
       {
-        id: "terracottawarriors", name: "Terracotta Warriors", perModel: true, basePoints: 3, unitSize: [20, 60],
+        id: "terracottawarriors", name: "Terracotta Warriors", perModel: true, basePoints: 3.5, unitSize: [20, 60],
         options: [
           { id: "wep", type: "choice", label: "Weapon", choices: [
-            { label: "Spears", cost: 0.5, per: "model" },
-            { label: "Shortbows", cost: 1, per: "model" },
-            { label: "Polearms", cost: 2, per: "model" },
-            { label: "Crossbows", cost: 3, per: "model" }
+            { label: "Spears", cost: 0, per: "model" },
+            { label: "Shortbows", cost: 0.5, per: "model" },
+            { label: "Polearms", cost: 1.5, per: "model" },
+            { label: "Crossbows", cost: 2.5, per: "model" }
           ]},
-          { id: "shield", type: "toggle", label: "Shields (not with bows/crossbows)", cost: 1, per: "model" },
+          { id: "shield", type: "toggle", label: "Shields (not with shortbows/crossbows)", cost: 0.5, per: "model" },
           { id: "cmd", type: "command" }
         ]
       },
@@ -1409,8 +1250,8 @@
         id: "stormhurlercrossbow", name: "Stormhurler Crossbow", perModel: false, basePoints: 40, unitSize: [1, 1],
         options: [
           { id: "armour", type: "choice", label: "Crew armour", choices: [
-            { label: "Light armour (3 Crew)", cost: 3, per: "flat" },
-            { label: "Medium armour (3 Crew)", cost: 6, per: "flat" }
+            { label: "Light armour (3 Crew)", cost: 1.5, per: "flat" },
+            { label: "Medium armour (3 Crew)", cost: 4.5, per: "flat" }
           ]}
         ]
       },
@@ -1418,8 +1259,8 @@
         id: "dragoncannon", name: "Dragon Cannon", perModel: false, basePoints: 85, unitSize: [1, 1],
         options: [
           { id: "armour", type: "choice", label: "Crew armour", choices: [
-            { label: "Light armour (3 Crew)", cost: 3, per: "flat" },
-            { label: "Medium armour (3 Crew)", cost: 6, per: "flat" }
+            { label: "Light armour (3 Crew)", cost: 1.5, per: "flat" },
+            { label: "Medium armour (3 Crew)", cost: 4.5, per: "flat" }
           ]}
         ]
       },
@@ -1428,8 +1269,8 @@
         options: [
           { id: "ogre", type: "toggle", label: "Ogre Loader", cost: 20, per: "flat" },
           { id: "armour", type: "choice", label: "Crew armour", choices: [
-            { label: "Light armour (3 Crew)", cost: 3, per: "flat" },
-            { label: "Medium armour (3 Crew)", cost: 6, per: "flat" }
+            { label: "Light armour (3 Crew)", cost: 1.5, per: "flat" },
+            { label: "Medium armour (3 Crew)", cost: 4.5, per: "flat" }
           ]}
         ]
       }
@@ -1469,7 +1310,7 @@
       {
         id: "skyjunk", name: "Sky-junk", perModel: false, basePoints: 150, unitSize: [1, 1],
         options: [
-          { id: "gun", type: "toggle", label: "Replace crane guns with blunderbusses & gunpowder bombs", cost: 0, per: "flat" }
+          { id: "gun", type: "toggle", label: "Replace crane guns with blunderbusses & grenades", cost: 0, per: "flat" }
         ],
         notes: "Line of Sight value 10."
       },
@@ -1496,8 +1337,8 @@
         id: "guardianlion", name: "Guardian Lion", perModel: false, basePoints: 240, unitSize: [1, 1],
         options: [
           { id: "liontype", type: "mustChoose", label: "Lion type", choices: [
-            { label: "Jade Lion (Yang, Power Dice, Dragon's Breath)", cost: 0 },
-            { label: "Jet Lion (Yin, Dispel Dice, Missile Mirror)", cost: 0 }
+            { label: "Jade Lion", cost: 0 },
+            { label: "Jet Lion", cost: 0 }
           ]}
         ],
         notes: "Each Guardian Lion must be either a Jade Lion or a Jet Lion."

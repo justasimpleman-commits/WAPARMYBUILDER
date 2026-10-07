@@ -79,8 +79,14 @@ uses `extraSignatures:1`). Picks live in `entry.sigSpells`; summed by
 `bonusSignatures`. `only` → restricts to a
 variant name (characters) or `"Hobgoblins"` (standards: requires `keyword:"hobgoblin"` unit).
 When `only` names one of the model's own variant names (or `"A or B"`), the engine
-**enforces** it (the item/choice is hidden on other variants); any other `only`
-keyword is treated as descriptive (shown to all).
+**enforces** it (the item/choice is hidden on other variants). When it names a
+variant of *another* character in the book, it is hidden from every other
+(non-special) character too (Grand Cathay's Seal of Xing Po: "Dragon-Blooded
+Shugengan or Dragon Descendant"). Any other `only` keyword is treated as descriptive
+(shown to all).
+
+`mixLores:["Yin","Yang"]` (on an item) → the bearer may also pick spells from these
+lores (Seal of Xing Po). See "Mixed lores" below.
 
 Two extra restriction fields used by the Undead/Bretonnia books:
 
@@ -192,6 +198,24 @@ lists only currently-available lores and clears a stored pick that becomes illeg
 `availableLores(e,u)` is the single source of truth (also used by the Undead
 `requireWizardLore` validator). Used by O&G (sub-species) and Daemons (a god-aligned
 Daemon Prince/Exalted Daemon is locked to that god's Lore).
+
+**Mixed lores.** `mixLores:[…]` on a unit (plain names, or entries gated exactly like
+`lores` — `{name:"Yin", requiresChoice:{id:"align",is:"Yin"}}`) or on a magic item
+lets a wizard **replace any number of its lore's spells with spells from those lores**
+(Grand Cathay: a Yin-aligned Shugengan uses Beasts/Death/Metal/Shadow plus Lore of
+Yin spells; Miao Ying uses Life plus Yin). Their spells join the spell picker as extra
+groups under the same wizard-level cap. **Knowing one spell of a lore brings its
+attribute and signature spell(s)**: the main lore's always; a mixed lore's once at
+least one of its spells is chosen (its signature is never a pick — in the picker the
+attribute/signature rows tick themselves, `autoWith`, while one of its spells is
+selected). `mixLores(e,u)`, `pickableSpells(e,u)` and `loresInUse(e,u)` are the single
+source of truth (picker, `reconcileSpells`, `knownSpells`, export, game mode).
+
+**Personal spells.** `fixedSpells:[{name,lvl,cast,type,range,effect}]` on a unit:
+spells the model always knows whatever lore it uses (Miao Ying's Wrath of the Storm
+and The Storm Dragon's Fury, Zhao Ming's Master of Alchemy). Free, outside the pick
+cap, shown in the spell chooser as locked "personal spell" rows, and included in
+`knownSpells` (export, loadout, game mode).
 
 `attachedPerN:{every,cost,name}` adds **required attached models at a fixed ratio** —
 one `name` model, costing `cost` points, for every `every` models in the unit
