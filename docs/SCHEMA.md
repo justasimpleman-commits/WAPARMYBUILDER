@@ -204,9 +204,12 @@ Daemon Prince/Exalted Daemon is locked to that god's Lore).
 lets a wizard **replace any number of its lore's spells with spells from those lores**
 (Grand Cathay: a Yin-aligned Shugengan uses Beasts/Death/Metal/Shadow plus Lore of
 Yin spells; Miao Ying uses Life plus Yin). Their spells join the spell picker as extra
-groups under the same wizard-level cap; the chosen lore's signature and attribute
-stay the only free ones. `mixLores(e,u)` / `pickableSpells(e,u)` are the single
-source of truth (picker, `reconcileSpells`, game mode).
+groups under the same wizard-level cap. **Knowing one spell of a lore brings its
+attribute and signature spell(s)**: the main lore's always; a mixed lore's once at
+least one of its spells is chosen (its signature is never a pick — in the picker the
+attribute/signature rows tick themselves, `autoWith`, while one of its spells is
+selected). `mixLores(e,u)`, `pickableSpells(e,u)` and `loresInUse(e,u)` are the single
+source of truth (picker, `reconcileSpells`, `knownSpells`, export, game mode).
 
 **Personal spells.** `fixedSpells:[{name,lvl,cast,type,range,effect}]` on a unit:
 spells the model always knows whatever lore it uses (Miao Ying's Wrath of the Storm

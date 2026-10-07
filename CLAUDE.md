@@ -277,6 +277,8 @@ then chooses **`wizardLevel`** more (i.e. as many spells as its level), **plus o
 per extra-spell magic item it carries** (`bonusSpells(e)` sums the `extraSpells:N`
 field over the model's chosen items — `e.magic`, `e.gifts`, `e.magicStd`; the
 Spell Familiar has `extraSpells:1`). So `cap = wizardLevel + bonusSpells(e)`.
+A mixed lore (`mixLores`) works the same way once one of its spells is chosen: its
+attribute and signature become known for free (`loresInUse`).
 `entry.spells` stores only the chosen non-signature spells and is trimmed to `cap`
 (removing the granting item drops the extra pick); `knownSpells(e)` returns
 signatures + the unit's personal `fixedSpells` (always known, free, locked in the

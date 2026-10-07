@@ -77,47 +77,50 @@ function renderSpells(e,u){
     const n=document.createElement("div"); n.className="note"; n.textContent="Choose a Lore of Magic above to pick spells."; box.appendChild(n); return box; }
   const lore=loreData(e.lore);
   if(!lore){ const n=document.createElement("div"); n.className="note"; n.textContent="No spell data for this lore."; box.appendChild(n); return box; }
-  // e.spells holds only the chosen NON-signature spells (kept legal by reconcileSpells);
-  // signatures are implicit & always known.
-  // always-known: lore attribute + signature spell(s), shown read-only
+  // e.spells holds only the chosen NON-signature spells (kept legal by reconcileSpells).
+  // Knowing one spell of a lore brings its attribute and signature(s): always for the
+  // main lore, and for a mixed lore (mixLores) once one of its spells is chosen.
+  const mixes=mixLores(e,u), pool=pickableSpells(e,u), inUse=loresInUse(e,u);
+  // one spell row (picker item); `extra` adds locked/reason/autoWith for free rows
+  const spellItem=(sp,extra)=>{
+    const tooHigh = !extra && sp.lvl>lvl;                          // beyond the wizard's level
+    return Object.assign({ name:sp.name,                           // cost omitted → no "pts" shown
+      disabled:tooHigh, reason: tooHigh?`requires a level ${sp.lvl} wizard`:"",
+      html:`<div class="d"><span class="slvl">${sp.lvl===0?"Sig":"L"+sp.lvl}</span> <span class="scast">${esc(String(sp.cast))}+</span> <span class="note">${esc(sp.type)} · ${esc(sp.range)}</span><br>${esc(sp.effect)}</div>` }, extra||{});
+  };
+  const attrItem=(l,extra)=>Object.assign({ name:l.attribute.name, locked:true, reason:"lore attribute",
+    html:`<div class="d">${esc(l.attribute.text)}</div>` }, extra||{});
+  // always-known summary: attributes + signatures of every lore in use, personal spells
   const free=[];
-  if(lore.attribute) free.push(lore.attribute.name+" (lore attribute)");
-  lore.spells.filter(sp=>sp.lvl===0).forEach(sp=>free.push(sp.name+" (signature)"));
+  inUse.forEach(nm=>{ const l=loreData(nm), tag=nm===e.lore?"":`, Lore of ${nm}`;
+    if(l.attribute) free.push(`${l.attribute.name} (lore attribute${tag})`);
+    l.spells.filter(sp=>sp.lvl===0).forEach(sp=>free.push(`${sp.name} (signature${tag})`)); });
   own.forEach(sp=>free.push(sp.name+" (personal spell)"));
   if(free.length){ const f=document.createElement("div"); f.className="note"; f.innerHTML="Always known: "+esc(free.join(", ")); box.appendChild(f); }
+  if(mixes.length){ const m=document.createElement("div"); m.className="note";
+    m.textContent="May replace any of these with spells from: "+mixes.map(n=>"Lore of "+n).join(", ")+" (a spell from a lore also brings its attribute and signature)"; box.appendChild(m); }
   const cnt=document.createElement("div"); cnt.className="budget"+(e.spells.length>cap?" over":"");
   cnt.innerHTML=`Chosen <b>${e.spells.length}</b> / ${cap}`;
   box.appendChild(cnt);
-  // Always-known group: lore attribute + signature spell(s), shown in the picker
-  // as already-chosen (locked) rows with their full effect — informational only.
+  // Always-known group: the main lore's attribute + signature(s) and personal spells,
+  // shown in the picker as already-chosen (locked) rows — informational only.
   const freeItems=[];
-  if(lore.attribute) freeItems.push({ name:lore.attribute.name, locked:true, reason:"lore attribute",
-    html:`<div class="d">${esc(lore.attribute.text)}</div>` });
-  lore.spells.filter(sp=>sp.lvl===0).forEach(sp=>freeItems.push({ name:sp.name, locked:true, reason:"signature",
-    html:`<div class="d"><span class="slvl">L${sp.lvl}</span> <span class="scast">${esc(String(sp.cast))}+</span> <span class="note">${esc(sp.type)} · ${esc(sp.range)}</span><br>${esc(sp.effect)}</div>` }));
-  own.forEach(sp=>freeItems.push({ name:sp.name, locked:true, reason:"personal spell",
-    html:`<div class="d"><span class="slvl">L${sp.lvl}</span> <span class="scast">${esc(String(sp.cast))}+</span> <span class="note">${esc(sp.type)} · ${esc(sp.range)}</span><br>${esc(sp.effect)}</div>` }));
-  // mixed lores (mixLores): their spells may replace spells of the chosen lore
-  const mixes=mixLores(e,u);
-  if(mixes.length){ const m=document.createElement("div"); m.className="note";
-    m.textContent="May replace any of these with spells from: "+mixes.map(n=>"Lore of "+n).join(", "); box.appendChild(m); }
-  const pool=pickableSpells(e,u);
-  const spellItem=sp=>{
-    const tooHigh = sp.lvl>lvl;                                    // beyond the wizard's level
-    return { name:sp.name,                                         // cost omitted → no "pts" shown
-      disabled:tooHigh, reason: tooHigh?`requires a level ${sp.lvl} wizard`:"",
-      html:`<div class="d"><span class="slvl">${sp.lvl===0?"Sig":"L"+sp.lvl}</span> <span class="scast">${esc(String(sp.cast))}+</span> <span class="note">${esc(sp.type)} · ${esc(sp.range)}</span><br>${esc(sp.effect)}</div>` };
-  };
-  const mixGroups=mixes.map(nm=>{ const ml=loreData(nm);
-    const attr=ml.attribute?[{ name:ml.attribute.name, locked:true, reason:"lore attribute (when a Lore of "+nm+" spell is cast)",
-      html:`<div class="d">${esc(ml.attribute.text)}</div>` }]:[];
-    return { label:`Lore of ${nm}`, items:[...attr, ...pool.filter(r=>r.lore===nm).map(r=>spellItem(r.sp))] }; });
+  if(lore.attribute) freeItems.push(attrItem(lore));
+  lore.spells.filter(sp=>sp.lvl===0).forEach(sp=>freeItems.push(spellItem(sp,{locked:true, reason:"signature"})));
+  own.forEach(sp=>freeItems.push(spellItem(sp,{locked:true, reason:"personal spell"})));
+  // a mixed lore's attribute + signature tick themselves (autoWith) while any of its
+  // spells is selected in the picker
+  const mixGroups=mixes.map(nm=>{ const ml=loreData(nm), picks=pool.filter(r=>r.lore===nm).map(r=>r.sp.name);
+    const auto={locked:true, autoWith:picks};
+    const head=[ ...(ml.attribute?[attrItem(ml,Object.assign({reason:"lore attribute — known with any Lore of "+nm+" spell"},auto))]:[]),
+      ...ml.spells.filter(sp=>sp.lvl===0).map(sp=>spellItem(sp,Object.assign({reason:"signature — known with any Lore of "+nm+" spell"},auto))) ];
+    return { label:`Lore of ${nm}`, items:[...head, ...pool.filter(r=>r.lore===nm).map(r=>spellItem(r.sp))] }; });
   const open=()=>openItemPicker({
     title:`Spells — Lore of ${e.lore}${mixes.length?" (+ "+mixes.join(", ")+")":""}`,
     multi:true, maxPicks:cap, selected:e.spells.slice(),
     groups:[
      ...(freeItems.length?[{ label:"Always known (free)", items:freeItems }]:[]),
-     { label:`Lore of ${e.lore}`, items: lore.spells.filter(sp=>sp.lvl!==0).map(spellItem) },
+     { label:`Lore of ${e.lore}`, items: lore.spells.filter(sp=>sp.lvl!==0).map(sp=>spellItem(sp)) },
      ...mixGroups],
     onConfirm:(sel)=>update(()=>{ e.spells=sel.filter(nm=>pool.some(r=>r.sp.name===nm && r.sp.lvl<=lvl)).slice(0,cap); })
   });
@@ -127,7 +130,7 @@ function renderSpells(e,u){
   // a SEPARATE pool/picker, not counted against the wizard-level cap above.
   const sigCap=bonusSignatures(e);
   const winds=windSignatures();
-  const ownSigs=new Set(lore.spells.filter(sp=>sp.lvl===0).map(sp=>sp.name));   // already known free
+  const ownSigs=new Set(inUse.flatMap(nm=>loreData(nm).spells.filter(sp=>sp.lvl===0).map(sp=>sp.name)));   // already known free
   if(sigCap>0){
     const sh=document.createElement("div"); sh.className="mt";
     sh.innerHTML=`Additional signature spell${sigCap>1?"s":""} <span style="color:var(--muted)">— from any of the eight Winds of Magic (granted by an item); choose ${sigCap}</span>`;

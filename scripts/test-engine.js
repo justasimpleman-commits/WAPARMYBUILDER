@@ -76,7 +76,7 @@ const engine=srcs.filter(s=>s.startsWith("js/")).map(load).join("\n");
   __renderCatalog:renderCatalog, __reconcile:reconcileEntry,
   __mountChoiceBlocked:mountChoiceBlocked, __renderOption:renderOption,
   __perNCount:perNCount, __perNMax:perNMax, __optChoiceBlocked:optChoiceBlocked,
-  __availableLores:availableLores, __mixLores:mixLores, __pickableSpells:pickableSpells, __loreNames:loreNames, __itemAllowed:itemAllowed,
+  __availableLores:availableLores, __mixLores:mixLores, __pickableSpells:pickableSpells, __loresInUse:loresInUse, __spellInfo:spellInfo, __describe:describe, __variantMatch:variantMatch, __loreNames:loreNames, __itemAllowed:itemAllowed,
   __modelAccess:modelAccess, __hasAccess:hasAccess, __itemEquipType:itemEquipType, __itemAccessOK:itemAccessOK, __normAccess:normAccess, __findItem:findItem, __pickerGroups:pickerGroups,
   __runeCatCost:runeCatCost, __runesCost:runesCost, __magicRunesCost:magicRunesCost,
   __runeCatsForChar:runeCatsForChar, __runeAllowed:runeAllowed, __runeDef:runeDef,
@@ -934,6 +934,19 @@ __setState([]); __setGen(null); __switch("grand-cathay",false);
   __addUnit("characters","zhaoming"); const zm=__getState()[4];
   ok(__knownSpells(zm).includes("Master of Alchemy"), "GC: Zhao Ming knows Master of Alchemy even before a lore is chosen");
   zm.lore="Metal"; ok(__knownSpells(zm).includes("Master of Alchemy") && __knownSpells(zm).includes("Glittering Robe"), "GC: Zhao Ming: Metal signature + Master of Alchemy");
+  // a mixed lore's attribute + signature come with any spell of that lore
+  __setState([]); __addUnit("characters","yuanbo"); const yb=__getState()[0], yu=U("characters","yuanbo"); yb.lore="Heavens";
+  ok(!__pickableSpells(yb,yu).some(r=>r.sp.name==="Shem's Burning Gaze"), "GC: a mixed lore's signature is not a pick");
+  ok(JSON.stringify(__loresInUse(yb,yu))===JSON.stringify(["Heavens"]) && !__knownSpells(yb).includes("Shem's Burning Gaze"), "GC: Yuan Bo without a Light spell does not know Light's signature");
+  yb.spells=["Dazzling Brightness"]; __reconcile(yb);
+  ok(JSON.stringify(__loresInUse(yb,yu))===JSON.stringify(["Heavens","Light"]), "GC: picking a Light spell brings the Lore of Light into use");
+  ok(__knownSpells(yb).includes("Shem's Burning Gaze") && yb.spells.length===1, "GC: …its signature is known free (outside the cap)");
+  { const d=__describe(yb,yu).join(" | "); ok(/Lore: Heavens \+ Light/.test(d) && /Focus Energy/.test(d), "GC: export lists both lores and Light's attribute"); }
+  ok(__spellInfo(yb,"Shem's Burning Gaze").lore==="Light", "GC: game mode resolves the mixed-lore signature");
+  __addUnit("characters","shugengan"); const s2=__getState()[1], s2u=U("characters","shugengan"); s2.opts.align=0; s2.lore="Metal";
+  ok(__loresInUse(s2,s2u).length===1, "GC: Yin Shugengan with no Yin spell has only Metal's attribute");
+  s2.spells=["Cloak of Jet"]; ok(JSON.stringify(__loresInUse(s2,s2u))===JSON.stringify(["Metal","Yin"]) && /Power of Yin/.test(__describe(s2,s2u).join(" ")), "GC: a Yin spell brings the Power of Yin attribute (exported)");
+  ok(__variantMatch(s2,s2u,"Dragon-Blooded Shugengan or Dragon Descendant"), "variantMatch accepts \"A or B\"");
   ok(!!U("characters","taoyan") && U("characters","taoyan").variants[0].points===180, "GC: Taoyan the Merciless present (180)");
   // v3.1 costs
   ok(U("core","peasantmilitia").basePoints===2.5 && U("core","jadewarriors").basePoints===4 && U("special","terracottawarriors").basePoints===3.5 && U("special","mercenaryogres").basePoints===25, "GC: Militia 2.5, Jade Warriors 4, Terracotta 3.5, Ogres 25");
