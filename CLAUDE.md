@@ -23,7 +23,9 @@ The app is a generic **engine** driven by **data files**. Adding another army
 book means writing a new data file and adding one line to `data/books.js`; for books that
 fit the existing systems the engine never needs to change. (Genuinely new mechanics
 get a *generic, data-driven* hook rather than per-book logic — e.g. Vampiric
-Powers, Virtues, the Undead `requireWizardLore` validator, and the High Elf
+Powers, Virtues, the Undead `requireWizardLore` validator, mixed lores (`mixLores` —
+a Grand Cathay Shugengan's Yin/Yang alignment gates its lores and lets it swap in
+Lore of Yin/Yang spells), and the High Elf
 Elven-Honour `cond` system (an honour shown-but-disabled when the chosen mount
 forbids it) plus choice-gated mounts (`requiresChoice` on a mount choice — a mount
 that only unlocks under its honour) are engine features toggled by data fields, see
@@ -168,7 +170,7 @@ script in **`build/`**.
   goes. Don't touch the data layer without reading it first.
 - **`reference/`** — source material, not shipped in the build (but committed): the
   core rulebook PDF (`reference/Rulebook/`, 9th Ed 3.11) and the army-book PDFs
-  (`reference/Army books/` — so far Chaos Dwarfs, Daemons of Chaos, Dark Elves, Vampire Counts, Wood Elves 3.1) used to
+  (`reference/Army books/` — so far Chaos Dwarfs, Daemons of Chaos, Dark Elves, Grand Cathay, Vampire Counts, Wood Elves 3.1) used to
   audit data, the audit notes, plus
   `reference/Chaos-Dwarfs-Stats-and-Logic.docx`, a printable stats + logic
   reference (title page, logic section, per-unit profiles, magic-item tables).

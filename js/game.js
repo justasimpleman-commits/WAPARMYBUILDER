@@ -32,12 +32,14 @@ function gameProfileRows(e,u){
   const kept=rows.filter(r=>!others.has(r[0]));
   return kept.length ? kept : rows;
 }
-/* a known spell's data by name: the wizard's own lore, else the eight Winds'
-   signatures (Arcane Familiar picks) */
+/* a known spell's data by name: the wizard's own lore, a mixed lore (mixLores),
+   else the eight Winds' signatures (Arcane Familiar picks) */
 function gameSpell(e,name){
   const lore=e.lore?loreData(e.lore):null;
   const sp=lore && lore.spells.find(s=>s.name===name);
   if(sp) return {lore:e.lore, sp};
+  const u=findUnit(e.cat,e.id), mx=u && pickableSpells(e,u).find(r=>r.sp.name===name);   // a mixed-lore pick
+  if(mx) return mx;
   const w=windSignatures().find(x=>x.name===name);
   return w ? {lore:w.lore, sp:w.sp} : null;
 }

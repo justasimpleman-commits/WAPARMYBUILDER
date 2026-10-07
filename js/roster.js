@@ -91,18 +91,29 @@ function renderSpells(e,u){
     html:`<div class="d">${esc(lore.attribute.text)}</div>` });
   lore.spells.filter(sp=>sp.lvl===0).forEach(sp=>freeItems.push({ name:sp.name, locked:true, reason:"signature",
     html:`<div class="d"><span class="slvl">L${sp.lvl}</span> <span class="scast">${esc(String(sp.cast))}+</span> <span class="note">${esc(sp.type)} · ${esc(sp.range)}</span><br>${esc(sp.effect)}</div>` }));
+  // mixed lores (mixLores): their spells may replace spells of the chosen lore
+  const mixes=mixLores(e,u);
+  if(mixes.length){ const m=document.createElement("div"); m.className="note";
+    m.textContent="May replace any of these with spells from: "+mixes.map(n=>"Lore of "+n).join(", "); box.appendChild(m); }
+  const pool=pickableSpells(e,u);
+  const spellItem=sp=>{
+    const tooHigh = sp.lvl>lvl;                                    // beyond the wizard's level
+    return { name:sp.name,                                         // cost omitted → no "pts" shown
+      disabled:tooHigh, reason: tooHigh?`requires a level ${sp.lvl} wizard`:"",
+      html:`<div class="d"><span class="slvl">${sp.lvl===0?"Sig":"L"+sp.lvl}</span> <span class="scast">${esc(String(sp.cast))}+</span> <span class="note">${esc(sp.type)} · ${esc(sp.range)}</span><br>${esc(sp.effect)}</div>` };
+  };
+  const mixGroups=mixes.map(nm=>{ const ml=loreData(nm);
+    const attr=ml.attribute?[{ name:ml.attribute.name, locked:true, reason:"lore attribute (when a Lore of "+nm+" spell is cast)",
+      html:`<div class="d">${esc(ml.attribute.text)}</div>` }]:[];
+    return { label:`Lore of ${nm}`, items:[...attr, ...pool.filter(r=>r.lore===nm).map(r=>spellItem(r.sp))] }; });
   const open=()=>openItemPicker({
-    title:`Spells — Lore of ${e.lore}`,
+    title:`Spells — Lore of ${e.lore}${mixes.length?" (+ "+mixes.join(", ")+")":""}`,
     multi:true, maxPicks:cap, selected:e.spells.slice(),
     groups:[
      ...(freeItems.length?[{ label:"Always known (free)", items:freeItems }]:[]),
-     { label:`Lore of ${e.lore}`, items: lore.spells.filter(sp=>sp.lvl!==0).map(sp=>{
-      const tooHigh = sp.lvl>lvl;                                  // beyond the wizard's level
-      return { name:sp.name,                                       // cost omitted → no "pts" shown
-        disabled:tooHigh, reason: tooHigh?`requires a level ${sp.lvl} wizard`:"",
-        html:`<div class="d"><span class="slvl">L${sp.lvl}</span> <span class="scast">${esc(String(sp.cast))}+</span> <span class="note">${esc(sp.type)} · ${esc(sp.range)}</span><br>${esc(sp.effect)}</div>` };
-    }) }],
-    onConfirm:(sel)=>update(()=>{ e.spells=sel.filter(nm=>lore.spells.some(sp=>sp.name===nm && sp.lvl!==0 && sp.lvl<=lvl)).slice(0,cap); })
+     { label:`Lore of ${e.lore}`, items: lore.spells.filter(sp=>sp.lvl!==0).map(spellItem) },
+     ...mixGroups],
+    onConfirm:(sel)=>update(()=>{ e.spells=sel.filter(nm=>pool.some(r=>r.sp.name===nm && r.sp.lvl<=lvl)).slice(0,cap); })
   });
   box.appendChild(pickBtn(e.spells.length?e.spells.join(", "):"Choose…", !e.spells.length, open));
 
