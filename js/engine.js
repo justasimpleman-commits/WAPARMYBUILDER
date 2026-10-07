@@ -263,7 +263,7 @@ function entryLoadout(e,u){
   if(e.magicStd) magic.push("Standard: "+e.magicStd);
   if(e.runes){ for(const cat in e.runes){ const list=e.runes[cat]; if(list && list.length){
     const g=runeGroup(list); Object.keys(g).forEach(n=>magic.push(g[n]>1?`${n} ×${g[n]}`:n)); } } }
-  const spells = e.lore ? knownSpells(e) : [];
+  const spells = (e.lore || fixedSpells(e).length) ? knownSpells(e) : [];
   return {equip, magic, spells, lore:e.lore};
 }
 /* ---------- mount profile lookup ----------
@@ -289,13 +289,18 @@ function mountProfile(label){
   return null;
 }
 
-/* all spells a wizard knows = signature(s) of its lore + chosen spells
-   (+ any extra signatures from an Arcane Familiar, trimmed to the item bonus) */
+/* a unit's personal spells (`fixedSpells:[{name,lvl,cast,type,range,effect}]`):
+   always known whatever lore it uses, free, outside the pick cap (Miao Ying's
+   Wrath of the Storm, Zhao Ming's Master of Alchemy) */
+function fixedSpells(e){ const u=findUnit(e.cat,e.id); return (u && u.fixedSpells) || []; }
+/* all spells a wizard knows = signature(s) of its lore + personal spells + chosen
+   spells (+ any extra signatures from an Arcane Familiar, trimmed to the item bonus) */
 function knownSpells(e){
   const extraSig=(e.sigSpells||[]).slice(0,bonusSignatures(e));
-  const lore=e.lore?loreData(e.lore):null; if(!lore) return [...(e.spells||[]), ...extraSig];
+  const own=fixedSpells(e).map(sp=>sp.name);
+  const lore=e.lore?loreData(e.lore):null; if(!lore) return [...own, ...(e.spells||[]), ...extraSig];
   const sigs=lore.spells.filter(sp=>sp.lvl===0).map(sp=>sp.name);
-  return [...sigs, ...(e.spells||[]), ...extraSig];
+  return [...sigs, ...own, ...(e.spells||[]), ...extraSig];
 }
 /* resolve a lore's spell data: book-specific lores win, then the shared 8 rulebook lores */
 function loreData(name){ return (D.spellLores && D.spellLores[name]) || (window.COMMON_LORES && window.COMMON_LORES[name]) || null; }

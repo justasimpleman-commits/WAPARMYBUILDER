@@ -927,6 +927,13 @@ __setState([]); __setGen(null); __switch("grand-cathay",false);
   // special characters' mixed lores
   __addUnit("characters","miaoying"); const my=__getState()[3]; my.lore="Life";
   ok(JSON.stringify(__mixLores(my,U("characters","miaoying")))===JSON.stringify(["Yin"]), "GC: Miao Ying uses Life + Yin spells");
+  ok(__knownSpells(my).includes("Wrath of the Storm") && __knownSpells(my).includes("The Storm Dragon's Fury"), "GC: Miao Ying always knows her personal spells");
+  my.spells=["Wrath of the Storm"]; __reconcile(my); ok(my.spells.length===0, "GC: personal spells are not stored as picks (outside the cap)");
+  { const box=__renderSpells(my,U("characters","miaoying")); const nd=[]; (function walk(x){ nd.push(x); (x.children||[]).forEach(walk); })(box);
+    ok(/Wrath of the Storm \(personal spell\)/.test(nd.map(x=>(x._html||"")+(x.textContent||"")).join(" ")), "GC: spell chooser lists Miao Ying's personal spells as always known"); }
+  __addUnit("characters","zhaoming"); const zm=__getState()[4];
+  ok(__knownSpells(zm).includes("Master of Alchemy"), "GC: Zhao Ming knows Master of Alchemy even before a lore is chosen");
+  zm.lore="Metal"; ok(__knownSpells(zm).includes("Master of Alchemy") && __knownSpells(zm).includes("Glittering Robe"), "GC: Zhao Ming: Metal signature + Master of Alchemy");
   ok(!!U("characters","taoyan") && U("characters","taoyan").variants[0].points===180, "GC: Taoyan the Merciless present (180)");
   // v3.1 costs
   ok(U("core","peasantmilitia").basePoints===2.5 && U("core","jadewarriors").basePoints===4 && U("special","terracottawarriors").basePoints===3.5 && U("special","mercenaryogres").basePoints===25, "GC: Militia 2.5, Jade Warriors 4, Terracotta 3.5, Ogres 25");

@@ -279,7 +279,8 @@ field over the model's chosen items — `e.magic`, `e.gifts`, `e.magicStd`; the
 Spell Familiar has `extraSpells:1`). So `cap = wizardLevel + bonusSpells(e)`.
 `entry.spells` stores only the chosen non-signature spells and is trimmed to `cap`
 (removing the granting item drops the extra pick); `knownSpells(e)` returns
-signatures + chosen (used for export, alongside the attribute). A chosen spell's
+signatures + the unit's personal `fixedSpells` (always known, free, locked in the
+chooser) + chosen (used for export, alongside the attribute). A chosen spell's
 **level may not exceed the wizard's level** (a level-1 wizard can only pick
 level-1 spells); `renderSpells` disables higher-level spells and drops any stored
 picks above the level. An item flagged `extraSignatures:N` (the Arcane Familiar,

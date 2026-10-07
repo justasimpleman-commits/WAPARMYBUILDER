@@ -881,6 +881,10 @@ Place the small round template with the centre where the cannon ball lands befor
         access: ["light armour"],
         variants: [ { name: "Miao Ying", points: 525, wizardLevel: 4, magicBudget: 0 } ],
         lores: ["Life"], mixLores: ["Yin"],
+        fixedSpells: [
+          { name: "Wrath of the Storm", lvl: 2, cast: 7, type: "Augment", range: `24"`, effect: `The target unit gains the Immunity (Psychology) and Magical Attacks special rules until the start of your next Magic phase.` },
+          { name: "The Storm Dragon's Fury", lvl: 3, cast: 10, type: "Magic missile", range: `24"`, effect: `Causes 2D3 Strength 5 Hits with the Lightning Attacks special rule.` }
+        ],
         options: [],
         notes: "Must always be the Army General. Fixed items: Storm Wind Coronal, Vambraces of Yin."
       },
@@ -889,6 +893,9 @@ Place the small round template with the centre where the cannon ball lands befor
         access: ["light armour"],
         variants: [ { name: "Zhao Ming", points: 480, wizardLevel: 4, magicBudget: 0 } ],
         lores: ["Metal"], mixLores: ["Yang"],
+        fixedSpells: [
+          { name: "Master of Alchemy", lvl: 1, cast: 6, type: "Augment", range: `24"`, effect: `The target unit gains the Armour Piercing (1) and Magical Attacks special rules until the start of your next Magic phase.` }
+        ],
         options: [],
         notes: "Must always be the Army General. Fixed items: Horns of Shang-Yang, The Burning Vambraces."
       },

@@ -71,7 +71,10 @@ function renderSpells(e,u){
   const head=document.createElement("div"); head.className="mt";
   head.innerHTML=`Spells <span style="color:var(--muted)">— signature &amp; lore attribute known automatically; choose ${cap} more (wizard level ${lvl}${bonus?` + ${bonus} from items`:``}), max spell level ${lvl}</span>`;
   box.appendChild(head);
-  if(!e.lore){ const n=document.createElement("div"); n.className="note"; n.textContent="Choose a Lore of Magic above to pick spells."; box.appendChild(n); return box; }
+  const own=fixedSpells(e);                  // personal spells: known whatever the lore
+  if(!e.lore){
+    if(own.length){ const f=document.createElement("div"); f.className="note"; f.innerHTML="Always known: "+esc(own.map(sp=>sp.name+" (personal spell)").join(", ")); box.appendChild(f); }
+    const n=document.createElement("div"); n.className="note"; n.textContent="Choose a Lore of Magic above to pick spells."; box.appendChild(n); return box; }
   const lore=loreData(e.lore);
   if(!lore){ const n=document.createElement("div"); n.className="note"; n.textContent="No spell data for this lore."; box.appendChild(n); return box; }
   // e.spells holds only the chosen NON-signature spells (kept legal by reconcileSpells);
@@ -80,6 +83,7 @@ function renderSpells(e,u){
   const free=[];
   if(lore.attribute) free.push(lore.attribute.name+" (lore attribute)");
   lore.spells.filter(sp=>sp.lvl===0).forEach(sp=>free.push(sp.name+" (signature)"));
+  own.forEach(sp=>free.push(sp.name+" (personal spell)"));
   if(free.length){ const f=document.createElement("div"); f.className="note"; f.innerHTML="Always known: "+esc(free.join(", ")); box.appendChild(f); }
   const cnt=document.createElement("div"); cnt.className="budget"+(e.spells.length>cap?" over":"");
   cnt.innerHTML=`Chosen <b>${e.spells.length}</b> / ${cap}`;
@@ -90,6 +94,8 @@ function renderSpells(e,u){
   if(lore.attribute) freeItems.push({ name:lore.attribute.name, locked:true, reason:"lore attribute",
     html:`<div class="d">${esc(lore.attribute.text)}</div>` });
   lore.spells.filter(sp=>sp.lvl===0).forEach(sp=>freeItems.push({ name:sp.name, locked:true, reason:"signature",
+    html:`<div class="d"><span class="slvl">L${sp.lvl}</span> <span class="scast">${esc(String(sp.cast))}+</span> <span class="note">${esc(sp.type)} · ${esc(sp.range)}</span><br>${esc(sp.effect)}</div>` }));
+  own.forEach(sp=>freeItems.push({ name:sp.name, locked:true, reason:"personal spell",
     html:`<div class="d"><span class="slvl">L${sp.lvl}</span> <span class="scast">${esc(String(sp.cast))}+</span> <span class="note">${esc(sp.type)} · ${esc(sp.range)}</span><br>${esc(sp.effect)}</div>` }));
   // mixed lores (mixLores): their spells may replace spells of the chosen lore
   const mixes=mixLores(e,u);

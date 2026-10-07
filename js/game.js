@@ -38,6 +38,8 @@ function gameSpell(e,name){
   const lore=e.lore?loreData(e.lore):null;
   const sp=lore && lore.spells.find(s=>s.name===name);
   if(sp) return {lore:e.lore, sp};
+  const own=fixedSpells(e).find(s=>s.name===name);                 // a personal spell
+  if(own) return {lore:"personal spell", sp:own};
   const u=findUnit(e.cat,e.id), mx=u && pickableSpells(e,u).find(r=>r.sp.name===name);   // a mixed-lore pick
   if(mx) return mx;
   const w=windSignatures().find(x=>x.name===name);
@@ -46,7 +48,7 @@ function gameSpell(e,name){
 function openGameSpell(i){
   const s=window.__gsp[i]; if(!s) return;
   const sp=s.sp, tag=sp.lvl===0?"Signature":"Level "+sp.lvl;
-  openModal2(sp.name, `<div class="rule"><b>${esc(String(sp.cast))}+</b> <span style="color:var(--muted)">Lore of ${esc(s.lore)} · ${esc(tag)} · ${esc(sp.type)} · ${esc(sp.range)}</span></div><div class="rule">${esc(sp.effect)}</div>`);
+  openModal2(sp.name, `<div class="rule"><b>${esc(String(sp.cast))}+</b> <span style="color:var(--muted)">${s.lore==="personal spell"?"Personal spell":"Lore of "+esc(s.lore)} · ${esc(tag)} · ${esc(sp.type)} · ${esc(sp.range)}</span></div><div class="rule">${esc(sp.effect)}</div>`);
 }
 function openGameAttr(i){
   const s=window.__gsp[i]; if(!s) return;
@@ -87,7 +89,7 @@ function gameCardHTML(e){
     h+=gameLine("Mount", `<b>${esc(mount.label)}</b>${mr?` — ${mr}`:""}`);
   }
   if(lo.magic.length) h+=gameLine("Magic", loadoutHTML(lo.magic,"item","__gw","__giw"));
-  if(lo.lore){
+  if(lo.lore || lo.spells.length){
     const lore=loreData(lo.lore), sp=[];
     if(lore && lore.attribute){ const i=window.__gsp.push({name:lore.attribute.name, text:lore.attribute.text, lore:lo.lore})-1;
       sp.push(`<span class="ruleword" onclick="openGameAttr(${i})">${esc(lore.attribute.name)}</span> <span class="note">(attribute)</span>`); }
@@ -95,7 +97,7 @@ function gameCardHTML(e){
       if(!s){ sp.push(esc(n)); return; }
       const i=window.__gsp.push(s)-1;
       sp.push(`<span class="ruleword" onclick="openGameSpell(${i})">${esc(n)}</span> <span class="gcast">${esc(String(s.sp.cast))}+</span>`); });
-    h+=gameLine(`Lore of ${esc(lo.lore)}`, sp.join(", "));
+    h+=gameLine(lo.lore?`Lore of ${esc(lo.lore)}`:"Spells", sp.join(", "));
   }
   return `<div class="gcard" id="game-${e.uid}">${h}</div>`;
 }

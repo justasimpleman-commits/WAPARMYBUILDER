@@ -208,6 +208,12 @@ groups under the same wizard-level cap; the chosen lore's signature and attribut
 stay the only free ones. `mixLores(e,u)` / `pickableSpells(e,u)` are the single
 source of truth (picker, `reconcileSpells`, game mode).
 
+**Personal spells.** `fixedSpells:[{name,lvl,cast,type,range,effect}]` on a unit:
+spells the model always knows whatever lore it uses (Miao Ying's Wrath of the Storm
+and The Storm Dragon's Fury, Zhao Ming's Master of Alchemy). Free, outside the pick
+cap, shown in the spell chooser as locked "personal spell" rows, and included in
+`knownSpells` (export, loadout, game mode).
+
 `attachedPerN:{every,cost,name}` adds **required attached models at a fixed ratio** —
 one `name` model, costing `cost` points, for every `every` models in the unit
 (`floor(count/every)`). Used by the Orcs & Goblins Squig Herd: the model count is the
