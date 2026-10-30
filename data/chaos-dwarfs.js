@@ -698,7 +698,7 @@
         options: [
           { id: "armour", type: "toggle", label: "Light armour", cost: 0.5, per: "model" },
           { id: "cmd", type: "command", magicStandard: 25 } ] },
-      { id: "wolfraiders", name: "Wolf Raiders", perModel: true, basePoints: 9, unitSize: [5,15],
+      { id: "wolfraiders", name: "Wolf Raiders", perModel: true, basePoints: 9, unitSize: [5,15], keyword: "hobgoblin",
         options: [
           { id: "lance", type: "toggle", label: "Light lances", cost: 1, per: "model" },
           { id: "bow", type: "toggle", label: "Shortbows", cost: 1, per: "model" },

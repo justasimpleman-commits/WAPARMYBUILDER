@@ -618,6 +618,8 @@ console.log("Equipment type: label on magic weapons/armour, lance split, all-of,
   // Daemonsmith buys a fireglaive → Inferno Glaive of Hashut is legal for him
   __setState([]); __addUnit("characters","daemonsmith"); const ds=__getState()[0];
   ok(__itemAllowed(__findItem("Inferno Glaive of Hashut"),ds,__findUnit("characters","daemonsmith")), "CD: Daemonsmith (fireglaive option) may take Inferno Glaive");
+  // Banner of the Khanate: every Hobgoblin unit (Cutthroats, Archers, Wolf Raiders) carries the hobgoblin keyword
+  ["cutthroats","archers","wolfraiders"].forEach(id=>ok(__findUnit("core",id).keyword==="hobgoblin", `CD: ${id} is a Hobgoblin unit (Banner of the Khanate)`));
 
   // Armour of Bone: medium armour, but Necromancers may take it regardless
   __setState([]); __switch("vampire-counts",false);
