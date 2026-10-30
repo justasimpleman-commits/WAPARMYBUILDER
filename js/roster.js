@@ -262,8 +262,16 @@ function catHeadNode(cat,label,items){
 // make el's children exactly `nodes`, moving/adding/removing as little as possible
 function patchChildren(el,nodes){
   if(typeof el.insertBefore!=="function"){ el.innerHTML=""; nodes.forEach(n=>el.appendChild(n)); return; }  // DOM stub (tests)
+  // A rebuilt card takes its old card's place via replaceChild; inserting it before
+  // the old one instead would then move every later card too, and on a phone that
+  // churn (plus losing the tapped, focused control) makes the scroll jump.
+  const keep=new Set(nodes);
   let ref=el.firstChild;
-  for(const n of nodes){ if(n===ref){ ref=ref.nextSibling; continue; } el.insertBefore(n,ref); }
+  for(const n of nodes){
+    if(n===ref){ ref=ref.nextSibling; continue; }
+    if(ref && !keep.has(ref) && !n.parentNode){ const nx=ref.nextSibling; el.replaceChild(n,ref); ref=nx; continue; }
+    el.insertBefore(n,ref);
+  }
   while(ref){ const nx=ref.nextSibling; el.removeChild(ref); ref=nx; }
 }
 function renderRoster(){
@@ -277,7 +285,23 @@ function renderRoster(){
     nodes.push(catHeadNode(cat,label,items));
     if(!collapsedCats[cat]) items.forEach(e=>nodes.push(entryNode(e)));
   });
+  const pin=rebuiltCardInView(el,nodes);
   patchChildren(el,nodes);
+  if(pin){ const n=document.getElementById(pin.id), dy=n?n.getBoundingClientRect().top-pin.top:0;
+    if(dy){ const sc=scrollParent(el); sc.scrollTop+=dy; } }
+}
+// The card being edited is rebuilt as a new node; keep its top where it was on
+// screen so the list doesn't jump (the CSS turns off browser scroll anchoring,
+// which loses its reference when the card it is anchored to is replaced).
+function rebuiltCardInView(el,nodes){
+  if(typeof el.insertBefore!=="function" || !el.children) return null;   // DOM stub (tests)
+  const keep=new Set(nodes), vh=innerHeight;
+  for(const c of el.children){
+    if(keep.has(c) || !c.id || !c.id.startsWith("entry-")) continue;
+    const r=c.getBoundingClientRect();
+    if(r.bottom>0 && r.top<vh) return {id:c.id, top:r.top};
+  }
+  return null;
 }
 
 /* ---------- drag to reorder ----------

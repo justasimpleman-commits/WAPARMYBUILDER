@@ -323,6 +323,14 @@ select:focus,.stepper input:focus,.catsearch:focus,textarea:focus,.shareurl:focu
 .bars{background:var(--owb-bg-l);border-bottom:2px solid var(--owb-list);padding:10px 18px}
 .bar .lab{font-size:13px;color:var(--owb-headline);font-weight:700}
 .bar .lab b{color:var(--owb-font)}
+/* keep each label on one line: a total gaining a digit or a ⚠ used to wrap it,
+   growing the bars and shoving the roster below them (a visible jump on phones) */
+.bar .lab{gap:6px;white-space:nowrap}
+.bar .lab>span{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.bar .lab b{flex-shrink:0}
+/* roster.js keeps the edited card in place itself (renderRoster); the browser's
+   own scroll anchoring would fight it when that card's node is replaced */
+.col.roster,#roster{overflow-anchor:none}
 .track{height:8px;background:var(--owb-white);border:1px solid var(--owb-list);border-radius:0}
 .fill{background:var(--owb-btn)} .fill.good{background:var(--owb-ok)} .fill.bad{background:var(--owb-err)}
 
