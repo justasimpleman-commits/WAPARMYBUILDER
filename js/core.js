@@ -77,15 +77,12 @@ function reorderEntry(uid, to){
 }
 function removeEntry(uid){
   const e=state.find(x=>x.uid===uid); if(!e) return;
-  const nm=entryName(e);
   update(()=>{ state=state.filter(x=>x.uid!==uid); if(generalUid===uid) generalUid=null; });
-  toast(`Removed ${nm}`, {label:"Undo", fn:undo});
 }
 function clearArmy(){
   if(!state.length) return;
   update(()=>{ state=[]; generalUid=null; }, {meta:true});
   currentSaveName=null; currentSaveFile=null;
-  toast("Army cleared", {label:"Undo", fn:undo});
 }
 
 /* ---------- the mutation path: update() + undo/redo ----------

@@ -214,20 +214,11 @@ h2.sec.cathead:hover{color:var(--fire2)}
 .librow .libacts{display:flex;gap:6px;flex-shrink:0}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:#2a1f17;color:#fff;border:1px solid var(--fire2);padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:1000}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
-.toast .tbtn{margin-left:14px;background:none;border:1px solid var(--fire2);color:var(--fire2);border-radius:5px;padding:3px 10px;font-size:13px;font-weight:600;cursor:pointer}
-.toast .tbtn:hover{background:var(--fire2);color:#1a120c}
 /* ---- prevent sideways scroll on narrow screens (belt-and-suspenders;
        mobile-init.js owns the phone drawer layout) ---- */
 html,body{max-width:100%;overflow-x:hidden}
 .wrap,.col{min-width:0}
 .col select{max-width:100%}
-/* restore-unsaved-work notice (autosave draft) */
-.restore-note{position:fixed;bottom:0;left:0;right:0;z-index:120;background:#2a1f17;
-  border-top:1px solid var(--fire2);color:var(--ink);padding:10px 14px;display:flex;align-items:center;gap:10px;
-  font-size:13px;transform:translateY(110%);transition:transform .25s}
-.restore-note.show{transform:translateY(0)}
-.restore-note span{flex:1}
-.restore-note .btn{padding:5px 10px}
 /* ---- game mode (js/game.js): read-only army reference over the builder ---- */
 .histbtn.gamebtn{width:auto;padding:0 10px;font-size:13px;margin-left:6px;color:var(--fire2)}
 body.gaming{overflow:hidden}
@@ -424,10 +415,8 @@ h2.sec.cathead:hover{color:var(--owb-btn)}
 .modal .pkfoot{background:var(--owb-bg-l);border-top:2px solid var(--owb-list)}
 .modal textarea,.modal .shareurl,.modal #promptInput,.modal select{background:var(--owb-white) !important;border:2px solid var(--owb-list) !important;color:var(--owb-font) !important;border-radius:0 !important}
 .librow{border:2px solid var(--owb-list) !important;border-radius:5px !important;background:var(--owb-bg-l) !important}
-.toast,.restore-note{background:var(--owb-header);color:var(--owb-white);border:none;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.toast{background:var(--owb-header);color:var(--owb-white);border:none;box-shadow:0 8px 24px rgba(0,0,0,.35)}
 .toast{border-radius:5px}
-.toast .tbtn{background:var(--owb-btn);border:none;color:var(--owb-white)}
-.toast .tbtn:hover{background:var(--owb-btn);color:var(--owb-font)}
 
 /* ---- game mode ---- */
 .gameview{background:linear-gradient(90deg,var(--owb-bg) 0%,var(--owb-bg-l) 50%,var(--owb-bg) 100%) var(--owb-bg)}

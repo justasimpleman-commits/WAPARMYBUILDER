@@ -389,15 +389,15 @@ stats card, which would make rule-heavy units unreadable.
   carets, catalogue search) just calls `render()`/`renderCatalog()`.
 - Snapshots are `{uidc, generalUid, state}` without each entry's `collapsed`; undo
   keeps the current fold state. Undo/redo: the ↶ ↷ header buttons, Ctrl/⌘+Z and
-  Ctrl/⌘+Shift+Z / Ctrl+Y (ignored while typing in a field or with a modal open), and
-  the "Undo" button on the toast after removing a unit or clearing the army
-  (`removeEntry`, `clearArmy` — no confirm dialogs; undo is the safety net).
+  Ctrl/⌘+Shift+Z / Ctrl+Y (ignored while typing in a field or with a modal open).
+  Removing a unit or clearing the army (`removeEntry`, `clearArmy`) has no confirm
+  and no Undo toast — the user asked for no such popups; undo is the safety net.
   Switching books and loading an army (file, library, shared link) are undo steps
   too, with no confirm: snapshots record the active book (`restoreSnapshot` calls
   `activateBook`), and these whole-army steps (`update(fn,{meta:true})` /
   `pushHistory(before,meta)`) also restore the save name/file, saved-state and
-  limit (`saveMeta`/`restoreMeta`). Deleting a library army shows an Undo toast
-  instead of a confirm.
+  limit (`saveMeta`/`restoreMeta`). Deleting a library army happens immediately
+  (no confirm, no toast).
 - **Dirty tracking:** `markSaved()` records the roster + points limit as saved
   (after Save, Save to file, or any load); `isDirty()` compares. The status line shows
   "● unsaved changes", the tab title gets a "●" and `beforeunload` warns (the only
@@ -437,7 +437,7 @@ stats card, which would make rule-heavy units unreadable.
   runs `migrateEntry()` on load. The storage keys keep their old `cd-`/
   `chaos-dwarfs-` names so existing saves keep loading — don't rename them.
 - Autosave draft: the roster is mirrored to localStorage (debounced) and restored
-  on the next visit with a Discard/Dismiss notice; the draft records whether it was
+  silently on the next visit (no notice); the draft records whether it was
   dirty.
 - **Share link** (`shareArmy`): the army is packed into the URL fragment
   `#army=<code>` — nothing is uploaded. Each entry is stored as its difference from
