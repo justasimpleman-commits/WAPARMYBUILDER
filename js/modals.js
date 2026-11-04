@@ -416,19 +416,13 @@ function openVirtueInfo(){
   const lines=(D.virtues||[]).map(v=>`<b>${v.name}</b> (${v.cost})<br>${v.desc||""}`);
   openModal("Virtues of the Knight", lines.join("<br><br>")||"No virtues.");
 }
-/* brief status message; with `action` ({label, fn}) it carries a button (e.g.
-   "Removed Lord — Undo") and stays up longer */
-function toast(msg, action){
+/* brief status message */
+function toast(msg){
   let t=document.getElementById("toast");
   if(!t){ t=document.createElement("div"); t.id="toast"; t.className="toast"; document.body.appendChild(t); }
   t.textContent=msg;
-  if(action){
-    const b=document.createElement("button"); b.className="tbtn"; b.textContent=action.label;
-    b.onclick=()=>{ t.classList.remove("show"); action.fn(); };
-    t.appendChild(b);
-  }
   t.classList.add("show");
-  clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"), action?5000:1800);
+  clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"), 1800);
 }
 /* open the shared modal without going through a unit-specific builder */
 function openModalRaw(){ document.getElementById("modalBg").classList.add("open"); }

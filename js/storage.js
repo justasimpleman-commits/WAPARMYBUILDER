@@ -44,7 +44,7 @@ function fileSafe(name){ return (String(name||"untitled").replace(/[^a-z0-9\-_ ]
 /* ---- temporary autosave draft ----
    Mobile browsers freeze/kill backgrounded tabs and lose unsaved work. We mirror
    the current roster to localStorage on every change (debounced) and on the
-   page being hidden/closed, then silently restore it on the next launch. This is
+   page being hidden/closed, then silently restore it on the next launch (no notice). This is
    separate from the named library/file saves; it is the "you didn't lose your
    work" safety net, not a save slot. */
 const LS_DRAFT="cd-army-draft";
@@ -65,32 +65,15 @@ function readDraft(){
   try{ snap=JSON.parse(localStorage.getItem(LS_DRAFT)||"null"); }catch(_){ snap=null; }
   return (snap && Array.isArray(snap.state) && snap.state.length) ? snap : null;
 }
-async function restoreDraft(notice){
+async function restoreDraft(){
   const snap=readDraft(); if(!snap) return false;
   if(!(await applyArmy(snap))) return false;         // applyArmy loads the book, the roster, renders
   currentSaveName = snap.savedName || null;          // restore "unsaved" status, not the draft's placeholder name
   currentSaveFile = null;
   if(snap.dirty!==false) _savedSig=null;             // it was unsaved when the page closed
   updateSaveStatus();
-  if(notice!==false) showRestoreNotice();
   return true;
 }
-function showRestoreNotice(){
-  let n=document.getElementById("restoreNote");
-  if(!n){ n=document.createElement("div"); n.id="restoreNote"; n.className="restore-note"; document.body.appendChild(n); }
-  n.innerHTML='<span>Restored your unsaved work from last time.</span>'
-    +'<button class="btn" onclick="discardDraft()">Discard</button>'
-    +'<button class="btn" onclick="dismissRestore()">Dismiss</button>';
-  requestAnimationFrame(()=>n.classList.add("show"));
-}
-function dismissRestore(){ const n=document.getElementById("restoreNote"); if(n) n.classList.remove("show"); }
-function discardDraft(){
-  clearDraft();
-  update(()=>{ state=[]; generalUid=null; });
-  currentSaveName=null; currentSaveFile=null;
-  updateSaveStatus(); dismissRestore(); toast("Unsaved work discarded", {label:"Undo", fn:undo});
-}
-
 /* ---- (de)serialize the whole roster ---- */
 function serializeArmy(name){
   return {
@@ -131,8 +114,6 @@ async function applyArmy(data, hist){
   markSaved(); updateSaveStatus();
   return true;
 }
-/* "Loaded" toast, with Undo when the load replaced an army */
-function loadedToast(msg, undoable){ toast(msg, undoable ? {label:"Undo", fn:undo} : null); }
 
 /* ---- browser-fallback library store ----
    Primary store is IndexedDB (persists on file:// across Chrome/Firefox/Safari,
@@ -215,8 +196,7 @@ async function openArmyFromFile(){
   inp.onchange=()=>{ const f=inp.files[0]; if(!f) return;
     const rd=new FileReader(); rd.onload=async()=>{
       let data; try{ data=JSON.parse(rd.result); }catch(_){ alert("Could not read that file."); return; }
-      const had=!!state.length;
-      if(await applyArmy(data)) loadedToast("Loaded", had); };
+      await applyArmy(data); };
     rd.readAsText(f);
   };
   inp.click();
@@ -230,19 +210,13 @@ async function listLibrary(){
     .sort((a,b)=>String(b.savedAt).localeCompare(String(a.savedAt)));
 }
 async function libraryLoad(file){
-  const data=await libGet(file), had=!!state.length;
-  if(await applyArmy(data)){ currentSaveFile=file; closeModal(); loadedToast("Loaded", had); }
+  const data=await libGet(file);
+  if(await applyArmy(data)){ currentSaveFile=file; closeModal(); }
 }
-async function libraryDelete(file,name){
-  const data=await libGet(file), wasCurrent=currentSaveFile===file;
+async function libraryDelete(file){
   await libDelete(file);
-  if(wasCurrent){ currentSaveFile=null; }
+  if(currentSaveFile===file) currentSaveFile=null;
   openLibrary();
-  // no confirm: the toast's Undo puts the saved army back
-  if(data) toast('Deleted "'+name+'"', {label:"Undo", fn:async()=>{
-    await libSave(file,data); if(wasCurrent) currentSaveFile=file;
-    if(document.getElementById("modalBg").classList.contains("open") && document.getElementById("modalTitle").textContent==="Army library") openLibrary();
-  }});
 }
 async function openLibrary(){
   const items=await listLibrary();
@@ -258,7 +232,7 @@ async function openLibrary(){
       return '<div class="librow"><div class="libmeta"><div class="libname">'+na+'</div>'+
              '<div class="libsub">'+[pts,when].filter(Boolean).join(" · ")+'</div></div>'+
              '<div class="libacts"><button class="btn primary" onclick="libraryLoad(decodeURIComponent(\''+fa+'\'))">Load</button>'+
-             '<button class="btn" onclick="libraryDelete(decodeURIComponent(\''+fa+'\'),\''+na+'\')">Delete</button></div></div>';
+             '<button class="btn" onclick="libraryDelete(decodeURIComponent(\''+fa+'\'))">Delete</button></div></div>';
     }).join("")+'</div>';
   }
   openModalRaw();
@@ -334,7 +308,7 @@ async function openSharedArmy(code){
   let p; try{ p=await decodeShare(code); }catch(err){ toast("Could not open that link ("+err.message+")"); return false; }
   if(!p || !p.a || !Array.isArray(p.s)){ toast("That link doesn't contain an army"); return false; }
   if(!bookMeta(p.a)){ alert(`That link is for an army this app doesn't have ("${p.a}").`); return false; }
-  const hist = D ? {s:snapshot(), m:saveMeta()} : null, had=!!state.length;
+  const hist = D ? {s:snapshot(), m:saveMeta()} : null;
   if(!(await switchArmy(p.a,true))) return false;
   let skipped=0; const st=[];
   p.s.forEach((o,i)=>{ if(!findUnit(o.c,o.i)){ skipped++; return; } const e=unpackEntry(o,i+1); migrateEntry(e); st.push(e); });
@@ -342,6 +316,6 @@ async function openSharedArmy(code){
     generalUid:(p.g>=0?p.g+1:null), state:st }, hist);
   if(!ok) return false;
   saveNameHint=p.n||null; _savedSig=null; updateSaveStatus();
-  toast(`Opened a shared ${D.name} army${p.n?` “${p.n}”`:""}${skipped?` (${skipped} unknown unit${skipped>1?"s":""} skipped)`:""} — Save to keep it`, had ? {label:"Undo", fn:undo} : null);
+  if(skipped) toast(`${skipped} unknown unit${skipped>1?"s":""} skipped from the shared army`);
   return true;
 }

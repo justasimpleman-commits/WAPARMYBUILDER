@@ -20,11 +20,9 @@ function switchArmy(id, silent){
   if(id===CURRENT_ARMY && D) return Promise.resolve(true);
   const go=()=>{
     const reset=()=>{ activateBook(id); state=[]; generalUid=null; currentSaveName=null; currentSaveFile=null; saveNameHint=null; };
-    const had=state.length;
     if(silent || !D){ reset(); render(); }
     else update(reset, {meta:true});
     markSaved(); updateSaveStatus();
-    if(!silent && had) toast("Switched to "+D.name, {label:"Undo", fn:undo});
     return true;
   };
   if(ARMY_BOOKS[id]) return Promise.resolve(go());
@@ -99,8 +97,8 @@ async function start(){
   updateHistoryUI();
   const code=sharedCodeInUrl(), draft=readDraft();
   let ready=false;
-  // a shared link opens over a restored draft as an undo step (undo returns to the draft)
-  if(draft) ready=await restoreDraft(!code);
+  // the draft is restored silently; a shared link opens over it as an undo step
+  if(draft) ready=await restoreDraft();
   if(code) ready=(await openSharedArmy(code)) || ready;
   if(!D) await switchArmy(DEFAULT_ARMY, true);
 }
