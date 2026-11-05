@@ -166,7 +166,7 @@ function openChosenInfoRows(title, rows){
   if(!rows.length){ openModal(title, `<div class="rule" style="color:var(--muted)">Nothing selected yet — tap “Choose…” to pick from the list.</div>`); return; }
   let html="";
   rows.forEach(r=>{ const et=r.type||itemEquipType(findItem(r.name));
-    html+=`<div class="mirow"><div><span class="nm">${esc(r.name)}</span>${et?` <span class="etype">${esc(et)}</span>`:""} — <span class="cost">${r.cost} pts</span></div><div class="d">${esc(r.desc||"(no description)")}</div></div>`; });
+    html+=`<div class="mirow"><div><span class="nm">${esc(r.name)}</span>${et?` <span class="etype">${esc(et)}</span>`:""} — <span class="cost">${r.cost} pts</span></div><div class="d">${r.html||esc(r.desc||"(no description)")}</div></div>`; });
   openModal(title, html);
 }
 /* entry-side "open the picker" button (shows the current pick, or "Choose…") */
