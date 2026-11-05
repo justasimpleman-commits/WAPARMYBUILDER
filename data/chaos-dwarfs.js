@@ -283,6 +283,7 @@
     "Relentless": `A unit composed entirely of Relentless models never needs a Leadership test to march.`,
     "Resolute": `When taking Break tests, count the combat as lost by 1 less than the actual margin.`,
     "Sorcerer's Curse": `On suffering a Miscast, after resolving it the model must pass a Toughness test or take a Wound with no saves allowed.`,
+    "Dirty, Rotten, Sneaky": `After each round of combat is fought, the Sneaky Gits may Fight in an Extra Rank each turn for as long as they are in combat. So, after one turn, they fight in one additional rank, after two turns they fight in two additional ranks, and so on.`,
     "Treacherous Gits": `Units of 5+ not charging/in combat must test for Treachery in the Charge sub-phase; on a 1, roll on the Treachery table.`,
     "Animosity": `Units of 5+ not charging/in combat must test for Animosity in the Charge sub-phase; on a 1, roll on the Animosity table.`,
     "Infernal Cohort": `You may upgrade one unit of Warriors with heavy armour for +1.5 pts/model for each model with this rule in your army.`,

@@ -133,8 +133,21 @@ function tokensToHTML(str, resolver, store){
   const reg = window[store] = window[store] || [];
   const parts = String(str).split(/([,;.])/);
   let out = "";
-  for(const part of parts){
+  for(let i=0;i<parts.length;i++){
+    const part=parts[i];
     if(part===","||part===";"||part==="."){ out+=esc(part); continue; }
+    // a rule name that itself contains commas ("Dirty, Rotten, Sneaky"): try the
+    // longest comma-joined run of following tokens first (exact resolver hit only)
+    let joined=null;
+    for(let j=Math.min(parts.length-1,i+8);j>i;j-=2){
+      if(parts.slice(i+1,j).some((p,k)=>k%2===0&&p!==",")) continue;   // join across commas only
+      const run=parts.slice(i,j+1).join(""), m2=run.match(/^(\s*)([\s\S]*?)(\s*)$/);
+      const d2=m2[2]&&resolver(m2[2]);
+      if(d2 && d2.name.includes(",")){ joined={m:m2,def:d2,j}; break; }
+    }
+    if(joined){ const idx=reg.push(joined.def.name)-1;
+      out += esc(joined.m[1]) + `<span class="ruleword" onclick="event.stopPropagation();openRuleInfo(${store}[${idx}])">${esc(joined.m[2])}</span>` + esc(joined.m[3]);
+      i=joined.j; continue; }
     const m = part.match(/^(\s*)([\s\S]*?)(\s*)$/);
     const lead=m[1], core=m[2], trail=m[3];
     if(!core){ out+=esc(part); continue; }
@@ -173,4 +186,10 @@ function eqToHTML(eq, store){ return tokensToHTML(eq, equipDef, store); }       
 function ruleTextHTML(text){
   return String(text).split(/\n[ \t]*\n/).map(p=>p.trim()).filter(Boolean)
     .map(p=>`<div class="rule">${esc(p).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\n(?=• )/g,"<br>")}</div>`).join("");
+}
+/* {html|desc} for an openChosenInfoRows row whose text is a rule definition:
+   formatted like the picker (bold sub-headers, paragraphs), not raw **markup**. */
+function ruleRowBody(label){
+  const def=ruleDef(label);
+  return def ? {html:ruleTextHTML(def.text)} : {desc:"(no separate rule text)"};
 }

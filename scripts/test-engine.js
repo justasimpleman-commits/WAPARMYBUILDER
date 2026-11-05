@@ -63,7 +63,7 @@ const engine=srcs.filter(s=>s.startsWith("js/")).map(load).join("\n");
   __bonusSpells:bonusSpells, __bonusSignatures:bonusSignatures, __windSignatures:windSignatures,
   __getState:()=>state, __setState:(s)=>{state=s;}, __setGen:(u)=>{generalUid=u;},
   __getGen:()=>generalUid, __D:()=>D,
-  __rulesToHTML:rulesToHTML, __ruleExact:ruleExact, __ruleDef:ruleDef,
+  __ruleRowBody:ruleRowBody, __rulesToHTML:rulesToHTML, __ruleExact:ruleExact, __ruleDef:ruleDef,
   __openRuleInfo:openRuleInfo, __eqToHTML:eqToHTML, __equipDef:equipDef,
   __mountEntityHTML:mountEntityHTML,
   __openMountPicker:openMountPicker,
@@ -201,6 +201,13 @@ console.log("Special rules: core rulebook rules resolve and render clickable…"
   // free text stays plain (not wrapped)
   const h3=__rulesToHTML("May buy Flaming Breath / Bloodrage");
   ok(!/ruleword/.test(h3), "rulesToHTML: non-rule free text stays plain");
+  // a rule whose name contains commas is one clickable token, neighbours still split
+  const h4=__rulesToHTML("Backstabbers, Poisoned Attacks, Treacherous Gits; Dirty, Rotten, Sneaky");
+  ok(/class="ruleword"[^>]*>Dirty, Rotten, Sneaky</.test(h4), "rulesToHTML: 'Dirty, Rotten, Sneaky' is one clickable rule");
+  ok(/class="ruleword"[^>]*>Treacherous Gits</.test(h4) && /class="ruleword"[^>]*>Poisoned Attacks</.test(h4), "rulesToHTML: neighbouring rules still split");
+  // chosen-option info renders rule markup (Razer crossbows), not raw **asterisks**
+  const rb=__ruleRowBody("Crossbows");
+  ok(rb.html && /<b>Range:<\/b>/.test(rb.html) && !/\*\*/.test(rb.html), "ruleRowBody: crossbow rule rendered with bold, no raw **");
   // clicking a rule opens the SECOND (stacked) window, leaving the main one intact
   document.getElementById("modalBg").classList.add("open");          // main detail open
   __openRuleInfo("Frenzy");

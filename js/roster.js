@@ -517,7 +517,7 @@ function renderToggleGroup(e,u,run){
   const labels=chosen().map(o=>o.label);
   r.appendChild(pickBtn(labels.length?labels.join(", "):"Choose…", !labels.length, open));
   r.appendChild(pickInfoBtn("Selected upgrades", ()=>openChosenInfoRows("Upgrades",
-    chosen().map(o=>{ const def=ruleDef(o.label); return {name:o.label, cost:o.cost||0, desc:def?def.text:"(no separate rule text)"}; }))));
+    chosen().map(o=>({name:o.label, cost:o.cost||0, ...ruleRowBody(o.label)})))));
   return r;
 }
 function renderOption(e,o,u){
@@ -555,7 +555,7 @@ function renderOption(e,o,u){
     const btnText = cur ? `${cur.label}${cur.cost?` (+${cur.cost}${cur.per==='model'?'/model':''})`:''}` : (req?"Choose…":"— none —");
     r.appendChild(pickBtn(btnText, !cur, open));
     r.appendChild(pickInfoBtn("Selected option", ()=>openChosenInfoRows(o.label,
-      cur?[{name:cur.label, cost:cur.cost||0, desc:(ruleDef(cur.label)?ruleDef(cur.label).text:"(no separate rule text)")}]:[])));
+      cur?[{name:cur.label, cost:cur.cost||0, ...ruleRowBody(cur.label)}]:[])));
     return r;
   }
   if(o.type==="toggle"){
@@ -640,8 +640,8 @@ function renderOption(e,o,u){
       };
       r.appendChild(pickBtn(labels.length?labels.join(", "):"Choose…", !labels.length, open));
       r.appendChild(pickInfoBtn("Selected upgrades", ()=>openChosenInfoRows(o.label,
-        sel.map(i=>{ const c=o.choices[i], def=ruleDef(c.label);
-          return { name:c.label, cost:c.cost, desc:def?def.text:"(no separate rule text)" }; }))));
+        sel.map(i=>{ const c=o.choices[i];
+          return { name:c.label, cost:c.cost, ...ruleRowBody(c.label) }; }))));
       const n=document.createElement("span"); n.className="note"; n.textContent=`(up to ${o.max})`; r.appendChild(n);
     }
     return r;
