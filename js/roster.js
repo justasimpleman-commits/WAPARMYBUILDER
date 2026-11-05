@@ -130,16 +130,15 @@ function renderSpells(e,u){
   // a SEPARATE pool/picker, not counted against the wizard-level cap above.
   const sigCap=bonusSignatures(e);
   const winds=windSignatures();
-  const ownSigs=new Set(inUse.flatMap(nm=>loreData(nm).spells.filter(sp=>sp.lvl===0).map(sp=>sp.name)));   // already known free
   if(sigCap>0){
     const sh=document.createElement("div"); sh.className="mt";
     sh.innerHTML=`Additional signature spell${sigCap>1?"s":""} <span style="color:var(--muted)">— from any of the eight Winds of Magic (granted by an item); choose ${sigCap}</span>`;
     box.appendChild(sh);
     const sc=document.createElement("div"); sc.className="budget"+(e.sigSpells.length>sigCap?" over":"");
     sc.innerHTML=`Chosen <b>${e.sigSpells.length}</b> / ${sigCap}`; box.appendChild(sc);
+    // any of the eight signatures may be picked — including the wizard's own lore's
     const sigItems=winds.map(w=>{
-      const dup=ownSigs.has(w.name);   // already a signature of the wizard's own lore
-      return { name:w.name, disabled:dup, reason:dup?"already known":"",
+      return { name:w.name,
         html:`<div class="d"><span class="note">Lore of ${esc(w.lore)}</span> · <span class="slvl">Signature</span> <span class="scast">${esc(String(w.sp.cast))}+</span> <span class="note">${esc(w.sp.type)} · ${esc(w.sp.range)}</span><br>${esc(w.sp.effect)}</div>` };
     });
     const openSig=()=>openItemPicker({
