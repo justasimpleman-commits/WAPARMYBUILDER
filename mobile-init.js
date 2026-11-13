@@ -71,6 +71,18 @@
       '.wrap{display:block !important;padding:10px !important;',
       '  padding-bottom:calc(10px + env(safe-area-inset-bottom)) !important;}',
       '.col.roster{width:100% !important;max-width:100% !important;padding:0 !important;}',
+      /* ONE scroller on a phone: the page. The desktop .col is its own scroll box
+         (max-height:100vh-120px); nested inside the scrolling page it trapped the
+         last card below the fold (100vh also counts the hidden URL bar) until the
+         page and the column were both scrolled to the end. */
+      '.col.roster,.m-drawer-body .col{max-height:none !important;overflow:visible !important;}',
+      /* overflow-x:hidden on body made body a scroll box, which silently broke
+         position:sticky; clip hides the overflow without that side effect */
+      'html,body{overflow-x:clip !important;}',
+      /* the header rows scroll away; the points line + category bars stay pinned */
+      'header{position:static !important;}',
+      '.m-sticky{position:sticky;top:0;z-index:20;padding-top:env(safe-area-inset-top);background:var(--owb-bg-l,#f3eadb);}',
+      '.m-sticky .bars{position:static;}',
 
       /* drawers */
       '.m-drawer{position:fixed;top:0;bottom:0;width:min(88vw,380px);z-index:90;display:flex;flex-direction:column;',
@@ -203,10 +215,14 @@
     // directly above the category-distribution bars. render() still updates
     // #totalPts / #totalNote by id, so the node just needs to live somewhere.
     var bars = document.getElementById('bars');
+    // Both sit in one sticky block so the points stay in view while scrolling.
     if (total && bars && bars.parentNode) {
+      var stick = el('div', 'm-sticky');
       var ptsLine = el('div', 'm-ptsline');
       ptsLine.appendChild(total);
-      bars.parentNode.insertBefore(ptsLine, bars);
+      bars.parentNode.insertBefore(stick, bars);
+      stick.appendChild(ptsLine);
+      stick.appendChild(bars);
     }
 
     // Close the menu after an action is tapped (the action still runs).
