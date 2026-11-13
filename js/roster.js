@@ -258,11 +258,20 @@ function catHeadNode(cat,label,items){
   h.onclick=()=>{ collapsedCats[cat]=!collapsedCats[cat]; render(); };
   _catHeads[cat]={html,node:h}; return h;
 }
-// make el's children exactly `nodes`, moving/adding/removing as little as possible
+// make el's children exactly `nodes`, moving/adding/removing as little as possible.
+// A rebuilt card REPLACES its old node in place (replaceChild) and the cards after
+// it are never touched: inserting the new card before the old one used to move
+// every following card, which threw off the browser's scroll anchoring and made
+// the roster jump (to the bottom on a phone) on every stepper/checkbox change.
 function patchChildren(el,nodes){
   if(typeof el.insertBefore!=="function"){ el.innerHTML=""; nodes.forEach(n=>el.appendChild(n)); return; }  // DOM stub (tests)
+  const want=new Set(nodes);
   let ref=el.firstChild;
-  for(const n of nodes){ if(n===ref){ ref=ref.nextSibling; continue; } el.insertBefore(n,ref); }
+  for(const n of nodes){
+    if(n===ref){ ref=ref.nextSibling; continue; }
+    if(ref && !want.has(ref) && n.parentNode!==el){ const nx=ref.nextSibling; el.replaceChild(n,ref); ref=nx; continue; }
+    el.insertBefore(n,ref);
+  }
   while(ref){ const nx=ref.nextSibling; el.removeChild(ref); ref=nx; }
 }
 function renderRoster(){
