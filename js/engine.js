@@ -7,6 +7,8 @@ function wizardLevel(e,u){
     if(optGodBlocked(e,u,o)) return;            // Khornate Daemons can't become Wizards
     if(o.type==="choice"||o.type==="mustChoose"){ const i=e.opts[o.id];
       if(i!=null && o.choices[i] && o.choices[i].wizLevel!=null) lvl=Math.max(lvl, o.choices[i].wizLevel); }
+    // …and so may a taken upgrade (`wizLevel` on a toggle — the Necrofex Colossus' Dark Soul)
+    else if(o.type==="toggle" && o.wizLevel!=null && e.opts[o.id] && optionActive(e,u,o)) lvl=Math.max(lvl, o.wizLevel);
   });
   if(lvl===0 && u.wizardIfUpgraded && e.opts.wiz) lvl=1;   // Daemonsmith upgraded to Wizard
   if(lvl>0 && e.opts.wlvl) lvl+=1;                          // "Additional Wizard Level"
@@ -202,7 +204,13 @@ function virtueCost(e){ return virtueBase(e)*virtueRank(e); }
 /* points a model has committed from its magic-item budget: items + standard-in-budget
    + gifts + powers + the Virtue's *base* cost (the duplicate surcharge is added to the
    army total via virtueCost, but does not eat the model's own item budget). */
-function spentMagic(e){ return Object.values(e.magic).reduce((s,nm)=>s+(nm?itemCost(nm):0),0)+giftsCost(e)+powersCost(e)+virtueBase(e)+magicRunesCost(e); }
+function spentMagic(e){ return Object.values(e.magic).reduce((s,nm)=>s+((nm && !itemExtra(nm))?itemCost(nm):0),0)+giftsCost(e)+powersCost(e)+virtueBase(e)+magicRunesCost(e); }
+/* an item flagged `extra:true` is taken IN ADDITION to the model's item of that
+   category and does not count against its magic-item points limit (the rulebook's
+   Warrior Familiar). It has its own slot, `e.magic["<Category>:extra"]`, and is
+   still paid for in the model's points. */
+function itemExtra(name){ const it=findItem(name); return !!(it && it.extra); }
+function extraSlotKey(cat){ return cat+":extra"; }
 
 /* ---------- Arcane Item sub-types (Relic / Charm / Staff) ----------
    In the source books every arcane item's description opens with its type
@@ -526,7 +534,13 @@ function reconcileMagic(e,u){
   for(const cat in e.magic){ const nm=e.magic[cat]; if(!nm) continue;
     // Arcane Items are for Wizards only: a model that stops being one (a Daemonsmith
     // without its Wizard upgrade, a Daemon aligned to Khorne) keeps none
-    if(!legal(nm) || (/^Arcane Items/.test(cat) && !wizard)) e.magic[cat]=""; }
+    if(!legal(nm) || (/^Arcane Items/.test(cat) && !wizard)){ e.magic[cat]=""; continue; }
+    // an `extra` item lives in its category's extra slot (older saves had it in the
+    // ordinary one), and only such an item may sit there
+    const isExtraSlot=/:extra$/.test(cat);
+    if(itemExtra(nm) && !isExtraSlot){ const k=extraSlotKey(cat); if(!e.magic[k]) e.magic[k]=nm; e.magic[cat]=""; }
+    else if(!itemExtra(nm) && isExtraSlot) e.magic[cat]="";
+  }
   if(e.magicStd && !findItem(e.magicStd)) e.magicStd="";
   if(e.virtue && !virtueDef(e.virtue)) e.virtue="";
   e.gifts=(e.gifts||[]).filter(nm=>legal(nm));
@@ -732,13 +746,13 @@ function collectIssues(){
     if(limit && p>limit*D.composition.singleUnitMax+0.001)
       errs.push(at(`${u.isCharacter?u.variants[e.variant].name:u.name} costs ${Math.round(p)} pts — over the 25% single-unit cap.`,e.uid)); });
 
-  // duplicate special/rare caps
-  const cap=dupCap(limit);
+  // duplicate special/rare caps — a character's mount that is also a Special/Rare
+  // unit counts towards that unit's limit (dupCounts)
+  const cap=dupCap(limit), dc=dupCounts();
   ["special","rare"].forEach(c=>{
-    const counts={};
-    state.filter(e=>e.cat===c).forEach(e=>{ counts[e.id]=(counts[e.id]||0)+1; hit("u:"+e.id,e); });
-    for(const id in counts){ if(counts[id]>cap[c]){ const u=findUnit(c,id);
-      errs.push(at(`Too many ${u.name} (${counts[id]}). Limit is ${cap[c]} duplicate ${c} choice(s) at ${limit} pts.`,lastUid["u:"+id])); } }
+    for(const id in dc[c]){ const x=dc[c][id]; if(x.n>cap[c]){ const u=findUnit(c,id);
+      const how=x.mounts ? ` — ${x.mounts===1?"1 is":x.mounts+" are"} a character's mount` : "";
+      errs.push(at(`Too many ${u.name} (${x.n})${how}. Limit is ${cap[c]} duplicate ${c} choice(s) at ${limit} pts.`,x.last)); } }
   });
 
   // special character uniqueness
@@ -834,7 +848,9 @@ function collectIssues(){
   // (VC Lore of Necromancy; TK Lore of Nehekhara — its highest-level wizard is the Hierophant).
   if(D.requireWizardLore && state.length){
     const lore=D.requireWizardLore;
-    const ok=state.some(e=>{ const u=findUnit(e.cat,e.id); if(!wizardActive(e,u)) return false;
+    // (a character — "at least one character that is a Wizard"; a casting unit or
+    // monster such as a Necrofex Colossus with Dark Soul does not count)
+    const ok=state.some(e=>{ const u=findUnit(e.cat,e.id); if(!u.isCharacter || !wizardActive(e,u)) return false;
       const av=availableLores(e,u);
       return e.lore===lore || (av.length===1 && av[0]===lore); });   // explicit pick, or the model's only legal lore
     if(!ok) errs.push(D.requireWizardLoreMsg || `Your army must include at least one Wizard using the Lore of ${lore}.`);
@@ -860,6 +876,33 @@ function collectIssues(){
 
   const norm=it=>(typeof it==="string")?{msg:it,uid:null}:it;
   return { errs:errs.map(norm), warns:warns.map(norm) };
+}
+/* Rulebook p.105, Duplicate Choices: "If a character has a Monstrous Creature,
+   Monster, Chariot, Shrine or War Machine mount that is available as a Special or
+   Rare choice, then these will also count towards the limit of duplicate choices."
+   Returns {cat,id} of the Special/Rare unit this entry's mount is, or null. The
+   mount's type comes from its TROOP TYPE line, so a book whose `unitInfo` has no
+   `troop` lines yet is not checked (no guessing). */
+const DUP_MOUNT_TYPES=["Monstrous Creatures","Monsters","Chariots","Shrines","War Machines"];
+function mountDupUnit(e,u){
+  const m=selectedMount(e,u); if(!m || mountChoiceBlocked(e,u,m)) return null;
+  const md=mountChoiceData(m), base=md && troopBase(md.troop);
+  if(!base || !DUP_MOUNT_TYPES.includes(base)) return null;
+  const wanted=[mountNorm(m.label)]; const pm=String(m.label).match(/\(([^)]+)\)/); if(pm) wanted.push(mountNorm(pm[1]));
+  for(const cat of ["special","rare"]){ const hit=D.units[cat].find(x=>wanted.includes(mountNorm(x.name))); if(hit) return {cat, id:hit.id}; }
+  return null;
+}
+/* how many of each Special/Rare choice the army holds, mounts included:
+   {special:{id:{n,mounts,last}}, rare:{…}} — n is the total, `mounts` how many of
+   them are character mounts, `last` the uid of the last entry that added one */
+function dupCounts(){
+  const out={special:{}, rare:{}};
+  const add=(cat,id,e,mount)=>{ const x=out[cat][id]||(out[cat][id]={n:0,mounts:0,last:null}); x.n++; if(mount) x.mounts++; x.last=e.uid; };
+  state.forEach(e=>{
+    if(e.cat==="special"||e.cat==="rare"){ add(e.cat,e.id,e,false); return; }
+    const u=findUnit(e.cat,e.id), d=u && mountDupUnit(e,u); if(d) add(d.cat,d.id,e,true);
+  });
+  return out;
 }
 /* duplicate Special/Rare limit for a game size. Past the last finite row of the
    book's table the rulebook (p.105) adds +1 Special and +1 Rare for each further
@@ -917,6 +960,53 @@ function migrateEntry(e){
     delete e.magic["Arcane Items"];
   }
 }
+// the key an option's value is stored under in entry.opts
+function optKey(o){ return o.type==="command" ? "cmd" : o.type==="mount" ? "mount" : o.id; }
+/* ---- picks by name ----
+   A roster entry holds its profile / choice / mount picks as list INDEXES (what the
+   engine uses everywhere). A saved army has to survive the book's lists being
+   re-ordered or extended, so saves and share links also carry each pick's NAME:
+   entryPicks() → {variant:"Overlord", opts:{wep:"Great weapon", mount:"Bale Taurus",
+   upg:["A","B"]}}. On load the name decides (applyPicks); the stored index is only
+   the fallback for a name the book no longer has. */
+function entryPicks(e){
+  const u=findUnit(e.cat,e.id), p={}; if(!u) return p;
+  if(u.isCharacter && u.variants[e.variant]) p.variant=u.variants[e.variant].name;
+  (u.options||[]).forEach(o=>{ const k=optKey(o), v=e.opts[k];
+    if(o.type==="choice"||o.type==="mustChoose"||o.type==="mount"){ if(v!=null && o.choices[v]) (p.opts=p.opts||{})[k]=o.choices[v].label; }
+    else if(o.type==="multi" && !o.repeatable && Array.isArray(v) && v.length) (p.opts=p.opts||{})[k]=v.filter(i=>o.choices[i]).map(i=>o.choices[i].label);
+  });
+  return p;
+}
+function applyPicks(e,p){
+  if(!e || !p || typeof p!=="object" || !D.units[e.cat]) return;
+  const u=findUnit(e.cat,e.id); if(!u) return;
+  if(u.isCharacter && typeof p.variant==="string"){ const i=u.variants.findIndex(v=>v.name===p.variant); if(i>=0) e.variant=i; }
+  const po=p.opts; if(!po || typeof po!=="object") return;
+  if(!e.opts || typeof e.opts!=="object") e.opts={};
+  (u.options||[]).forEach(o=>{ const k=optKey(o); if(!(k in po)) return; const v=po[k];
+    if(o.type==="choice"||o.type==="mustChoose"||o.type==="mount"){
+      if(typeof v==="string"){ const i=o.choices.findIndex(c=>c.label===v); if(i>=0) e.opts[k]=i; } }
+    else if(o.type==="multi" && !o.repeatable && Array.isArray(v))
+      e.opts[k]=v.map(l=>o.choices.findIndex(c=>c.label===l)).filter(i=>i>=0);
+  });
+}
+/* Saves made before picks were stored by name hold bare indexes. Where a book later
+   re-ordered a list, the option records what the indexes used to mean:
+   `orderBefore:[{until:"<ISO time the new order went live>", order:[labels in the old
+   order]}]` (oldest first). A name-less save older than `until` is translated through
+   that order, so it keeps the weapon / mount it was saved with. */
+function applyLegacyOrder(e,savedAt){
+  const t=Date.parse(savedAt); if(!isFinite(t) || !e || typeof e!=="object" || !D.units[e.cat]) return;
+  const u=findUnit(e.cat,e.id); if(!u || !e.opts || typeof e.opts!=="object") return;
+  (u.options||[]).forEach(o=>{ if(!o.orderBefore) return;
+    const was=o.orderBefore.find(x=>t<Date.parse(x.until)); if(!was) return;
+    const k=optKey(o), v=e.opts[k];
+    const now=i=>{ const lab=was.order[i]; return lab==null ? -1 : o.choices.findIndex(c=>c.label===lab); };
+    if(Array.isArray(v)) e.opts[k]=v.map(now).filter(j=>j>=0);
+    else if(Number.isInteger(v)){ const j=now(v); e.opts[k]= j<0 ? null : j; }
+  });
+}
 /* Make a loaded roster entry structurally sound against the CURRENT book. A save
    (library, file, draft, shared link) can be older than the data — options added,
    removed or re-ordered since — or hand-edited, and the engine indexes straight
@@ -933,7 +1023,7 @@ function normalizeEntry(e){
   e.count = (u.perModel && !u.isCharacter) ? num(e.count,1,1e6,b.count) : b.count;
   const old=(e.opts && typeof e.opts==="object") ? e.opts : {}, opts={};
   (u.options||[]).forEach(o=>{
-    const k = o.type==="command" ? "cmd" : o.type==="mount" ? "mount" : o.id, v=old[k];
+    const k=optKey(o), v=old[k];
     if(o.type==="choice" || o.type==="mount"){ const i=v==null?-1:idx(v,o.choices.length); opts[k]= i<0?null:i; }
     else if(o.type==="mustChoose") opts[k]=Math.max(0,idx(v,o.choices.length));
     else if(o.type==="toggle") opts[k]=!!v;

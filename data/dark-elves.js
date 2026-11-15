@@ -230,7 +230,7 @@
       { name: "Potion of Toughness", cost: 10, common: true },
       { name: "Potion of Speed", cost: 10, common: true },
       { name: "Potion of Foolhardiness", cost: 5, common: true },
-      { name: "Warrior Familiar", cost: 5, common: true }
+      { name: "Warrior Familiar", cost: 5, common: true, extra: true }
     ],
     "Magic Standards": [
       { name: "Banner of Defiance", cost: 25 },
@@ -555,7 +555,7 @@
     "Potion of Toughness":`One use. +D3 Toughness until the end of the turn. Common.`,
     "Potion of Speed":`One use. +D3 Attacks until the end of the turn. Common.`,
     "Potion of Foolhardiness":`One use. Frenzy until the end of the turn. Common.`,
-    "Warrior Familiar":`+1 Strength 3 Attack (no special rules); does not count against the magic-item points limit. Common.`,
+    "Warrior Familiar":`+1 Strength 3 Attack (no special rules). May be taken in addition to another Enchanted Item and does not count against the magic-item points limit. Common.`,
     "Banner of Defiance":`The unit gains Stubborn.`,
     "Banner of Iron Resolve":`The unit gains Immunity (Psychology).`,
     "Rampager's Standard":`The unit can re-roll its charge distance.`,
@@ -675,7 +675,9 @@
         access: ["additional hand weapon","spear","light armour","light lance","sea dragon cloak"],
         variants: [ { name: "Beastmaster", points: 45, magicBudget: 50 } ],
         options: [
-          { id: "wep", type: "choice", label: "Weapon", choices: [
+          { id: "wep", type: "choice", label: "Weapon",
+            orderBefore: [ { until: "2026-09-28T10:43:36Z", order: ["Additional hand weapon","Spear","Light lance"] } ],   // v3.1 put Spear first
+            choices: [
             { label: "Spear", cost: 0 }, { label: "Additional hand weapon", cost: 5 }, { label: "Light lance", cost: 5 } ] },
           { id: "armour", type: "toggle", label: "Light armour", cost: 3, per: "flat" },
           { id: "cloak", type: "toggle", label: "Sea Dragon Cloak", cost: 3, per: "flat" },
@@ -757,7 +759,9 @@
       access: ["light armour"],
         variants: [ { name: "Crone Hellebron", points: 280, magicBudget: 0 } ],
         options: [
-          { id: "mount", type: "mount", label: "Mount", choices: [
+          { id: "mount", type: "mount", label: "Mount",
+            orderBefore: [ { until: "2026-09-28T10:43:36Z", order: ["Cauldron of Blood","Manticore"] } ],   // v3.1 swapped the two
+            choices: [
             { label: "Manticore", key: "manticore", cost: 150 }, { label: "Cauldron of Blood", cost: 160 } ] },
           { id: "man_fangs", type: "toggle", label: "Rending Fangs", cost: 5, per: "flat", requiresMount: "manticore" },
           { id: "man_rage", type: "toggle", label: "Bloodrage", cost: 15, per: "flat", requiresMount: "manticore" },

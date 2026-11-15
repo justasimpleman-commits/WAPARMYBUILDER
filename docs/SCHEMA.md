@@ -68,6 +68,12 @@ from its normally-allowed spells (raises the spell cap; the Spell Familiar uses
 `extraSpells:1`). The engine sums this over every item the model holds
 (`bonusSpells`).
 
+`extra:true` → the item is taken **in addition** to the model's item of that
+category and does **not count against its magic-item points limit** (the rulebook's
+Warrior Familiar: "You may still take another Enchanted Item … and it also does not
+count against the maximum points limit"). It gets its own "<Category> — extra" slot
+(`entry.magic["<Category>:extra"]`); its points are still paid.
+
 `exclusive:true` → the bearer may take **no other magic items** (e.g. the Chaos
 Dwarf Talisman of Obsidian). Enforced in validation across `magic`, `gifts` and
 `magicStd`.
@@ -252,7 +258,18 @@ auto-grouped "Upgrades" picker (`isPlainToggle`).
 A `choice`/`mustChoose` option may set `only` on an individual choice; the engine
 hides that choice on variants whose name doesn't match (e.g. a "Level 3 Wizard"
 upgrade `only:"Count"`). A choice carrying `wizLevel:N` raises the model's Wizard
-level when selected (tiered wizardry); a `toggle` with `id:"wlvl"` adds +1 level.
+level when selected (tiered wizardry); a `toggle` with `id:"wlvl"` adds +1 level. A
+`toggle` may carry `wizLevel:N` too — taking it makes the model (also a non-character
+unit, given a unit-level `lores` list) a Level N Wizard (Vampire Counts' Necrofex
+Colossus "Dark Soul").
+
+**Re-ordering a list (`orderBefore`).** Saves now store picks by name, but saves made
+before that hold bare indexes. If you change the order of a `choice`/`mustChoose`/
+`multi`/`mount` option's `choices` (or insert one anywhere but the end), record what
+the indexes used to mean: `orderBefore:[{until:"2026-09-28T10:43:36Z", order:["Additional
+hand weapon","Spear","Light lance"]}]` — `until` is when the new order went live,
+`order` the labels (current spelling) in the old order, oldest entry first. Older
+name-less saves are translated through it on load.
 
 Any option may carry `noGod:["Khorne",…]` — it is hidden, ignored by the points
 maths, and excluded from `wizLevel` when the model's god (from a fixed `god` or an
@@ -315,7 +332,8 @@ nomination radio is hidden for `cannotBeGeneral:true` characters (peasant heroes
 the Green Knight, etc.).
 
 **Required Wizard lore (Undead).** `requireWizardLore:"<lore>"` makes the engine
-demand the army contain at least one Wizard actually using that lore — Vampire
+demand the army contain at least one **character** Wizard actually using that lore
+(a casting unit or monster does not count) — Vampire
 Counts' Lore of Necromancy, and Tomb Kings' Lore of Nehekhara (its highest-level
 Nehekhara wizard is the Hierophant). `requireWizardLoreMsg` overrides the message.
 
@@ -326,7 +344,10 @@ Nehekhara wizard is the Hierophant). `requireWizardLoreMsg` overrides the messag
 - Unit size min/max — the model stepper is **clamped** to the range (can't pick
   fewer than min or more than max; open-ended max stays unbounded)
 - Duplicate Special/Rare caps by game size (`duplicateCaps`; past its last finite
-  row the engine adds +1 Special and +1 Rare per further 1000 points)
+  row the engine adds +1 Special and +1 Rare per further 1000 points). A character's
+  mount counts towards a unit's limit when it is that Special/Rare unit (same name)
+  and its `troop` line is a Monstrous Creature, Monster, Chariot, Shrine or War
+  Machine — so a book needs `troop` lines for this check
 - Special characters unique; army-wide magic-item uniqueness (unless `common`)
 - One magic item per category per model (one dropdown per category; Arcane Items
   split into Relic/Charm/Staff sub-slots, one each)
@@ -351,7 +372,7 @@ Nehekhara wizard is the Hierophant). `requireWizardLoreMsg` overrides the messag
 - At most one Battle Standard Bearer; a warning if the BSB is the Army General
 - A magic standard / Banner Runes only on the BSB or a unit whose Standard Bearer is
   taken (removed otherwise); Arcane Items only on Wizards (removed otherwise)
-- Undead armies require a Wizard of the book's `requireWizardLore`
+- Undead armies require a **character** Wizard of the book's `requireWizardLore`
 - Vampiric Powers / Virtues share the per-character magic-item budget (Virtues escalate on duplicates)
 - **Equipment access:** a magic weapon/armour item tagged `requiresAccess` is offered
   only to a model whose `access` list covers that mundane type (armour tiered light⊂

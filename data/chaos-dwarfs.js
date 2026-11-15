@@ -189,7 +189,7 @@
       { name: "Potion of Toughness", cost: 10, common: true },
       { name: "Potion of Speed", cost: 10, common: true },
       { name: "Potion of Foolhardiness", cost: 5, common: true },
-      { name: "Warrior Familiar", cost: 5, common: true }
+      { name: "Warrior Familiar", cost: 5, common: true, extra: true }
     ],
     "Magic Standards": [
       { name: "Banner of Defiance", cost: 25 },
@@ -467,7 +467,7 @@
     "Potion of Toughness":`One use. +D3 Toughness until the end of the turn. Common.`,
     "Potion of Speed":`One use. +D3 Attacks until the end of the turn. Common.`,
     "Potion of Foolhardiness":`One use. Frenzy until the end of the turn. Common.`,
-    "Warrior Familiar":`+1 Strength 3 Attack (no special rules); does not count against the magic-item points limit. Common.`,
+    "Warrior Familiar":`+1 Strength 3 Attack (no special rules). May be taken in addition to another Enchanted Item and does not count against the magic-item points limit. Common.`,
     "Banner of Defiance":`The unit gains Stubborn.`,
     "Banner of Iron Resolve":`The unit gains Immunity (Psychology).`,
     "Rampager's Standard":`The unit can re-roll its charge distance.`,

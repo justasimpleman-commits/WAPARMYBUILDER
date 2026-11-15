@@ -305,7 +305,7 @@
       { name: "Potion of Toughness", cost: 10, common: true },
       { name: "Potion of Speed", cost: 10, common: true },
       { name: "Potion of Foolhardiness", cost: 5, common: true },
-      { name: "Warrior Familiar", cost: 5, common: true }
+      { name: "Warrior Familiar", cost: 5, common: true, extra: true }
     ],
     "Magic Standards": [
       { name: "Banner of Defiance", cost: 25 },
@@ -839,11 +839,12 @@
         notes: "Monster." },
 
       { id: "necrofexcolossus", name: "Necrofex Colossus", basePoints: 240, unitSize: null,
+        lores: ["Death", "Necromancy"],   // only once Dark Soul makes it a Level 1 Wizard
         options: [
           { id: "scythes", type: "toggle", label: "Scythes and Barbs", cost: 10, per: "flat" },
           { id: "vampblood", type: "toggle", label: "Vampire Blood", cost: 10, per: "flat" },
           { id: "corpsekillers", type: "toggle", label: "Corpse Killers", cost: 20, per: "flat" },
-          { id: "darksoul", type: "toggle", label: "Dark Soul (Level 1 Wizard)", cost: 45, per: "flat" } ],
+          { id: "darksoul", type: "toggle", label: "Dark Soul (Level 1 Wizard)", cost: 45, per: "flat", wizLevel: 1 } ],
         notes: "Monster." },
 
       { id: "skeletoncatapult", name: "Skeleton Catapult", basePoints: 80, unitSize: null,

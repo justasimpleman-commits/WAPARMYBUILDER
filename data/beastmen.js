@@ -197,7 +197,7 @@
       { name: "Potion of Toughness",   cost: 10, common: true },
       { name: "Potion of Speed",       cost: 10, common: true },
       { name: "Potion of Foolhardiness",cost: 5, common: true },
-      { name: "Warrior Familiar",      cost: 5,  common: true }
+      { name: "Warrior Familiar",      cost: 5,  common: true, extra: true }
     ],
     "Magic Standards": [
       { name: "Banner of Defiance",    cost: 25 },
