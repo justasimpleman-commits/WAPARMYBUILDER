@@ -419,7 +419,7 @@ function isBSB(e,u){ return u.isCharacter && (u.options||[]).some(o=>o.bsb) && e
 function entryGod(e,u){
   if(u.god) return u.god;
   const o=alignOption(u);
-  if(o){ const i=e.opts.align; if(i!=null && o.choices[i]) return o.choices[i].god||null; }
+  if(o){ const i=e.opts[o.id]; if(i!=null && o.choices[i]) return o.choices[i].god||null; }
   return null;
 }
 // the alignment option: the choice whose choices carry a `god` (Daemonic Alignment)
@@ -451,25 +451,66 @@ function honourCondOK(e,u,c){
   const label=(k)=> k==="__foot__"?"on foot":(((mo&&mo.choices.find(x=>x.key===k))||{}).label||k);
   return {ok:false, reason:"Requires: "+c.cond.mounts.map(label).join(" or ")};
 }
-// drop a mount whose unlocking Honour is no longer selected (keeps state legal)
+// an option's "not taken" value, by type (what blankEntry starts it at)
+function optDefault(o){
+  if(o.type==="toggle") return false;
+  if(o.type==="multi") return o.repeatable?0:[];
+  if(o.type==="perN") return 0;
+  return null;                                     // choice
+}
+/* barred for THIS model by something about the model itself — its god, its mount,
+   a sibling choice, or (a toggle) its profile. Unlike a missing `requires.unit`,
+   which only hides the option, these reset it (see reconcileEntry). */
+function optSelfBlocked(e,u,o){
+  return optGodBlocked(e,u,o) || optMountBlocked(e,u,o) || optChoiceBlocked(e,u,o) ||
+    (o.type==="toggle" && !!o.only && !variantMatch(e,u,o.only));
+}
+// may this entry carry a magic standard / banner runes? Only the BSB, or a unit
+// whose Standard Bearer is taken (and whose command option allows a magic standard)
+function canCarryStandard(e,u){
+  if(isBSB(e,u)) return true;
+  return !u.isCharacter && !!(e.opts.cmd && e.opts.cmd.standard) &&
+    (u.options||[]).some(o=>o.type==="command" && o.magicStandard);
+}
+/* keep one entry legal after any change (runs at the start of every render):
+   - a mount that is no longer allowed is dropped (its unlocking Honour is gone, or
+     it is restricted to a profile the model no longer is — Royal Hippogryph is
+     Baron-only);
+   - an option barred by the model's mount / god / sibling choice / profile goes
+     back to "not taken", so a switched-away upgrade never lingers unseen (Royal
+     Hippogryph Bloodrage, a Count-only wizard level on a Scion, the Battle Standard
+     of a profile that may not carry it) — and never comes back with a stale value;
+   - a pick restricted to another profile (`only` on a choice) is cleared;
+   - perN counters are clamped to the unit's size;
+   - a magic standard / banner runes without a bearer are removed;
+   then magic items and spells are reconciled. Mounts and options gate each other
+   (a mount needs an Honour, an upgrade needs a mount), so it runs to a fixed point. */
 function reconcileEntry(e){ const u=findUnit(e.cat,e.id); if(!u) return;
   const mo=mountOptionOf(u);
-  if(mo && e.opts.mount!=null){ const c=mo.choices[e.opts.mount];
-    // drop the chosen mount if it became illegal: honour-gated and its honour is
-    // gone, or restricted to a variant the model no longer is (e.g. Royal
-    // Hippogryph is Baron-only — switching off Baron deselects it)
-    if(!c || mountChoiceBlocked(e,u,c) || (c.only && !variantMatch(e,u,c.only))) e.opts.mount=null;
+  for(let pass=0; pass<4; pass++){
+    let changed=false;
+    const set=(k,v)=>{ if(JSON.stringify(e.opts[k])!==JSON.stringify(v)){ e.opts[k]=v; changed=true; } };
+    if(mo && e.opts.mount!=null){ const c=mo.choices[e.opts.mount];
+      if(!c || mountChoiceBlocked(e,u,c) || (c.only && !variantMatch(e,u,c.only))) set("mount",null);
+    }
+    (u.options||[]).forEach(o=>{
+      if(o.type==="command" || o.type==="mount") return;
+      if(o.type==="mustChoose"){                       // exactly one: fall back to the first legal pick
+        const c=o.choices[e.opts[o.id]];
+        if(!c || (c.only && !restrictOK(e,u,c.only))){ const i=o.choices.findIndex(x=>!x.only || restrictOK(e,u,x.only)); set(o.id, i<0?0:i); }
+        return;
+      }
+      if(optSelfBlocked(e,u,o)){ set(o.id, optDefault(o)); return; }
+      if(o.type==="perN") set(o.id, perNCount(e,o));
+      else if(o.type==="choice" && e.opts[o.id]!=null){ const c=o.choices[e.opts[o.id]];
+        if(!c || (c.only && !restrictOK(e,u,c.only))) set(o.id,null); }
+    });
+    if(!changed) break;
   }
-  // clear any mount-gated upgrade toggles whose mount is no longer the chosen one,
-  // so a switched-away mount's upgrades (e.g. Royal Hippogryph Bloodrage) don't
-  // linger in state and silently reappear if that mount is picked again
-  (u.options||[]).forEach(o=>{ if(o.requiresMount && e.opts[o.id] && optMountBlocked(e,u,o)) e.opts[o.id]=false; });
-  // reset options barred by a sibling choice (e.g. sub-species) so a switched-away
-  // upgrade doesn't linger; clamp perN counters to the unit's current model count
-  (u.options||[]).forEach(o=>{
-    if(optChoiceBlocked(e,u,o)){ if(o.type==="perN") e.opts[o.id]=0; else if(o.type==="toggle") e.opts[o.id]=false; }
-    else if(o.type==="perN"){ e.opts[o.id]=perNCount(e,o); }
-  });
+  if(!canCarryStandard(e,u)){
+    if(e.magicStd) e.magicStd="";
+    if(e.runes && e.runes["Banner Runes"]) delete e.runes["Banner Runes"];
+  }
   reconcileMagic(e,u);
   reconcileSpells(e,u);
 }
@@ -477,12 +518,18 @@ function reconcileEntry(e){ const u=findUnit(e.cat,e.id); if(!u) return;
    equipment access lost, variant switched, bloodline mismatch — so neither a later
    edit nor a loaded save can keep (or pay for) an illegal item */
 function reconcileMagic(e,u){
-  const god=entryGod(e,u);
-  const legal=nm=>{ const it=findItem(nm); if(!it) return true;
+  const god=entryGod(e,u), wizard=wizardActive(e,u);
+  // an item this book doesn't (or no longer) list is not legal either
+  const legal=nm=>{ const it=findItem(nm); if(!it) return false;
     if(D.godSections && it.god && it.god!==god) return false;
     return itemAllowed(it,e,u); };
-  for(const cat in e.magic){ const nm=e.magic[cat]; if(nm && !legal(nm)) e.magic[cat]=""; }
-  e.gifts=(e.gifts||[]).filter(nm=>{ const it=findItem(nm); return it && legal(nm); });
+  for(const cat in e.magic){ const nm=e.magic[cat]; if(!nm) continue;
+    // Arcane Items are for Wizards only: a model that stops being one (a Daemonsmith
+    // without its Wizard upgrade, a Daemon aligned to Khorne) keeps none
+    if(!legal(nm) || (/^Arcane Items/.test(cat) && !wizard)) e.magic[cat]=""; }
+  if(e.magicStd && !findItem(e.magicStd)) e.magicStd="";
+  if(e.virtue && !virtueDef(e.virtue)) e.virtue="";
+  e.gifts=(e.gifts||[]).filter(nm=>legal(nm));
   if(D.vampiricPowers && unitHasTag(u,"Vampire")){ const bl=entryBlood(e,u);
     e.powers=(e.powers||[]).filter(nm=>{ const pw=powerDef(nm); return pw && (!pw.blood || pw.blood.includes(bl)); }); }
 }
@@ -699,16 +746,21 @@ function collectIssues(){
   state.forEach(e=>{ const u=findUnit(e.cat,e.id); if(u.isSpecialChar){ scCount[e.id]=(scCount[e.id]||0)+1; hit("u:"+e.id,e); } });
   for(const id in scCount){ if(scCount[id]>1){ const u=findUnit("characters",id); errs.push(at(`${u.name} is a special character — may be taken only once.`,lastUid["u:"+id])); } }
 
-  // expendable core requires a non-expendable core
+  // Expendable Core (rulebook p.105): "For every Core unit with the Expendable special
+  // rule … you are required to include at least one other Core Unit without" it — one for one
   const coreEntries=state.filter(e=>e.cat==="core");
-  const hasExp=coreEntries.some(e=>findUnit("core",e.id).expendable);
-  const hasNonExp=coreEntries.some(e=>!findUnit("core",e.id).expendable);
-  if(hasExp && !hasNonExp) errs.push(`Expendable Core units require at least one non-Expendable Core unit.`);
+  const expUnits=coreEntries.filter(e=>findUnit("core",e.id).expendable);
+  const nonExp=coreEntries.length-expUnits.length;
+  if(expUnits.length>nonExp)
+    errs.push(at(`Expendable Core units (${expUnits.length}) need at least as many non-Expendable Core units (${nonExp}).`,expUnits[expUnits.length-1].uid));
 
-  // slaves <= hobgoblin units
-  const slaveUnits=coreEntries.filter(e=>["orcslaves","goblinslaves"].includes(e.id)).length;
+  // Chaos Dwarfs: no more units of Orc Slaves — nor of Goblin Slaves — than units of
+  // Hobgoblin Cutthroats/Archers (each slave type is limited separately)
   const hobUnits=coreEntries.filter(e=>["cutthroats","archers"].includes(e.id)).length;
-  if(slaveUnits>hobUnits) errs.push(`Slave units (${slaveUnits}) exceed Hobgoblin Cutthroat/Archer units (${hobUnits}).`);
+  ["orcslaves","goblinslaves"].forEach(id=>{
+    const sl=coreEntries.filter(e=>e.id===id);
+    if(sl.length>hobUnits) errs.push(at(`${findUnit("core",id).name} units (${sl.length}) exceed Hobgoblin Cutthroat/Archer units (${hobUnits}).`,sl[sl.length-1].uid));
+  });
 
   // army-wide magic item uniqueness (incl. standards)
   const itemNames=[];
@@ -799,25 +851,39 @@ function collectIssues(){
   if(chars.length && !chars.some(e=>e.uid===generalUid))
     errs.push(at(`You must nominate one of your characters as the Army General.`,chars[0].uid));
 
+  // Battle Standard Bearer (rulebook p.104): where several characters have the option
+  // only one may be nominated; and, unless its own rules say otherwise, the BSB may not
+  // be the Army General (a warning — the engine doesn't know each book's exceptions)
+  const bsbs=state.filter(e=>isBSB(e,findUnit(e.cat,e.id)));
+  if(bsbs.length>1) errs.push(at(`Only one character may carry the Battle Standard (${bsbs.length} do).`,bsbs[bsbs.length-1].uid));
+  bsbs.forEach(e=>{ if(e.uid===generalUid) warns.push(at(`${entryName(e)}: the Battle Standard Bearer may not be the Army General (unless its rules say otherwise).`,e.uid)); });
+
   const norm=it=>(typeof it==="string")?{msg:it,uid:null}:it;
   return { errs:errs.map(norm), warns:warns.map(norm) };
 }
+/* duplicate Special/Rare limit for a game size. Past the last finite row of the
+   book's table the rulebook (p.105) adds +1 Special and +1 Rare for each further
+   1000 points (5000-5999 → 6/4, 6000-6999 → 7/5, …). */
 function dupCap(limit){
-  for(const r of D.duplicateCaps){ if(limit<=r.upTo) return r; }
-  return D.duplicateCaps[D.duplicateCaps.length-1];
+  const rows=D.duplicateCaps, fin=rows.filter(r=>typeof r.upTo==="number" && isFinite(r.upTo));
+  for(const r of fin){ if(limit<=r.upTo) return r; }
+  const last=fin[fin.length-1];
+  if(!last) return rows[rows.length-1];
+  const extra=Math.floor((limit-last.upTo-1)/1000)+1;
+  return { upTo:Infinity, special:last.special+extra, rare:last.rare+extra };
 }
 
 function describe(e,u){
   const d=[];
   (u.options||[]).forEach(o=>{
     if(!optionActive(e,u,o)) return;
-    if((o.type==="choice")&&e.opts[o.id]!=null) d.push(o.choices[e.opts[o.id]].label);
-    else if(o.type==="mustChoose") d.push(o.choices[e.opts[o.id]].label);
+    if((o.type==="choice")&&e.opts[o.id]!=null){ if(o.choices[e.opts[o.id]]) d.push(o.choices[e.opts[o.id]].label); }
+    else if(o.type==="mustChoose"){ if(o.choices[e.opts[o.id]]) d.push(o.choices[e.opts[o.id]].label); }
     else if(o.type==="toggle"&&e.opts[o.id]) d.push(o.label);
     else if(o.type==="perN"){ const c=perNCount(e,o); if(c) d.push(`${c}× ${o.label}`); }
-    else if(o.type==="mount"&&e.opts.mount!=null) d.push("Mount: "+o.choices[e.opts.mount].label);
-    else if(o.type==="command"){ const c=e.opts.cmd; const cc=[]; if(c.leader)cc.push("Leader"); if(c.musician)cc.push("Musician"); if(c.standard)cc.push("Standard"); if(cc.length)d.push(cc.join(", ")); }
-    else if(o.type==="multi"){ if(o.repeatable){ if(e.opts[o.id])d.push(`${e.opts[o.id]}× ${o.choices[0].label}`); } else (e.opts[o.id]||[]).forEach(i=>d.push(o.choices[i].label)); }
+    else if(o.type==="mount"&&e.opts.mount!=null){ if(o.choices[e.opts.mount]) d.push("Mount: "+o.choices[e.opts.mount].label); }
+    else if(o.type==="command"){ const c=e.opts.cmd||{}; const cc=[]; if(c.leader)cc.push("Leader"); if(c.musician)cc.push("Musician"); if(c.standard)cc.push("Standard"); if(cc.length)d.push(cc.join(", ")); }
+    else if(o.type==="multi"){ if(o.repeatable){ if(e.opts[o.id])d.push(`${e.opts[o.id]}× ${o.choices[0].label}`); } else (e.opts[o.id]||[]).forEach(i=>{ if(o.choices[i]) d.push(o.choices[i].label); }); }
   });
   if(u.attachedPerN){ const n=attachedCount(e,u); if(n) d.push(`${n}× ${u.attachedPerN.name} (required)`); }
   if(e.lore){ const inUse=loresInUse(e,u);
@@ -850,4 +916,46 @@ function migrateEntry(e){
     if(nm) e.magic["Arcane Items:"+arcaneType(nm)]=nm;
     delete e.magic["Arcane Items"];
   }
+}
+/* Make a loaded roster entry structurally sound against the CURRENT book. A save
+   (library, file, draft, shared link) can be older than the data — options added,
+   removed or re-ordered since — or hand-edited, and the engine indexes straight
+   into option/variant lists. Missing fields get their defaults, out-of-range picks
+   are cleared, stray types are coerced. Returns false for a unit this book does
+   not have, so the caller can drop the entry instead of crashing on it. */
+function normalizeEntry(e){
+  if(!e || typeof e!=="object" || !D.units[e.cat]) return false;
+  const u=findUnit(e.cat,e.id); if(!u) return false;
+  const b=blankEntry(e.cat,e.id);
+  const idx=(v,n)=>{ v=+v; return (Number.isInteger(v) && v>=0 && v<n) ? v : -1; };   // a valid list index, else -1
+  const num=(v,lo,hi,def)=>{ v=Math.floor(+v); return isFinite(v) ? Math.max(lo,Math.min(hi,v)) : def; };
+  e.variant = u.isCharacter ? Math.max(0,idx(e.variant,u.variants.length)) : 0;
+  e.count = (u.perModel && !u.isCharacter) ? num(e.count,1,1e6,b.count) : b.count;
+  const old=(e.opts && typeof e.opts==="object") ? e.opts : {}, opts={};
+  (u.options||[]).forEach(o=>{
+    const k = o.type==="command" ? "cmd" : o.type==="mount" ? "mount" : o.id, v=old[k];
+    if(o.type==="choice" || o.type==="mount"){ const i=v==null?-1:idx(v,o.choices.length); opts[k]= i<0?null:i; }
+    else if(o.type==="mustChoose") opts[k]=Math.max(0,idx(v,o.choices.length));
+    else if(o.type==="toggle") opts[k]=!!v;
+    else if(o.type==="perN") opts[k]=num(v,0,1e6,0);
+    else if(o.type==="multi"){
+      if(o.repeatable) opts[k]=num(Array.isArray(v)?v.length:v,0,o.max||0,0);
+      else opts[k]=[...new Set((Array.isArray(v)?v:[]).map(i=>idx(i,o.choices.length)).filter(i=>i>=0))].slice(0,o.max||o.choices.length);
+    }
+    else if(o.type==="command"){ const c=(v && typeof v==="object") ? v : {}; opts.cmd={leader:!!c.leader, musician:!!c.musician, standard:!!c.standard}; }
+  });
+  e.opts=opts;
+  const strs=a=>Array.isArray(a) ? a.filter(x=>typeof x==="string" && x) : [];
+  e.magic = (e.magic && typeof e.magic==="object" && !Array.isArray(e.magic)) ? e.magic : {};
+  for(const k in e.magic){ if(typeof e.magic[k]!=="string") e.magic[k]=""; }
+  e.magicStd = typeof e.magicStd==="string" ? e.magicStd : "";
+  e.virtue = typeof e.virtue==="string" ? e.virtue : "";
+  e.gifts=strs(e.gifts); e.powers=strs(e.powers); e.spells=strs(e.spells); e.sigSpells=strs(e.sigSpells);
+  if(e.lore!=null && typeof e.lore!=="string") delete e.lore;
+  const runes={};
+  if(e.runes && typeof e.runes==="object" && !Array.isArray(e.runes)){
+    for(const cat in e.runes){ const list=strs(e.runes[cat]).filter(n=>runeDef(cat,n)); if(list.length) runes[cat]=list; } }
+  e.runes=runes;
+  e.collapsed=!!e.collapsed;
+  return true;
 }

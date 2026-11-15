@@ -752,10 +752,10 @@
           { id: "armour", type: "toggle", label: "Light armour", cost: 10, per: "flat" },
           { id: "namegnoblar", type: "multi", label: "Name-Gnoblars (up to 2)", max: 2, choices: [
             { label: "Name-Gnoblar", cost: 3 }
-          ]},
+          ], repeatable: true },
           { id: "swordgnoblar", type: "multi", label: "Sword-Gnoblars (up to 2)", max: 2, choices: [
             { label: "Sword-Gnoblar", cost: 3 }
-          ]},
+          ], repeatable: true },
           { id: "luckgnoblar", type: "toggle", label: "Luck-Gnoblar", cost: 5, per: "flat" },
           { id: "mount", type: "mount", label: "Mount", choices: [
             { label: "Mournfang", cost: 40 },
@@ -782,10 +782,10 @@
           ]},
           { id: "scalpgnoblar", type: "multi", label: "Scalp-Gnoblars (up to 2)", max: 2, choices: [
             { label: "Scalp-Gnoblar", cost: 5 }
-          ]},
+          ], repeatable: true },
           { id: "toothgnoblar", type: "multi", label: "Tooth-Gnoblars (up to 2)", max: 2, choices: [
             { label: "Tooth-Gnoblar", cost: 5 }
-          ]},
+          ], repeatable: true },
           { id: "mawpot", type: "toggle", label: "Great Mawpot (Slaughtermaster only)", cost: 100, per: "flat", only: "Slaughtermaster" }
         ],
         notes: "At least one Butcher/Slaughtermaster in the army must choose their spells from the Lore of the Great Maw."
@@ -897,10 +897,10 @@
         options: [
           { id: "scalpgnoblar", type: "multi", label: "Scalp-Gnoblars (up to 2)", max: 2, choices: [
             { label: "Scalp-Gnoblar", cost: 5 }
-          ]},
+          ], repeatable: true },
           { id: "toothgnoblar", type: "multi", label: "Tooth-Gnoblars (up to 2)", max: 2, choices: [
             { label: "Tooth-Gnoblar", cost: 5 }
-          ]},
+          ], repeatable: true },
           { id: "mawpot", type: "toggle", label: "Great Mawpot", cost: 100, per: "flat" }
         ]
       },

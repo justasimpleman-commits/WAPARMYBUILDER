@@ -796,7 +796,7 @@
             { label: "Tuskgor Chariot (replacing the Bestigor)", cost: 70 },
             { label: "Ramhorn (replacing one crew)",            cost: 250 }
           ]},
-          { id: "bsb", type: "toggle", label: "Battle Standard (Wargor only)", cost: 25, per: "flat", bsb: true }
+          { id: "bsb", type: "toggle", label: "Battle Standard (Wargor only)", cost: 25, per: "flat", bsb: true, only: "Wargor" }
         ],
         notes: "The Battle Standard Bearer may have a Magic Standard with no points limit in addition to other Magic Items."
       },
@@ -846,7 +846,7 @@
             { label: "Mark of Nurgle",   cost: 20 },
             { label: "Mark of Tzeentch", cost: 20 }
           ]},
-          { id: "bsb", type: "toggle", label: "Battle Standard (Gorebull only)", cost: 25, per: "flat", bsb: true }
+          { id: "bsb", type: "toggle", label: "Battle Standard (Gorebull only)", cost: 25, per: "flat", bsb: true, only: "Gorebull" }
         ],
         notes: "The Battle Standard Bearer may have a Magic Standard with no points limit in addition to other Magic Items."
       },

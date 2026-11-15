@@ -83,7 +83,9 @@ const engine=srcs.filter(s=>s.startsWith("js/")).map(load).join("\n");
   __runeCopyCost:runeCopyCost, __runeMaxCopies:runeMaxCopies, __isBSB:isBSB,
   __reorderEntry:reorderEntry, __openGame:openGameMode, __closeGame:closeGameMode, __gameProfileRows:gameProfileRows,
   __troopBase:troopBase, __entryTroop:entryTroop, __troopToHTML:troopToHTML, __mountChoiceData:mountChoiceData,
-  __openUnitDetail:openUnitDetail, __syncLimitPreset:syncLimitPreset, __wireLimit:wireLimit
+  __openUnitDetail:openUnitDetail, __syncLimitPreset:syncLimitPreset, __wireLimit:wireLimit,
+  __normalizeEntry:normalizeEntry, __dupCap:dupCap, __freeSaveName:freeSaveName, __libFileFor:libFileFor,
+  __libSave:libSave, __openLibrary:openLibrary, __loreData:loreData, __canCarryStandard:canCarryStandard
 });`);
 
 /* ---------- helpers ---------- */
@@ -1025,7 +1027,7 @@ console.log("Undo: switching armies and loading an army are undo steps (no confi
     finish();
   });
 }
-function finish(){
+async function finish(){
 __addUnit("core","warriors");
 console.log("Dirty tracking: saved vs changed…");
 {
@@ -1220,6 +1222,150 @@ console.log("Points limit: the number input only shows for a Custom limit…");
   inp.value="1500"; p.value="1500"; p.onchange(); ok(inp.hidden===true, "picking a preset hides it again");
   p.value=""; p.onchange(); ok(inp.hidden===false, "picking Custom shows it even at a preset value");
   inp.value="2000"; __syncLimitPreset(true);
+}
+
+
+console.log("Reconcile: an option the model can no longer have is reset, a standard needs a bearer…");
+{
+  const fresh=(book,cat,id)=>{ __setState([]); __setGen(null); __switch(book,false); __addUnit(cat,id); return [__getState()[0], __findUnit(cat,id)]; };
+  { // un-ticking the Battle Standard drops (and stops charging for) the magic standard
+    const [e,u]=fresh("chaos-dwarfs","characters","despots");
+    e.variant=u.variants.findIndex(v=>v.name==="Overseer"); const base=__entryPoints(e);
+    __update(()=>{ e.opts.bsb=true; e.magicStd=__D().magicItems["Magic Standards"][0].name; });
+    ok(__entryPoints(e)===base+25+__D().magicItems["Magic Standards"][0].cost, "BSB + magic standard charged");
+    __update(()=>{ e.opts.bsb=false; });
+    ok(e.magicStd==="" && __entryPoints(e)===base, "un-ticking the Battle Standard removes its magic standard");
+    __update(()=>{ e.opts.bsb=true; e.variant=u.variants.findIndex(v=>v.name==="Overlord"); });
+    ok(e.opts.bsb===false && !__isBSB(e,u), "a profile that may not carry the Battle Standard loses it");
+  }
+  { // a pick restricted to another profile does not survive a profile switch
+    const [e,u]=fresh("vampire-counts","characters","voncarstein");
+    const wiz=u.options.find(o=>o.id==="wiz");
+    __update(()=>{ e.variant=u.variants.findIndex(v=>v.name==="Count"); e.opts.wiz=wiz.choices.findIndex(c=>c.wizLevel===3); });
+    ok(__wlevel(e,u)===3, "Count: Level 3 Wizard");
+    __update(()=>{ e.variant=u.variants.findIndex(v=>v.name==="Scion"); });
+    ok(e.opts.wiz===null && __wlevel(e,u)===0 && __entryPoints(e)===u.variants[e.variant].points, "Scion: the Count-only wizard level is cleared, not kept and charged");
+  }
+  { // Arcane Items are for Wizards only
+    const [e,u]=fresh("chaos-dwarfs","characters","daemonsmith"); const base=__entryPoints(e);
+    __update(()=>{ e.opts.wiz=true; e.magic["Arcane Items:Charm"]="Dispel Scroll"; });
+    ok(__entryPoints(e)>base+35, "Daemonsmith Wizard carries an Arcane Item");
+    __update(()=>{ e.opts.wiz=false; });
+    ok(!e.magic["Arcane Items:Charm"] && __entryPoints(e)===base, "no longer a Wizard ⇒ the Arcane Item goes (it was charged but invisible)");
+  }
+  { // a mount-gated CHOICE is reset to "none" (it used to become `false` and crash on re-mounting)
+    const [e,u]=fresh("estalia","characters","priests");
+    const mo=u.options.find(o=>o.type==="mount"), dr=u.options.find(o=>o.id==="drawn"), altar=mo.choices.findIndex(c=>c.key==="altar");
+    e.variant=u.variants.findIndex(v=>v.name===mo.choices[altar].only);
+    __update(()=>{ e.opts.mount=altar; e.opts.drawn=dr.choices.length-1; });
+    const withAltar=__entryPoints(e);
+    __update(()=>{ e.opts.mount=null; });
+    ok(e.opts.drawn===null, "leaving the War Altar resets what draws it");
+    let threw=false; try{ __update(()=>{ e.opts.mount=altar; }); }catch(err){ threw=true; }
+    ok(!threw && __entryPoints(e)===withAltar-dr.choices[dr.choices.length-1].cost, "taking the War Altar again works");
+  }
+  { // a unit's banner runes need its Standard Bearer
+    const D=(__setState([]), __switch("dwarfs",false), __D());
+    const cat=["core","special"].find(c=>D.units[c].some(u=>(u.options||[]).some(o=>o.type==="command"&&o.magicStandard)));
+    const u=D.units[cat].find(u=>(u.options||[]).some(o=>o.type==="command"&&o.magicStandard));
+    __addUnit(cat,u.id); const e=__getState()[0], base=__entryPoints(e);
+    const rune=D.runes["Banner Runes"].find(r=>!r.master && !r.only);
+    __update(()=>{ e.opts.cmd.standard=true; e.runes["Banner Runes"]=[rune.name]; });
+    ok(__entryPoints(e)>base+10, "standard bearer with a banner rune");
+    __update(()=>{ e.opts.cmd.standard=false; });
+    ok(!e.runes["Banner Runes"] && __entryPoints(e)===base, "no Standard Bearer ⇒ no banner runes");
+  }
+}
+
+console.log("Validation: one BSB, Expendable one-for-one, slave limits per type, duplicate caps past the table…");
+{
+  const issues=()=>{ const r=__collectIssues(); return {e:r.errs.map(x=>x.msg), w:r.warns.map(x=>x.msg)}; };
+  __setState([]); __setGen(null); __switch("chaos-dwarfs",false);
+  __addUnit("characters","despots"); __addUnit("characters","despots");
+  const [a,b]=__getState(), du=__findUnit("characters","despots"), ov=du.variants.findIndex(v=>v.name==="Overseer");
+  __update(()=>{ a.variant=ov; b.variant=ov; a.opts.bsb=true; __setGen(b.uid); });
+  ok(!issues().e.some(m=>/Battle Standard/.test(m)) && !issues().w.some(m=>/Battle Standard/.test(m)), "one BSB who is not the General: fine");
+  __update(()=>{ b.opts.bsb=true; });
+  ok(issues().e.some(m=>/Only one character may carry the Battle Standard/.test(m)), "two BSBs ⇒ error");
+  ok(issues().w.some(m=>/may not be the Army General/.test(m)), "BSB nominated General ⇒ warning");
+  __setState([]); __setGen(null);
+  __addUnit("core","goblinslaves"); __addUnit("core","orcslaves"); __addUnit("core","cutthroats");
+  ok(issues().e.some(m=>/Expendable Core units \(2\)/.test(m)), "2 Expendable Core units need 2 non-Expendable ones (1 present) ⇒ error");
+  ok(!issues().e.some(m=>/exceed Hobgoblin/.test(m)), "one Orc Slaves + one Goblin Slaves unit per Hobgoblin unit is legal (each type is limited separately)");
+  __addUnit("core","warriors");
+  ok(!issues().e.some(m=>/Expendable/.test(m)), "two non-Expendable Core units cover two Expendable ones");
+  __addUnit("core","orcslaves");
+  ok(issues().e.some(m=>/Orc Slaves units \(2\) exceed/.test(m)), "a second Orc Slaves unit with one Hobgoblin unit ⇒ error");
+  const cap=l=>{ const c=__dupCap(l); return c.special+"/"+c.rare; };
+  ok(cap(999)==="1/1" && cap(2000)==="3/1" && cap(3000)==="4/2" && cap(4999)==="5/3", "duplicate caps follow the rulebook table");
+  ok(cap(5000)==="6/4" && cap(5999)==="6/4" && cap(6000)==="7/5", "past 4999: +1 Special and +1 Rare per further 1000 points");
+  __setState([]); __setGen(null);
+}
+
+console.log("Loading: a stale or damaged save is repaired, never a crash…");
+{
+  __setState([]); __setGen(null); __switch("chaos-dwarfs",true); __resetHistory();
+  const good=Object.assign({uid:1},__blankEntry("core","warriors"));
+  const noOpts=Object.assign({uid:2},__blankEntry("core","warriors")); delete noOpts.opts; delete noOpts.magic; noOpts.count="x";
+  const stale=Object.assign({uid:2},__blankEntry("characters","despots")); stale.variant=9; stale.opts.mount=42;
+  stale.opts[__findUnit("characters","despots").options.find(o=>o.type==="choice").id]=77; stale.magic["Magic Weapons"]="No Such Sword";
+  const gone={uid:5,cat:"core",id:"nosuchunit",variant:0,count:10,opts:{}};
+  let r=false, threw=null;
+  try{ r=await __applyArmy({app:"chaos-dwarfs-army-builder",army:"chaos-dwarfs",name:"old",limit:2000,generalUid:5,state:[good,noOpts,stale,gone]}); }catch(err){ threw=err; }
+  ok(!threw && r===true, "an old save with a missing unit, missing fields and out-of-range picks loads"+(threw?" ("+threw.message+")":""));
+  const st=__getState();
+  ok(st.length===3 && !st.some(e=>e.id==="nosuchunit"), "the unknown unit is dropped, the rest kept");
+  ok(new Set(st.map(e=>e.uid)).size===3, "duplicate uids are made unique");
+  ok(__getGen()===null, "a General that no longer exists is not kept");
+  ok(st.every(e=>isFinite(__entryPoints(e))) && st[1].count===__blankEntry("core","warriors").count, "every entry has finite points; a bad model count falls back to the default");
+  const ch=st.find(e=>e.cat==="characters");
+  ok(ch.variant===0 && ch.opts.mount===null && !ch.magic["Magic Weapons"], "out-of-range profile/mount and an item the book doesn't list are cleared");
+  let dthrew=false; try{ st.forEach(e=>__describe(e,__findUnit(e.cat,e.id))); __openGame(); __closeGame(); }catch(err){ dthrew=true; }
+  ok(!dthrew, "export and game mode work on the repaired army");
+  // a `multi` that became a repeatable counter since the save (Ogre Gnoblars): array → count
+  __switch("ogre-kingdoms",true);
+  const og=Object.assign({uid:1},__blankEntry("characters","chieftains")); og.opts.namegnoblar=[0];
+  ok(__normalizeEntry(og) && og.opts.namegnoblar===1, "an old multi-pick array becomes the new counter's value");
+  __setState([]); __setGen(null); __resetHistory();
+}
+
+console.log("Library: a new army never silently replaces another saved army…");
+{
+  const realLS=global.localStorage;
+  global.localStorage={ _d:{}, getItem(k){ return (k in this._d)?this._d[k]:null; }, setItem(k,v){ this._d[k]=String(v); }, removeItem(k){ delete this._d[k]; } };
+  __switch("chaos-dwarfs",true);
+  ok(await __freeSaveName("My Chaos Dwarfs")==="My Chaos Dwarfs", "default name offered as-is while it is free");
+  await __libSave("My Chaos Dwarfs.json",{army:"chaos-dwarfs",name:"My Chaos Dwarfs",state:[]});
+  ok(await __freeSaveName("My Chaos Dwarfs")==="My Chaos Dwarfs 2", "a taken default name gets a number instead of overwriting");
+  await __libSave("Horde.json",{army:"skaven",name:"Horde",state:[]});
+  ok(await __libFileFor("Horde")==="Horde--chaos-dwarfs.json", "a name used by another book's army gets its own library key");
+  ok(await __libFileFor("My Chaos Dwarfs")==="My Chaos Dwarfs.json", "same book, same name ⇒ the same entry is updated");
+  await __libSave("x.json",{army:"chaos-dwarfs",name:"<img src=x onerror=alert(1)>",state:[]});
+  await __openLibrary();
+  const lh=document.getElementById("modalBody").innerHTML;
+  ok(/&lt;img src=x/.test(lh) && !/<img src=x/.test(lh), "army names are escaped in the library list");
+  if(realLS===undefined) delete global.localStorage; else global.localStorage=realLS;
+}
+
+console.log("Data: values corrected against the source books…");
+{
+  __setState([]); __setGen(null); __switch("dark-elves",false);
+  ok(__findUnit("special","bloodhags").options.find(o=>o.type==="command").magicStandard===50, "Dark Elves: Blood Hags may take a Magic Standard up to 50 points");
+  ok(__D().unitInfo.warlocks.profile[0][8]===1, "Dark Elves: Doomfire Warlock has 1 Attack");
+  ok(__D().unitInfo.reaper.profile[0][6]==="–", "Dark Elves: the Reaper Bolt Thrower itself has no Wounds value");
+  __switch("daemons-of-chaos",false); __addUnit("rare","hellflayer");
+  { const e=__getState()[0]; e.count=2; __render();
+    ok(__entryPoints(e)===240 && !__collectIssues().errs.some(x=>/Too many|maximum size/.test(x.msg)), "Daemons: two Hellflayers are one Rare choice (240 pts)"); }
+  __setState([]); __switch("beastmen",false); __addUnit("characters","chieftains");
+  { const e=__getState()[0], u=__findUnit("characters","chieftains"), bsb=u.options.find(o=>o.bsb);
+    e.variant=u.variants.findIndex(v=>v.name==="Beastlord"); ok(!__optionActive(e,u,bsb), "Beastmen: a Beastlord cannot carry the Battle Standard");
+    e.variant=u.variants.findIndex(v=>v.name==="Wargor");    ok(__optionActive(e,u,bsb), "Beastmen: a Wargor can"); }
+  __setState([]); __switch("ogre-kingdoms",false); __addUnit("characters","chieftains");
+  { const e=__getState()[0], base=__entryPoints(e); __update(()=>{ e.opts.namegnoblar=2; });
+    ok(__entryPoints(e)===base+6 && /2× Name-Gnoblar/.test(__describe(e,__findUnit("characters","chieftains")).join("|")), "Ogre Kingdoms: up to two Name-Gnoblars can actually be taken"); }
+  __setState([]); __switch("chaos-dwarfs",false);
+  ok(!__D().spellLores.Fire && __loreData("Fire")===COMMON_LORES.Fire && __loreData("Hashut")===__D().spellLores.Hashut, "Chaos Dwarfs use the shared rulebook lores (no stale private copy)");
+  __setState([]); __setGen(null);
 }
 
 console.log(`\n${fails? "FAIL":"PASS"}: ${checks-fails}/${checks} checks passed.`);

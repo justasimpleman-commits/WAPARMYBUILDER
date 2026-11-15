@@ -325,7 +325,8 @@ Nehekhara wizard is the Hierophant). `requireWizardLoreMsg` overrides the messag
 - No single unit/character above 25% of total
 - Unit size min/max — the model stepper is **clamped** to the range (can't pick
   fewer than min or more than max; open-ended max stays unbounded)
-- Duplicate Special/Rare caps by game size
+- Duplicate Special/Rare caps by game size (`duplicateCaps`; past its last finite
+  row the engine adds +1 Special and +1 Rare per further 1000 points)
 - Special characters unique; army-wide magic-item uniqueness (unless `common`)
 - One magic item per category per model (one dropdown per category; Arcane Items
   split into Relic/Charm/Staff sub-slots, one each)
@@ -342,9 +343,14 @@ Nehekhara wizard is the Hierophant). `requireWizardLoreMsg` overrides the messag
   `COMMON_RULES`, `special-rules-common.js` `COMMON_SPECIAL_RULES`, or the book's
   own `glossary`); the unit-detail Special-rules line makes each recognised rule
   name clickable for the same definitions
-- Expendable Core requires a non-Expendable Core unit
-- Slave units ≤ Hobgoblin Cutthroat/Archer units
+- Expendable Core one-for-one: each Expendable Core unit needs its own
+  non-Expendable Core unit
+- Orc Slave units ≤ Hobgoblin Cutthroat/Archer units, and Goblin Slave units
+  likewise (each slave type separately)
 - Exactly one character nominated as Army General (and `mustBeGeneral`/`cannotBeGeneral`)
+- At most one Battle Standard Bearer; a warning if the BSB is the Army General
+- A magic standard / Banner Runes only on the BSB or a unit whose Standard Bearer is
+  taken (removed otherwise); Arcane Items only on Wizards (removed otherwise)
 - Undead armies require a Wizard of the book's `requireWizardLore`
 - Vampiric Powers / Virtues share the per-character magic-item budget (Virtues escalate on duplicates)
 - **Equipment access:** a magic weapon/armour item tagged `requiresAccess` is offered

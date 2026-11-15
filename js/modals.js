@@ -324,7 +324,9 @@ function openUnitDetail(cat,id,variant,e){
     if(!hasEq && !lo.magic.length)
       html+=`<div class="lbl loadout">Loadout</div><div class="rule" style="color:var(--muted)">No upgrades or items purchased yet.</div>`;
   }
-  const title = u.isCharacter && u.variants.length>1 ? u.name : (inf&&inf.profile?inf.profile[0][0]:u.name);
+  // a character is titled by its own name: its first profile row can be something else
+  // ("Human Form" for a Cathayan dragon, one twin of "Naestra & Arahan")
+  const title = u.isCharacter ? u.name : (inf&&inf.profile?inf.profile[0][0]:u.name);
   openModal(title, html);
 }
 

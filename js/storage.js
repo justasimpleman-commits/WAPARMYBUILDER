@@ -101,17 +101,23 @@ async function applyArmy(data, hist){
     else if(!D || !confirm(`This army ("${data.army}") isn't one of the bundled books. Load it under ${D.name} anyway?`)) return false;
   }
   if(!D && !(await switchArmy(DEFAULT_ARMY, true))) return false;
-  state = JSON.parse(JSON.stringify(data.state));
-  state.forEach(migrateEntry);                       // upgrade older save formats
-  uidc = data.uidc || (state.reduce((m,e)=>Math.max(m,e.uid||0),0)+1);
-  generalUid = data.generalUid || null;
-  if(data.limit){ document.getElementById("limit").value=data.limit; syncLimitPreset(true); }
+  // upgrade older save formats, repair entries against the current book data, and
+  // drop units this book doesn't have — a stale save must never break the page
+  let dropped=0;
+  state = JSON.parse(JSON.stringify(data.state)).filter(e=>{
+    migrateEntry(e); if(normalizeEntry(e)) return true; dropped++; return false; });
+  const seen=new Set(); let top=state.reduce((m,e)=>Math.max(m,Number.isInteger(e.uid)?e.uid:0),0);
+  state.forEach(e=>{ if(!Number.isInteger(e.uid) || e.uid<1 || seen.has(e.uid)) e.uid=++top; seen.add(e.uid); });
+  uidc = Math.max(Number.isInteger(data.uidc)?data.uidc:0, top+1);
+  generalUid = state.some(e=>e.uid===data.generalUid && e.cat==="characters") ? data.generalUid : null;
+  if(isFinite(+data.limit) && +data.limit>0){ document.getElementById("limit").value=+data.limit; syncLimitPreset(true); }
   currentSaveName = data.name||null;
   currentSaveFile = null;            // set by library load when applicable
   saveNameHint = null;
   render();
   if(hist && hist.s!==snapshot()) pushHistory(hist.s, hist.m);
   markSaved(); updateSaveStatus();
+  if(dropped) toast(`${dropped} unit${dropped>1?"s":""} skipped — not in this version of ${D.name}`);
   return true;
 }
 
@@ -165,16 +171,32 @@ async function libDelete(file){
   try{ const lib=lsLibRead(); delete lib[file]; lsLibWrite(lib); }catch(_){}
 }
 
-/* ---- LIBRARY: quick save ---- */
+/* ---- LIBRARY: quick save ----
+   The library is keyed by a filename made from the army's name. Two things must not
+   silently replace another saved army: the default name offered for a NEW army (it
+   is the same for every army of a book, so it gets a number once taken), and a name
+   already used by an army of ANOTHER book (the library only lists the current book's
+   armies, so the clash would be invisible — that save gets its own key). */
+async function freeSaveName(base){
+  let taken=new Set(); try{ taken=new Set((await libAll()).map(r=>r.file)); }catch(_){}
+  let name=base; for(let i=2; taken.has(fileSafe(name)+".json"); i++) name=base+" "+i;
+  return name;
+}
+async function libFileFor(name){
+  const file=fileSafe(name)+".json";
+  let ex=null; try{ ex=await libGet(file); }catch(_){}
+  return (ex && ex.army && ex.army!==D.id) ? fileSafe(name)+"--"+D.id+".json" : file;
+}
 async function saveArmy(){
   if(!state.length){ toast("Nothing to save"); return; }
   let name=currentSaveName;
   if(!name){
-    name=await modalPrompt("Save army as", saveNameHint||("My "+D.name), "Save");
+    name=await modalPrompt("Save army as", saveNameHint||await freeSaveName("My "+D.name), "Save");
     if(!name) return;
   }
   const data=serializeArmy(name);
-  const file=fileSafe(name)+".json";
+  // an army loaded from the library is saved back to the entry it came from
+  const file=(currentSaveFile && currentSaveName) ? currentSaveFile : await libFileFor(name);
   const ok=await libSave(file,data);
   if(!ok){ toast("Could not save — browser storage unavailable"); return; }
   currentSaveFile=file;
@@ -228,7 +250,7 @@ async function openLibrary(){
     body.innerHTML='<div class="liblist">'+items.map(it=>{
       const when=it.savedAt? new Date(it.savedAt).toLocaleString():"";
       const pts=(it.points!=null)?(it.points+(it.limit?(" / "+it.limit):"")+" pts"):"";
-      const fa=encodeURIComponent(it.file), na=(it.name||"").replace(/"/g,"&quot;");
+      const fa=encodeURIComponent(it.file), na=esc(it.name||"");   // a name can come from someone else's file or link
       return '<div class="librow"><div class="libmeta"><div class="libname">'+na+'</div>'+
              '<div class="libsub">'+[pts,when].filter(Boolean).join(" · ")+'</div></div>'+
              '<div class="libacts"><button class="btn primary" onclick="libraryLoad(decodeURIComponent(\''+fa+'\'))">Load</button>'+

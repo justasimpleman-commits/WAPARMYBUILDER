@@ -213,10 +213,14 @@ script in **`build/`**.
 ## Rules the engine enforces
 
 Category caps; 25% single-unit cost limit; duplicate Special/Rare caps by game
-size; special characters unique; army-wide magic-item uniqueness (common `*` items
+size (past the table's last row `dupCap` adds +1/+1 per further 1000 pts, as the
+rulebook does); special characters unique; army-wide magic-item uniqueness (common `*` items
 exempt); one item per category per model; per-character magic-item budgets;
-Expendable Core needs a non-Expendable Core unit; slave units ≤ Hobgoblin
-Cutthroat/Archer units; exactly one Army General; **equipment access** — a magic
+Expendable Core one-for-one (each Expendable Core unit needs its own non-Expendable
+Core unit); Orc Slave units ≤ Hobgoblin Cutthroat/Archer units, and Goblin Slave
+units likewise (each slave type separately); exactly one Army General; at most one
+Battle Standard Bearer (and a warning if the BSB is the General — the rulebook
+forbids it "unless specified"); **equipment access** — a magic
 weapon/armour that *is* a mundane type (`requiresAccess`: heavy armour, shield, heavy
 lance, longbow, gut-plate…) only for a character whose `access` list (base equipment +
 buyable options) includes that type (armour tiered light⊂medium⊂heavy; items with no
@@ -236,10 +240,18 @@ and scrolls to it (and closes the mobile drawer).
 `toggle`'s `only`). `entryPoints`, the entry card, `describe()` (export) and the
 loadout popup all use it, so a hidden option is never charged or exported.
 `reconcileEntry(e)` runs at the start of every `render()` and keeps each entry
-legal: drops illegal mounts, mount/choice-gated upgrades, illegal magic items/gifts/
-powers (`reconcileMagic`), a lore that is no longer offered and over-cap or
-too-high spells (`reconcileSpells` — a model that stops being a wizard loses its
-lore). Render functions do **not** mutate entries; put any such normalisation here.
+legal: drops illegal mounts; resets any option the model itself bars (`optSelfBlocked`:
+its mount, god, a sibling choice, or a profile-only toggle — so the Battle Standard,
+a wizard upgrade or a mount upgrade never lingers on a model that can't have it) to
+its "not taken" value by type (`optDefault`); clears a pick restricted to another
+profile (`only` on a choice); removes a magic standard / Banner Runes that has no
+bearer (`canCarryStandard`: the BSB, or a unit with its Standard Bearer); drops
+illegal or unknown magic items/gifts/powers and a non-Wizard's Arcane Items
+(`reconcileMagic`), a lore that is no longer offered and over-cap or too-high spells
+(`reconcileSpells` — a model that stops being a wizard loses its lore). Mounts and
+options gate each other, so it loops to a fixed point. A missing `requires.unit`
+only hides an option (it is not reset). Render functions do **not** mutate entries;
+put any such normalisation here.
 
 **Unit size is clamped, not just validated.** The model stepper/input in
 `renderEntry` cannot go below `unitSize[0]` or above `unitSize[1]` (open-ended max
@@ -434,11 +446,21 @@ stats card, which would make rule-heavy units unreadable.
   Blob download / file input.
 - Army JSON: `{ app, version, army, name, savedAt, limit, points, uidc,
   generalUid, state }`. `applyArmy()` (async — it may need to load the book first)
-  runs `migrateEntry()` on load. The storage keys keep their old `cd-`/
-  `chaos-dwarfs-` names so existing saves keep loading — don't rename them.
+  runs `migrateEntry()` then `normalizeEntry()` on every entry: a save can be older
+  than the data (options added/removed/re-ordered) or hand-edited, so missing fields
+  get defaults, out-of-range picks are cleared and a unit the book no longer has is
+  dropped (with a toast) — a stale save must never throw. Saves store choice
+  **indexes**, so re-ordering a unit's choices in a book changes what old saves
+  select; append new choices instead where possible. The storage keys keep their old
+  `cd-`/`chaos-dwarfs-` names so existing saves keep loading — don't rename them.
+- Library keys are `fileSafe(name)+".json"`. The default name offered for a new army
+  is made unique (`freeSaveName`: "My Chaos Dwarfs 2"), a name already used by
+  another book's army gets its own key (`libFileFor`), and an army loaded from the
+  library is saved back to the entry it came from.
 - Autosave draft: the roster is mirrored to localStorage (debounced) and restored
   silently on the next visit (no notice); the draft records whether it was
-  dirty.
+  dirty. A draft that cannot be restored is discarded at start-up rather than left
+  to break the page.
 - **Share link** (`shareArmy`): the army is packed into the URL fragment
   `#army=<code>` — nothing is uploaded. Each entry is stored as its difference from
   `blankEntry(cat,id)` (`packEntry`/`unpackEntry`; a default entry is just

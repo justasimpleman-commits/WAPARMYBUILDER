@@ -628,6 +628,7 @@ function renderOption(e,o,u){
       inp.onchange=()=>update(()=>{ e.opts[o.id]=Math.max(0,Math.min(o.max,Math.floor(+inp.value||0))); });
       st.append(m,inp,p); r.appendChild(st);
       const n=document.createElement("span"); n.className="note"; n.textContent=`× ${o.choices[0].cost} pts each (max ${o.max})`; r.appendChild(n);
+      if(hasRuleDef(o.choices[0].label)) r.appendChild(mkRuleInfoBtn(o.choices[0].label));
     } else {
       // multi-select upgrades use the same modal picker as magic items/mounts, so
       // each upgrade shows its rule text inline and the cap is enforced (max picks).

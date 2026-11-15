@@ -98,7 +98,11 @@ async function start(){
   const code=sharedCodeInUrl(), draft=readDraft();
   let ready=false;
   // the draft is restored silently; a shared link opens over it as an undo step
-  if(draft) ready=await restoreDraft();
+  // (a draft that cannot be restored is discarded rather than left to break every start-up)
+  if(draft){
+    try{ ready=await restoreDraft(); }
+    catch(err){ console.error("Could not restore the autosaved army:",err); clearDraft(); state=[]; generalUid=null; resetHistory(); if(D) render(); }
+  }
   if(code) ready=(await openSharedArmy(code)) || ready;
   if(!D) await switchArmy(DEFAULT_ARMY, true);
 }
