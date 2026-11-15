@@ -5,7 +5,8 @@
   "author": "András",
   "license": "MIT",
   "scripts": {
-    "test": "node scripts/test-engine.js"
+    "test": "node scripts/test-engine.js",
+    "audit": "node scripts/audit-pdf.js all"
   },
   "devDependencies": {
     "docx": "^9.7.1"

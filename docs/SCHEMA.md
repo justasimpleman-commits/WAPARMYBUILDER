@@ -74,6 +74,9 @@ Warrior Familiar: "You may still take another Enchanted Item … and it also doe
 count against the maximum points limit"). It gets its own "<Category> — extra" slot
 (`entry.magic["<Category>:extra"]`); its points are still paid.
 
+`restrict:"footCav"|"infantry"` → a note only (Trickster's Helm, Dawnstone, Boots of
+Flight: "models on foot or cavalry" / "infantry"). The engine does **not** enforce it.
+
 `exclusive:true` → the bearer may take **no other magic items** (e.g. the Chaos
 Dwarf Talisman of Obsidian). Enforced in validation across `magic`, `gifts` and
 `magicStd`.

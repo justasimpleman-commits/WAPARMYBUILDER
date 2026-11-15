@@ -1202,7 +1202,7 @@ Place the small round template with the centre where the cannon ball lands befor
           { id: "armour", type: "toggle", label: "Medium armour", cost: 8, per: "model" },
           { id: "scythes", type: "toggle", label: "Scythes", cost: 5, per: "model" },
           { id: "crew", type: "multi", label: "Additional Crew per chariot (up to two)", max: 2, choices: [
-            { label: "+1 Crew", cost: 6, per: "model" }
+            { label: "+1 Crew", cost: 6 }
           ], repeatable: true },
           { id: "horses", type: "toggle", label: "Two additional Warhorses", cost: 6, per: "flat" },
           { id: "standard", type: "toggle", label: "Standard Bearer (one chariot)", cost: 10, per: "flat" }

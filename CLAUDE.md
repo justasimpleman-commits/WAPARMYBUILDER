@@ -1,544 +1,353 @@
 # CLAUDE.md — Warhammer Army Builder
 
-A **static web app** for Warhammer 9th Edition 3.0 (Mathias Eliasson's unofficial
-ruleset), hosted on GitHub Pages. It lets a player assemble an army, calculates
-points, enforces the list-building rules, saves/loads armies (browser library or
-`.json` files), shares an army as a link, and exports the list. There is no build
-step: open `index.html` (works from `file://`) or serve the folder. On a phone the
-same page switches to a drawer layout (`mobile-init.js`). (It used to be an Electron
-desktop app with a Capacitor Android build; both were removed — there is no
-`main.js`/`preload.js`/`mobile/` any more.)
+A static web app for building armies for Warhammer 9th Edition (Mathias Eliasson's
+unofficial "Warhammer Armies Project" ruleset), published on GitHub Pages. The player
+assembles a list; the app does the points and composition maths, enforces the
+list-building rules, saves and loads armies (browser library or `.json` files), shares
+an army as a link, exports it as text, and shows it as a table-side reference (Game
+mode). No build step, no dependencies at runtime: `index.html` works from `file://`.
 
-Multiple army books are bundled (Chaos Dwarfs, Grand Cathay, Daemons of Chaos,
-Beastmen, Ogre Kingdoms, Orcs & Goblins, Skaven, High Elves, Dark Elves, Tomb
-Kings, Vampire Counts, Bretonnia, Wood Elves, Dwarfs, Lizardmen, Estalia) and chosen
-from the **Army** dropdown in the header;
-switching armies clears the roster (no confirm — it is an undo step). Each army nominates exactly one character as its **Army General** (radio
-on each character entry; any character is eligible, exactly one required —
-enforced in validation, shown with ★ in the summary and `[General]` in export).
+It is a generic **engine** (`js/`) driven by **data files** (`data/`), one per army
+book. Sixteen books are bundled.
 
-## Architecture: engine + data
+Read this file first. Then, depending on the task:
 
-The app is a generic **engine** driven by **data files**. Adding another army
-book means writing a new data file and adding one line to `data/books.js`; for books that
-fit the existing systems the engine never needs to change. (Genuinely new mechanics
-get a *generic, data-driven* hook rather than per-book logic — e.g. Vampiric
-Powers, Virtues, the Undead `requireWizardLore` validator, mixed lores (`mixLores` —
-a Grand Cathay Shugengan's Yin/Yang alignment gates its lores and lets it swap in
-Lore of Yin/Yang spells), and the High Elf
-Elven-Honour `cond` system (an honour shown-but-disabled when the chosen mount
-forbids it) plus choice-gated mounts (`requiresChoice` on a mount choice — a mount
-that only unlocks under its honour) are engine features toggled by data fields, see
-SCHEMA.md. Don't key engine logic on a book's option ids or unit ids.)
+- any change to `data/` → read [`docs/SCHEMA.md`](docs/SCHEMA.md) (what each field
+  means) **and** [`docs/DATA-MAPPING.md`](docs/DATA-MAPPING.md) (how to get it out of
+  the PDF and prove it) before touching anything;
+- a release → [`docs/RELEASING.md`](docs/RELEASING.md).
 
-Visual theme: modelled on **Old World Builder** (old-world-builder.com, light theme) —
-warm parchment page with a horizontal fade, slate-blue header (`#303d4d`), tan category
-bars and 2px tan rules between list rows, green primary buttons (`#4f7f6b`), square white
-inputs, system sans-serif body with Gideon Roman (Google Fonts) for the title, flat red
-info seals. The palette is the `--owb-*` tokens in `:root` at the top of `css/app.css`;
-the base tokens (`--bg/--ink/--line/--fire…`) map onto them, and the theme block at the
-end of the file styles each area. `mobile-init.js` still reads a few legacy token names
-(`--gold*`, `--iron-bg`, `--blood`), which `:root` aliases.
+## Working rules
 
-Repository layout: `index.html`, `mobile-init.js` and `package.json` at the
-**root**; styles in **`css/`**, the engine in **`js/`**, the data layer in
-**`data/`**, docs in **`docs/`**, dev/test scripts in **`scripts/`**, release
-script in **`build/`**.
+These are what "done well" means here. They outrank convenience.
 
-- **`index.html`** — markup only (header, three columns, the two modal shells),
-  `css/app.css`, and plain `<script src>` tags (work from `file://`, no CORS, no
-  bundler): the common data files, `data/books.js`, then the engine files in order.
-- **`js/`** — the engine, split by concern. Classic scripts share one global scope,
-  so the files see each other's top-level functions/`let`s exactly like the old
-  single inline script did; only start-up code (in `app.js`, loaded last) runs at
-  load time.
-  - `core.js` — the book registry handles + `loadBook`, global state (`state`,
-    `generalUid`, `uidc`, `D`), `blankEntry`/`addUnit`/`removeEntry`, and the
-    mutation path `update()` with undo/redo and dirty tracking (see "Mutations,
-    undo & rendering").
-  - `engine.js` — pure rules, no DOM: points, budgets, wizard levels, items, runes,
-    option gating (`optionActive`), `reconcileEntry`, validation (`entryErrors`,
-    `collectIssues`), `describe`/`entryLoadout`, `migrateEntry`.
-  - `rules.js` — rule/equipment lookup (`ruleDef`, `ruleExact`, `equipDef`) and
-    `tokensToHTML`.
-  - `modals.js` — the modal shells, `openItemPicker`, the rune picker, unit/mount
-    detail popups, `toast`.
-  - `roster.js` — `render()`, catalogue, bars, entry cards, options, magic, spells,
-    summary, validation panel.
-  - `storage.js` — library (IndexedDB/localStorage), `.json` files, autosave draft,
-    share links, text export.
-  - `game.js` — **Game mode** (the ⚔ Game header button, next to undo/redo): a
-    read-only, full-screen overlay (`#gameView`, z-index 97 — under the modals) with
-    one compact card per roster entry in roster order: the chosen profile's statline
-    (a character's other variant rows dropped, `gameProfileRows`) plus the mount's
-    rows, equipment, special rules, mount rules, magic items, lore attribute and
-    spells with casting values — every known word clickable into the stacked
-    window. Jump chips at the top; Esc or "Exit game mode" closes it. Its click
-    targets use their own globals (`__gw`/`__giw`/`__gsp`, via the `store` param of
-    `tokensToHTML`/`loadoutHTML`) so a popup resetting `__rw` can't break them.
-  - `app.js` — `switchArmy`, header controls, event wiring, `start()`.
-- **`data/books.js`** — `window.BOOK_INDEX`, the **only list of books**
-  (`{id, name, file}`), kept alphabetical (the Army dropdown also sorts by name). The page loads nothing but this up
-  front; `loadBook(id)` injects the book's `<script>` the first time that army is
-  chosen, so a visitor downloads one book, not all sixteen. All books register into
-  `window.ARMY_BOOKS` keyed by `id`; the engine selects the active one as `D`
-  (default `chaos-dwarfs`) and `switchArmy(id)` swaps it (a promise; synchronous
-  when the book is already loaded). The test harness and `scripts/sweep.js` also
-  read this registry.
-- **`data/chaos-dwarfs.js`**, **`data/grand-cathay.js`**, **`data/daemons-of-chaos.js`**,
-  **`data/beastmen.js`**, **`data/ogre-kingdoms.js`**, **`data/orcs-and-goblins.js`**,
-  **`data/skaven.js`**, **`data/high-elves.js`**, **`data/dark-elves.js`**, **`data/tomb-kings.js`**,
-  **`data/vampire-counts.js`**, **`data/bretonnia.js`**, **`data/wood-elves.js`**,
-  **`data/dwarfs.js`**, **`data/lizardmen.js`**, **`data/estalia.js`** — pure
-  data. Each does
-  `(window.ARMY_BOOKS = window.ARMY_BOOKS || {})["<id>"] = {…}` with an `id` field.
-  The three Undead/Bretonnia books exercise the engine's army-specific systems:
-  Vampiric Powers + Bloodlines (VC), Virtues with duplicate-cost escalation
-  (Bretonnia), and the `requireWizardLore` Undead validators (VC Necromancy /
-  TK Nehekhara Hierophant). Wood Elves add **Forest Spites** (a `multiPickCategories`
-  magic-item category) and the generic `magicCatsOnly` unit field (tree characters may
-  spend their budget on Spites only). Lizardmen use the same pair of hooks twice:
-  **Blessed Spawnings** and **Disciplines of the Old Ones** are both
-  `multiPickCategories`, and `magicCatsOnly` keeps each model on exactly one of them
-  (the Slann sees Disciplines, everyone else sees Blessed Spawnings) — the engine
-  stores all multi-picks in the single `entry.gifts` array, so a model must never see
-  two multi-pick categories at once. See SCHEMA.md → "Army-specific systems".
-- **`rules-common.js`** — `window.COMMON_RULES`: rulebook equipment & command
-  rules transcribed **verbatim** from the 9th Ed 3.0 rulebook (Close Combat
-  Weapons / Missile Weapons / Armour pp.79-81; Command p.87) — hand/great/paired
-  weapons, spear, halberd (Polearm), pike, lances, light/medium/heavy armour,
-  shield, buckler, barding, the missile weapons (incl. Greatbow, Blowpipe),
-  Leader/Musician/Standard Bearer. A plain "bow" in the army books is the
-  rulebook's Longbow, so `bow` maps onto the Longbow entry (no invented stats).
-  Universal special rules (Poisoned Attacks, Armour Piercing, …) are NOT
-  duplicated here — they live in COMMON_SPECIAL_RULES. The clickable Equipment
-  line on the unit-detail screen resolves each token via `equipDef`: an exact
-  glossary / COMMON_SPECIAL_RULES / COMMON_RULES hit, else an **exact-phrase**
-  match in `EQUIP_ALIASES` (e.g. "two hand weapons" → Additional Hand Weapons).
-  It deliberately does NOT substring-match, so a named magic item embedded in an
-  `eq` line ("Bow of Avelorn", "The Lion's Shield", "Star Lance", "Morning Star
-  of Fracasse") is not mis-linked to a generic weapon/armour — such items are
-  only clickable when the book defines them in its own `glossary`. The per-option
-  `i` buttons (controlled labels) use `ruleDef`, which keeps the looser
-  `EQUIP_REGEX` substring matching plus a glossary-substring fallback.
-  `tokensToHTML(str,resolver)` builds both the Equipment and Special-rules
-  clickable lines.
-- **`special-rules-common.js`** — `window.COMMON_SPECIAL_RULES`: the core
-  rulebook's *universal special rules* glossary (Fear, Terror, Frenzy, Hatred,
-  Stubborn, Unbreakable, Fast Cavalry, Vanguard, Skirmishers, Fly, Magic
-  Resistance, Impact Hits, Immunity, …) transcribed **verbatim** from the 9th Ed
-  3.0 rulebook (pp.57-69) — full rule text, not summaries; bold sub-headers from
-  the book are written `**like this**` and `ruleTextHTML` renders paragraphs +
-  bold. These are printed on unit profiles in every book but defined only
-  in the core rules; the engine renders each recognised rule name in a unit's
-  Special-rules line as a **clickable word** (`rulesToHTML` + `ruleExact`) that
-  opens its definition. A profile parenthetical (e.g. `Fly (8)`, `Immunity
-  (Psychology)`) is stripped to the base name for lookup but kept in the display.
-- **`troop-types-common.js`** — `window.COMMON_TROOP_TYPES`: the rulebook's Troop
-  Types chapter (pp.71-76, plus the War Machines chapter pp.77-78) **verbatim**, keyed by
-  the rulebook heading (Infantry, Monstrous Infantry, Cavalry, Monstrous Cavalry, Swarms,
-  War Beasts, Monstrous Beasts, Monstrous Creatures, Monsters, Chariots, Shrines, War
-  Machines) plus a "Troop Types" intro. Each `unitInfo` entry's `troop` field is the
-  army book's TROOP TYPE line verbatim; `troopBase()` strips the parenthetical and maps
-  singular→heading, `troopToHTML` makes the base type clickable (a `troop:<name>` link
-  that `ruleDef` resolves), and `entryTroop(e,u)` gives a mounted character's effective
-  type (War Beast → Cavalry, Monstrous Beast → Monstrous Cavalry, Monstrous
-  Creature/Monster/Chariot/Shrine → the mount's type). Shown on the unit-detail popup,
-  the mount picker entity and the game-mode card. **Only the books with PDFs in
-  `reference/Army books/` have `troop` lines so far** — the others still need them
-  transcribed from their PDFs (don't guess).
-- **`common-items.js`** — `window.COMMON_ITEM_DESC`: descriptions of the common
-  (core-rulebook) magic items, shared across all books so they aren't duplicated
-  per file. The engine resolves an item's text via `itemDescOf()`: the book's own
-  `itemDesc` first, then this shared map.
-- **`lores-common.js`** — the 8 standard Lores of Magic (Fire, Beasts, Metal,
-  Light, Life, Heavens, Shadow, Death) as `window.COMMON_LORES`. The engine resolves
-  a wizard's lore via `loreData()`: a book's own `spellLores` wins, else COMMON_LORES.
-  Each book still restricts which lores its wizards may pick via the unit `lores:[…]`
-  list (e.g. Chaos Dwarfs never list Life). These are the single source of truth for points, options,
-  caps, magic items, profiles, rules, item descriptions and spell lores. Saved
-  armies are namespaced by `id`; loading a file for another bundled book switches
-  to it.
-- **`docs/SCHEMA.md`** — documents every field in the data file. Read it before
-  editing data or adding a book.
-- **`docs/DATA-MAPPING.md`** — the extraction playbook: maps each section of a source
-  army-book PDF to where it goes in the data files, with the pdftotext technique,
-  the clickable-token rules, and verification steps. **Always read it before any
-  data work** — extracting, auditing, or editing any `data/` file or adding a book.
-  It is the companion to SCHEMA.md (which is the field reference): SCHEMA.md says
-  what a field *means*, DATA-MAPPING.md says what to pull from the PDF and where it
-  goes. Don't touch the data layer without reading it first.
-- **`reference/`** — source material, not shipped in the build (but committed): the
-  core rulebook PDF (`reference/Rulebook/`, 9th Ed 3.11) and the army-book PDFs
-  (`reference/Army books/` — so far Chaos Dwarfs, Daemons of Chaos, Dark Elves, Grand Cathay, Vampire Counts, Wood Elves 3.1) used to
-  audit data, the audit notes, plus
-  `reference/Chaos-Dwarfs-Stats-and-Logic.docx`, a printable stats + logic
-  reference (title page, logic section, per-unit profiles, magic-item tables).
-- **`build/release.command`** — runs the tests, bumps the version and snapshots the
-  source for the changelog (see `docs/RELEASING.md`). The web app itself needs no
-  build — pushing to GitHub publishes it via Pages.
-- **`gen-doc.js`** (in the scratch/outputs area, not the project folder) — the
-  Node script that builds the .docx. It reads points/options/caps from
-  `chaos-dwarfs.js`; statlines and rule text are transcribed in the script.
+### 1. The source books decide
 
-## Data model (see SCHEMA.md for the full reference)
+- Every statline, points value, option, cost, item, spell and rule text comes from the
+  PDF. Never fill a value in from memory, from another edition, from a similar unit,
+  or from what looks consistent. (Unit sizes were once invented for two units; the
+  owner still remembers.)
+- **No PDF, no data.** `reference/Army books/` holds only Chaos Dwarfs, Daemons of
+  Chaos, Dark Elves, Grand Cathay, Vampire Counts and Wood Elves (v3.1);
+  `reference/Rulebook/` holds the 3.11 rulebook. For the other ten books you can
+  check internal consistency only. If something there looks wrong, **report it and
+  say it is unverified** — do not change it on a hunch. The one exception is a
+  contradiction the data itself settles (a label that says "(Wargor only)" with
+  nothing enforcing it).
+- After any data change to a PDF-backed book, `node scripts/audit-pdf.js <book-id>`
+  must show no `✗`.
 
-- `composition` — category caps as fractions (Characters 0.35, Core min 0.25,
-  Special 0.50, Rare 0.25, single-unit 0.25).
-- `duplicateCaps` — Special/Rare duplicate limits by game size.
-- `magicItems` / `commonMagicItems` — six categories each; `common:true` ⇒ may be
-  taken in multiples (shown with `*`); `only:` restricts to a variant or keyword.
-- `units.{characters,core,special,rare}` — unit entries. Key fields:
-  `perModel`+`basePoints` (regiments) or flat `basePoints` (single models);
-  `variants` (characters, with `points`/`wizardLevel`/`magicBudget`);
-  `unitSize:[min,max]` where `max:null` means open-ended ("10+") and the whole
-  field `null` means no stated size; `options:[...]`.
-- Option types: `choice` (≤1), `mustChoose` (exactly 1), `toggle`, `multi`
-  (`max`, or `repeatable` counter), `command` (Leader/Musician/Standard +
-  `magicStandard` budget), `mount`. Cost `per:"model"` scales with count;
-  `per:"flat"` (default) is added once. Command costs are fixed in the engine
-  (Leader +5, Musician +5, Standard +10). A mount's own upgrades are gated with
-  `requiresMount:"key"|[…]` (matched against the chosen `mount` choice's `key`):
-  hidden and uncharged until that mount is selected (Bretonnia Pegasus/Royal
-  Hippogryph, Chaos Dwarf Great/Bale Taurus & Lammasu).
-- `unitInfo` — `{id:{profile,eq,rules}}` for the detail popup.
-- `itemDesc` — `{name: effect}` for the magic-item info popup.
-- `glossary` — `{rule: definition}`; in the detail popup any rule name in a
-  unit's `rules` string that matches a glossary key (or a core
-  COMMON_SPECIAL_RULES / COMMON_RULES name) is rendered as a clickable word that
-  opens its definition.
-- `spellLores` — `{lore:{attribute,spells:[{name,lvl,cast,type,range,effect}]}}`.
-  `lvl:0` is the signature spell.
+### 2. The engine stays generic
 
-## Rules the engine enforces
+- A book that fits the existing systems needs no engine change. A genuinely new
+  mechanic gets a **data-driven hook** (a field any book can use, documented in
+  SCHEMA.md), never logic keyed on a book, unit id or option id.
+- Existing exceptions are legacy, not precedent: the Chaos Dwarf slave limits
+  (`orcslaves` / `goblinslaves` / `cutthroats` / `archers` in `collectIssues`), the
+  item restrictions `only:"Daemonsmith"` / `"Hobgoblins"` in `restrictOK`, the Dwarf
+  rune `only` keywords in `runeAllowed`, and the god list in `pickerGroups`. Do not
+  add to them; turn one into a data hook if you have to touch it.
 
-Category caps; 25% single-unit cost limit; duplicate Special/Rare caps by game
-size (past the table's last row `dupCap` adds +1/+1 per further 1000 pts, as the
-rulebook does) — a character's Monstrous Creature / Monster / Chariot / Shrine / War
-Machine mount that is also a Special or Rare unit counts towards that unit's limit
-(`mountDupUnit`/`dupCounts`, matched by name; the mount's type comes from its `troop`
-line, so books without troop lines are not checked yet); special characters unique; army-wide magic-item uniqueness (common `*` items
-exempt); one item per category per model; per-character magic-item budgets;
-Expendable Core one-for-one (each Expendable Core unit needs its own non-Expendable
-Core unit); Orc Slave units ≤ Hobgoblin Cutthroat/Archer units, and Goblin Slave
-units likewise (each slave type separately); exactly one Army General; at most one
-Battle Standard Bearer (and a warning if the BSB is the General — the rulebook
-forbids it "unless specified"); **equipment access** — a magic
-weapon/armour that *is* a mundane type (`requiresAccess`: heavy armour, shield, heavy
-lance, longbow, gut-plate…) only for a character whose `access` list (base equipment +
-buyable options) includes that type (armour tiered light⊂medium⊂heavy; items with no
-mundane type are open to all). The picker shows such items disabled ("needs Shield")
-and every typed item carries a type badge (`itemEquipType`); `test-engine.js` audits
-every book's `access` lists against equipment/options.
+### 3. One path for every change of state
 
-**Validation is data, then view.** `collectIssues()` (engine) returns
-`{errs:[{msg,uid}], warns:[…]}`; `uid` names the roster entry an issue is about
-(null for army-wide ones — for a duplicate/uniqueness clash it is the last offending
-entry). `renderValidation()` renders an issue with a uid as a clickable row
-(`.vmsg.link`) that calls `scrollToEntry(uid)`, which unfolds that card/category
-and scrolls to it (and closes the mobile drawer).
+- Every roster change goes through `update(fn)` — that is what makes it undoable and
+  re-rendered. Never mutate `state` and call `render()` yourself. View-only state
+  (fold carets, catalogue search) calls `render()` / `renderCatalog()` directly.
+- Whatever keeps an entry legal lives in `reconcileEntry` (run at the start of every
+  render). Render functions never mutate entries.
+- Anything shown, charged or exported for an option goes through `optionActive`. A
+  hidden option is never charged or exported.
+- Rule checks live in `collectIssues` and return data (`{msg, uid}`); the panel only
+  displays them.
 
-**One option gate.** `optionActive(e,u,o)` decides whether an option is live
-(`requires.unit`, `noGod`, `requiresMount`, `requiresChoice`, a variant-only
-`toggle`'s `only`). `entryPoints`, the entry card, `describe()` (export) and the
-loadout popup all use it, so a hidden option is never charged or exported.
-`reconcileEntry(e)` runs at the start of every `render()` and keeps each entry
-legal: drops illegal mounts; resets any option the model itself bars (`optSelfBlocked`:
-its mount, god, a sibling choice, or a profile-only toggle — so the Battle Standard,
-a wizard upgrade or a mount upgrade never lingers on a model that can't have it) to
-its "not taken" value by type (`optDefault`); clears a pick restricted to another
-profile (`only` on a choice); removes a magic standard / Banner Runes that has no
-bearer (`canCarryStandard`: the BSB, or a unit with its Standard Bearer); drops
-illegal or unknown magic items/gifts/powers and a non-Wizard's Arcane Items
-(`reconcileMagic`), a lore that is no longer offered and over-cap or too-high spells
-(`reconcileSpells` — a model that stops being a wizard loses its lore). Mounts and
-options gate each other, so it loops to a fixed point. A missing `requires.unit`
-only hides an option (it is not reset). Render functions do **not** mutate entries;
-put any such normalisation here.
+### 4. Saved armies keep working
 
-**Unit size is clamped, not just validated.** The model stepper/input in
-`renderEntry` cannot go below `unitSize[0]` or above `unitSize[1]` (open-ended max
-`null` stays unbounded; no `unitSize` ⇒ min 1). Validation still flags sizes too.
+- Never rename a unit `id`, an option `id`, or the storage keys (`cd-…`,
+  `chaos-dwarfs-…` — historical names that existing saves depend on).
+- Do not re-order, insert into the middle of, or delete from an existing `choices`
+  list without adding `orderBefore` (SCHEMA.md). Append instead where you can.
+- Anything loaded (library, file, draft, link) must never throw: it goes through
+  `migrateEntry` → `normalizeEntry`. If you add a field to roster entries, give it a
+  default in `blankEntry` and handle its absence in `normalizeEntry`.
 
-**Magic items are chosen from a modal picker, not dropdowns.** Each slot shows a
-**Choose…** button (or the current pick, which re-opens the list); the button
-opens `openItemPicker` — a single shared modal listing the whole category with each
-item's description inline. The `i` button next to a slot shows **only the chosen
-item(s)** (`openChosenInfoRows`). `pickerGroups` builds the legal, grouped item
-list (by God for `godSections` books, else one army group, plus Common). In the
-picker, items are shown but **disabled** when unpickable: in a single-pick list,
-once one item is selected the rest lock until it is deselected; in a multi-pick
-list (gifts, Vampiric Powers), items costing more than the points left lock until
-you free up budget. Each picker takes a `remaining(sel)` function so the headroom
-reflects everything else the model has already spent. The same picker drives
-per-category slots, arcane sub-slots, multi-pick gifts, Vampiric Powers, Virtues,
-the BSB Magic Standard, and a unit Standard Bearer's banner.
+### 5. What the owner has asked for
 
-**Arcane Items → three sub-slots.** Arcane Items render as **Relic**, **Charm**,
-**Staff** slots (one pick each, max three arcane items), Wizards only. The
-subtype is derived in `arcaneType(name)` from the first word of `D.itemDesc[name]`
-(books open every arcane description with "Relic./Charm./Staff."), with
-`ARCANE_TYPE_FALLBACK` for rulebook common items and a "Relic" default for the few
-untyped ones. Picks live in `entry.magic` under keys `"Arcane Items:<Type>"`;
-`migrateEntry()` upgrades older single-key saves.
+- No confirmation popups and no "Undo" toasts for removing units, clearing the army,
+  switching books or loading — undo is the safety net. The single confirm in the app
+  is "Replace saved army?", because undo cannot restore an overwritten save. Do not
+  add others without asking.
+- Concise, direct answers; minimal formatting. Correctness against the books matters
+  more than speed. This is a personal hobby project — no corporate branding.
 
-Magic standards: only the BSB (no points limit, charged outside the magic-item
-budget, stored in `entry.magicStd`) or a unit's Standard Bearer (within the
-unit's banner budget).
+### 6. Keep the docs true
 
-**Extra items.** An item flagged `extra:true` (the rulebook's Warrior Familiar) is
-taken *in addition* to the model's item of that category and does not count against
-the magic-item points limit: it gets its own "<Category> — extra" slot
-(`entry.magic["<Category>:extra"]`), `spentMagic` skips it, `entryPoints` still
-charges it, and `reconcileMagic` moves one found in the ordinary slot (older saves).
+A change is not finished until the docs describe it: a new or changed data field →
+`docs/SCHEMA.md`; a change in how data is extracted or checked →
+`docs/DATA-MAPPING.md`; a change in engine behaviour, a rule the engine enforces, or
+a working rule → this file. Delete statements that stop being true; do not let them
+pile up. The changelog and version number belong to the release step, not to
+ordinary changes.
 
-**Spells.** A wizard knows its lore's **signature spell(s)** and its **lore
-attribute** automatically (free, locked in the UI, excluded from the pick limit),
-then chooses **`wizardLevel`** more (i.e. as many spells as its level), **plus one
-per extra-spell magic item it carries** (`bonusSpells(e)` sums the `extraSpells:N`
-field over the model's chosen items — `e.magic`, `e.gifts`, `e.magicStd`; the
-Spell Familiar has `extraSpells:1`). So `cap = wizardLevel + bonusSpells(e)`.
-A mixed lore (`mixLores`) works the same way once one of its spells is chosen: its
-attribute and signature become known for free (`loresInUse`).
-`entry.spells` stores only the chosen non-signature spells and is trimmed to `cap`
-(removing the granting item drops the extra pick); `knownSpells(e)` returns
-signatures + the unit's personal `fixedSpells` (always known, free, locked in the
-chooser) + chosen (used for export, alongside the attribute). A chosen spell's
-**level may not exceed the wizard's level** (a level-1 wizard can only pick
-level-1 spells); `renderSpells` disables higher-level spells and drops any stored
-picks above the level. An item flagged `extraSignatures:N` (the Arcane Familiar,
-`extraSignatures:1`) adds a **separate** picker — N signature spells chosen from
-any of the eight Winds of Magic (`windSignatures()` flattens `COMMON_LORES`' lvl-0
-spells), stored in `entry.sigSpells`, not counted against the wizard-level cap;
-`bonusSignatures(e)` sums the field and `knownSpells` appends the picks (trimmed to
-the bonus so removing the item drops them).
-`wizardLevel(e,u)` = base profile/unit level, raised to a choice option's
-`wizLevel` if one is selected (e.g. the Daemon Prince and greater daemons buy
-their level via a `choice`, not a flat profile level) or to a taken toggle's
-`wizLevel` (the Necrofex Colossus' Dark Soul — a non-character unit with `lores`
-then gets the lore/spell picker), +1 if the Daemonsmith
-"Wizard" upgrade is taken, +1 for the "Additional Wizard Level" option — but an
-option flagged `noGod:[…]` is ignored when the model's god matches, so **Khornate
-Daemons cannot become Wizards** (the Daemon Prince / Exalted Daemon `wizlvl`
-upgrade is hidden and uncharged once Khorne alignment is chosen). A wizard with
-level 0 shows no lore/spell picker.
+## Definition of done
 
-**Mount profiles.** Mounts are stat/rule-heavy, so they reuse the **same picker as
-magic items** (`openItemPicker`, single-select): the entry card shows a "Choose…"
-`pickBtn` (just the chosen mount's name + cost — no inline statline on the card),
-and clicking it opens `openMountPicker`, a thin wrapper that feeds each mount to
-`openItemPicker` as an item whose `html` is the **compact unit entity**
-(`mountEntityHTML`: profile table + clickable equipment + clickable special-rules
-line, NOT expanded). Tick one mount and the rest lock; OK confirms, Cancel closes,
-nothing ticked ⇒ no mount. `openItemPicker` renders an item's raw `html` when
-present (else the escaped text desc). Tapping a rule/weapon inside opens it in the
-second window above — `tokensToHTML` adds `event.stopPropagation()` so a rule
-click doesn't also toggle the row. `mountProfile(label)` matches the mount name —
-the label or its parenthetical creature — exactly against any `unitInfo` profile
-row, so mounts that are also units reuse their stats; mounts that aren't units are
-added as dedicated `unitInfo` entries (keys prefixed `mount_`). A choice may also
-carry its own `prof`/`rules` (via `mountChoiceData`).
-
-**Two option-UI patterns (consolidated).** Anything that is a *choice among
-several options* — magic items, mounts, `choice`/`mustChoose`, `multi`, Vampiric
-Powers, Virtues, and an auto-grouped run of upgrade toggles — uses the **modal
-picker** (`openItemPicker`): a "Choose…" `pickBtn` opens a screen listing every
-option with its rule text (or, for mounts, its full profile via `mountEntityHTML`)
-inline, and the `i` button (`pickInfoBtn`) then shows **only the chosen** pick.
-Anything that is a *single yes/no* — a lone `toggle`, a command role — stays an
-inline checkbox with a single-rule `i` (`mkRuleInfoBtn`→`openRuleInfo`). Quantity
-`repeatable` multis stay a `+/–` stepper.
-
-Picker modes (all `openItemPicker`): `multi:true` (+ optional `maxPicks`) for
-multi-select; `radio:true` (+ `requireOne` for `mustChoose`) for single-select
-that swaps the pick directly instead of locking the alternatives. `choice`/
-`mustChoose` render via `radio`; `multi` and the grouped-toggle picker via `multi`.
-
-**Auto-grouped upgrades.** `renderOptions` collapses a contiguous run of **3+
-plain add-on toggles** (`isPlainToggle`: a `toggle` with no `only`/`bsb`/`requires`/
-`requiresMount`/`noGod`/`oncePerArmy`/`limitByUnit`) into ONE "Upgrades" multi-pick
-picker (`renderToggleGroup`) so rule-heavy upgrade blocks (e.g. the Kolossus) read
-on one screen instead of many `i` buttons. Each toggle keeps its own boolean in
-`e.opts`, so points/validation/save are unchanged. Specially-gated toggles and
-runs shorter than 3 stay inline checkboxes.
-
-The info button is a round italic "i" (`.info`, via `mkRuleInfoBtn` /
-`pickInfoBtn`) showing the single fixed rule or the *chosen* pick. (`mkAllInfoBtn`
-/ `openOptionRules` — the old "≣" all-options list for dropdowns — remain defined
-for reference but are no longer used now that the picker shows every option's
-rule inline.)
-`ruleDef(label)` resolves a label to a definition: the active book's `glossary`
-wins, then `window.COMMON_SPECIAL_RULES` (**`special-rules-common.js`** —
-universal special rules), then `window.COMMON_RULES` (**`rules-common.js`** —
-rulebook weapon/armour/command rules), matched by exact name or keyword.
-
-**Clickable special rules & equipment.** In the unit (and mount) detail popup
-both the Equipment line and the Special-rules line are rendered by
-`tokensToHTML(str, resolver)`: it splits on `, ; .`, and for each token calls the
-resolver to decide if it is a known rule. The Special-rules line uses `ruleExact`
-(strict exact-name lookup — glossary, COMMON_SPECIAL_RULES, COMMON_RULES; no regex
-fallback); the Equipment line uses `equipDef` (the same exact lookup plus
-`EQUIP_REGEX`, but no loose glossary-substring fallback, so free text like
-"Fixed items: …" isn't mis-wrapped). Known tokens become `.ruleword` `<span>`s
-that call `openRuleInfo`; unknown free text stays plain. A trailing parenthetical
-(`Fly (8)`, `Natural Armour (6+)`, `light armour (Handlers)`) is stripped for the
-lookup but kept in the display. Clicking a token opens its
-definition in a **second, stacked window** (`openModal2`/`#modal2Bg`,
-z-index 110) so the unit-detail (stats) window stays open underneath rather than
-being replaced — the definitions are deliberately *not* expanded inline on the
-stats card, which would make rule-heavy units unreadable.
-
-## Conventions & gotchas
-
-- **Data must match the source PDFs.** Statlines, points, options and item costs
-  were transcribed and then audited line-by-line against the army book and
-  rulebook. Don't invent values (an earlier bug fabricated unit sizes for Zealots
-  and Devastators). If you change data, re-check it against the PDFs in the
-  workspace.
-- **Single source of truth is `chaos-dwarfs.js`.** The .docx generator reads
-  points/options from it; statlines in `gen-doc.js` and `unitInfo` are duplicated
-  transcriptions — keep them consistent if profiles ever change.
-- Description/effect strings use **backtick** template literals (text contains
-  both apostrophes and `"` inch marks).
-- Paths in the workspace shell contain a space ("Army builder") — always quote.
-
-## Mutations, undo & rendering
-
-- **Every roster change goes through `update(fn)`** (core.js): it snapshots the
-  roster, runs `fn`, calls `render()`, and — if the roster actually changed — pushes
-  the old snapshot on the undo stack (cap 100) and clears redo. Event handlers are
-  written `onclick=()=>update(()=>{ e.count=… })`; don't mutate state and call
-  `render()` directly (that change can't be undone). View-only state (collapse
-  carets, catalogue search) just calls `render()`/`renderCatalog()`.
-- Snapshots are `{uidc, generalUid, state}` without each entry's `collapsed`; undo
-  keeps the current fold state. Undo/redo: the ↶ ↷ header buttons, Ctrl/⌘+Z and
-  Ctrl/⌘+Shift+Z / Ctrl+Y (ignored while typing in a field or with a modal open).
-  Removing a unit or clearing the army (`removeEntry`, `clearArmy`) has no confirm
-  and no Undo toast — the user asked for no such popups; undo is the safety net.
-  Switching books and loading an army (file, library, shared link) are undo steps
-  too, with no confirm: snapshots record the active book (`restoreSnapshot` calls
-  `activateBook`), and these whole-army steps (`update(fn,{meta:true})` /
-  `pushHistory(before,meta)`) also restore the save name/file, saved-state and
-  limit (`saveMeta`/`restoreMeta`). Deleting a library army happens immediately
-  (no confirm, no toast).
-- **Dirty tracking:** `markSaved()` records the roster + points limit as saved
-  (after Save, Save to file, or any load); `isDirty()` compares. The status line shows
-  "● unsaved changes", the tab title gets a "●" and `beforeunload` warns (the only
-  unsaved-work prompt — loads don't ask, they are undoable).
-- **`render()` is incremental.** It reconciles entries, then: the catalogue DOM is
-  rebuilt only when the book, search text or collapse state changes (otherwise
-  `refreshCatalog` just updates each row's badge); roster cards are cached per entry
-  object with a signature (entry JSON + General flag + points) and only changed
-  cards are rebuilt, then `patchChildren` moves/inserts the minimum. The cache is
-  dropped when the army's make-up changes (an entry's options can depend on other
-  units via `requires.unit`). Summary, bars and validation are small and redrawn.
-- **Catalogue:** a search box filters units (name or character profile names, all
-  categories expanded while searching). Each row's badge shows how many are in the
-  army (`×2`), Special/Rare duplicates against the game-size cap (`2/3`, amber at the
-  cap, red over it), and a special character already taken is greyed out with its
-  **+** disabled.
-- **Reorder:** drag a roster card by its header (`wireDrag` in roster.js): a mouse
-  drags after a few px, a finger after a ~350ms hold (a swipe still scrolls); a line
-  marks the drop slot among the card's own category and the drop is one
-  `reorderEntry(uid,to)` (an undo step) — the category keeps its slots in `state`,
-  only their order changes. That order is what the roster, summary, export, share
-  link and game mode show. Header buttons/inputs never start a drag.
-- **Points limit:** a presets dropdown (1000–4000) plus a free number input that is
-  **hidden while a preset is selected** and only shown for "Custom" (`limitCustom` in
-  app.js keeps it open after picking Custom even at a preset value; loads/undo
-  re-derive it via `syncLimitPreset(true)`).
-
-## Save / load
-
-- The library lives in **IndexedDB** (`cd-army-builder` db, `armies`
-  store) via `libSave/libAll/libGet/libDelete`, with a localStorage fallback and
-  legacy-localStorage read (Safari blocks localStorage on `file://`, which is why
-  the old localStorage-only library silently failed). `.json` save/open use
-  Blob download / file input.
-- Army JSON: `{ app, version, army, name, savedAt, limit, points, uidc,
-  generalUid, state }`. `applyArmy()` (async — it may need to load the book first)
-  runs `migrateEntry()` then `normalizeEntry()` on every entry: a save can be older
-  than the data (options added/removed/re-ordered) or hand-edited, so missing fields
-  get defaults, out-of-range picks are cleared and a unit the book no longer has is
-  dropped (with a toast) — a stale save must never throw. The storage keys keep
-  their old `cd-`/`chaos-dwarfs-` names so existing saves keep loading — don't
-  rename them.
-- **Picks travel by name.** In memory an entry holds its profile / choice / mount /
-  multi picks as list indexes; `serializeArmy` adds `pick` to each saved entry
-  (`entryPicks`: `{variant:"Overlord", opts:{wep:"Great weapon", mount:"Bale Taurus"}}`)
-  and `applyArmy` resolves it (`applyPicks` — the name wins, the index is only the
-  fallback) and strips it again, so re-ordering or extending a list in a book cannot
-  change a saved army. Share links do the same (`p` in a packed entry). Saves made
-  before this have indexes only: **when you re-order a list, record the old order on
-  the option** — `orderBefore:[{until:"<ISO time the change went live>", order:[labels
-  in the old order]}]` — and `applyLegacyOrder` translates name-less saves older than
-  `until` (Dark Elves Beastmaster weapon / Hellebron mount, Grand Cathay character
-  weapons from the v3.1 updates). The harness checks every `orderBefore`.
-- Library keys are `fileSafe(name)+".json"`. The default name offered for a new army
-  is made unique (`freeSaveName`: "My Chaos Dwarfs 2"), a name already used by
-  another book's army gets its own key (`libFileFor`), and an army loaded from the
-  library is saved back to the entry it came from (the draft remembers that entry
-  across a reload). Saving an army that is not tied to an entry yet under a name
-  already in the library asks first (`modalConfirm` "Replace saved army?"; declining
-  offers a free name) — the one confirm in the app, because undo cannot bring a
-  replaced save back.
-- Autosave draft: the roster is mirrored to localStorage (debounced) and restored
-  silently on the next visit (no notice); the draft records whether it was
-  dirty. A draft that cannot be restored is discarded at start-up rather than left
-  to break the page.
-- **Share link** (`shareArmy`): the army is packed into the URL fragment
-  `#army=<code>` — nothing is uploaded. Each entry is stored as its difference from
-  `blankEntry(cat,id)` (`packEntry`/`unpackEntry`; a default entry is just
-  `{c,i}`), the payload `{v,a:army,l:limit,n:name,g:generalIndex,s:[…]}` is
-  deflate-raw compressed with `CompressionStream` and base64url-encoded (`z`
-  prefix; `j` = plain JSON fallback). Opening such a URL (at start-up, or via
-  `hashchange` in an open tab) loads the army unsaved, suggests its name for the
-  first Save, and strips the fragment. Links made from `file://` only work on that
-  machine; share from the hosted site. Start-up order: restored draft, then a
-  shared link opened over it as an undo step (undo returns to the draft) →
-  default army.
-
-## Phone layout
-
-`mobile-init.js` (root, loaded last by `index.html`) is the narrow-screen layout: it
-activates when the viewport is ≤ 820px and **moves** (not clones) `#catalog` into a
-left drawer, `.col.validation` into a right drawer and the `.actions` toolbar into a
-☰ menu, so `render()` keeps filling them by id. The header controls, the
-undo/redo buttons and the points total move into two compact header rows. Crossing
-back to a wide window reloads the page. Anything added to the header, the action bar
-or the validation panel must keep working after being moved.
-
-## Verifying changes (no browser/GUI needed)
-
-Syntax-check, then run the engine under a minimal DOM stub in Node. **`scripts/test-engine.js`**
-(run it from the project root) implements exactly this: `global.window = global`;
-a stub `document` (`getElementById`, `createElement`, `createTextNode`,
-`createComment`, `addEventListener`) with elements exposing `innerHTML`,
-`classList`, `appendChild`, `value`, `onclick/onchange`; it `eval`s the common
-files named in `index.html` + every book in `data/books.js` (they assign into
-`window.ARMY_BOOKS`), concatenates the `js/*.js` files in `index.html`'s order and
-`eval`s them as one script with an appended `Object.assign(globalThis,{…})` exposing
-internals (`entryPoints`, `render`, `spentMagic`, `update`, `undo`, `collectIssues`,
-`packEntry`, a `state` getter, …). `location`/`history`/`addEventListener` are
-stubbed so `start()` runs. It smoke-renders every book and asserts point maths,
-validation, the army-specific systems, the book registry, undo/redo, dirty tracking,
-option gating, share-link round-trips and catalogue search. Add new cases here when
-you touch the engine. IndexedDB isn't available in Node — test the
-storage fallback by stubbing `localStorage` and leaving `indexedDB` undefined.
+Run all that apply, and report the actual results — including what you could not
+verify.
 
 ```bash
-node --check data/*.js js/*.js mobile-init.js
-node scripts/test-engine.js   # DOM-stub harness (the js/ engine is eval'd inside it)
+for f in data/*.js js/*.js mobile-init.js scripts/*.js; do node --check "$f"; done
+node scripts/test-engine.js          # must end "PASS: N/N"
+node scripts/audit-pdf.js <book-id>  # after data changes to a PDF-backed book: no ✗
+node scripts/sweep.js <book-id>      # after data changes: no new unresolved tokens
 ```
 
-Always include point-math checks, validation checks, and the new feature's logic;
-a good smoke test is running `render()` once per bundled book without throwing.
-For UI changes, also load the page in the pre-installed Chromium (Playwright) and
-check for console errors — at desktop width and at phone width (the drawer layout).
-Render the .docx and view a page or two when changing the document.
+- **Engine change** → add cases to `scripts/test-engine.js`: the point maths, the
+  validation, and the new behaviour, including the way it used to fail.
+- **Data correction** → fix it from the PDF, and add a test if the mistake is of a
+  kind that could come back.
+- **UI change** → also load `index.html` in the pre-installed Chromium (Playwright)
+  at desktop width and at phone width (≤ 820px, the drawer layout), drive the changed
+  flow through the real controls, and check for console errors.
+- **Any change** → smoke: `render()` once per bundled book without throwing (the
+  harness does this).
+- Say plainly what was checked against a PDF, what was checked only for internal
+  consistency, and what was not checked.
 
-## Tone / working style for this project
+## Repository map
 
-User prefers concise, direct answers with minimal formatting. They care about
-correctness against the source books — verify, don't assume. This is a personal
-hobby project, not a Webstar deliverable, so corporate branding does not apply.
+```
+index.html            markup + <script src> tags only (classic scripts, work from file://)
+mobile-init.js        phone layout (≤ 820px): drawers and ☰ menu; loaded last
+css/app.css           styles; palette = the --owb-* tokens in :root
+js/                   the engine — classic scripts sharing one global scope, loaded in this order
+  core.js               book registry + lazy loader, state, blankEntry/addUnit, update()/undo/redo, dirty tracking
+  engine.js             pure rules, no DOM: points, budgets, wizard levels, items, runes, option gating,
+                        reconcileEntry, collectIssues, describe/entryLoadout, picks by name, migrate/normalize
+  rules.js              rule / equipment lookup (ruleDef, ruleExact, equipDef), clickable-token HTML
+  modals.js             modal shells, prompt/confirm, openItemPicker, rune picker, unit/mount detail, toast
+  roster.js             render(): catalogue, bars, entry cards, options, magic, spells, summary, validation panel
+  storage.js            library (IndexedDB + localStorage fallback), .json files, draft, share links, export
+  game.js               Game mode
+  app.js                switchArmy, header controls, wiring, start() — the only code that runs at load
+data/
+  books.js              BOOK_INDEX — the only list of books ({id,name,file}), alphabetical
+  <book>.js             one book each; registers into window.ARMY_BOOKS[id]
+  lores-common.js       the eight rulebook Lores of Magic            (COMMON_LORES)
+  common-items.js       text of the rulebook's common magic items   (COMMON_ITEM_DESC)
+  special-rules-common.js  universal special rules, verbatim        (COMMON_SPECIAL_RULES)
+  rules-common.js       weapons, armour, command rules, verbatim    (COMMON_RULES)
+  troop-types-common.js rulebook Troop Types chapter, verbatim      (COMMON_TROOP_TYPES)
+docs/                 SCHEMA.md, DATA-MAPPING.md, RELEASING.md, changelogs, unit-analysis write-ups
+scripts/              test-engine.js (harness), audit-pdf.js (data vs PDF), sweep.js (unresolved tokens), release helpers
+build/release.command tests + version bump + source snapshot (macOS double-click)
+reference/            source PDFs (rulebook 3.11; six army books v3.1), audit notes, a printable CD reference .docx — not shipped
+```
+
+Quote paths: `reference/Army books/` contains a space.
+
+The shared rules files were transcribed at the rulebook's 3.1 level and audited
+against 3.11 (`reference/Core-Rulebook-3.11-Audit.md`); magic items and lores are
+identical between the two.
+
+## How the engine works
+
+### Books and loading
+
+`data/books.js` is loaded up front; `loadBook(id)` injects a book's `<script>` the
+first time it is chosen. Books register in `window.ARMY_BOOKS`; the active one is `D`
+(default `chaos-dwarfs`). `switchArmy(id)` returns a promise (synchronous when the
+book is already loaded), clears the roster and is an undo step.
+
+A roster entry: `{uid, cat, id, variant, count, opts, magic, magicStd, gifts, powers,
+virtue, lore, spells, sigSpells, runes, collapsed}`. Picks are stored as **indexes**
+into the unit's lists (`variant`, `opts.<choice id>`, `opts.mount`, `opts.<multi id>[]`),
+toggles as booleans, command as `opts.cmd = {leader, musician, standard}`.
+
+### Mutations, undo, dirty tracking
+
+- `update(fn, opts)` snapshots, runs `fn`, renders, and pushes the old snapshot on the
+  undo stack (100 deep) if the roster changed. Snapshots are `{army, uidc, generalUid,
+  state}` without `collapsed`; undo keeps the current fold state.
+- Whole-army steps (switch book, load, clear: `{meta:true}` / `pushHistory(before,meta)`)
+  also restore the save name / file, saved-state and points limit.
+- Undo / redo: header ↶ ↷, Ctrl/⌘+Z, Ctrl/⌘+Shift+Z or Ctrl+Y — ignored while typing or
+  with a modal or Game mode open.
+- `markSaved()` records roster + limit as saved; `isDirty()` compares. Dirty shows as
+  "● unsaved changes", a "●" in the tab title and a `beforeunload` warning.
+
+### Rendering
+
+`render()` reconciles every entry, then draws catalogue, roster, bars, summary and
+validation, updates the save status, schedules the autosave draft and refreshes Game
+mode if open. It is incremental: the catalogue DOM is rebuilt only when the book,
+search or fold state changes (`refreshCatalog` otherwise just updates badges); entry
+cards are cached per entry with a signature and only changed cards are rebuilt, in
+place (`patchChildren`). The cache is dropped when the army's make-up changes, because
+options can depend on other units. Cards reorder by dragging the header (`wireDrag` →
+`reorderEntry`, an undo step; touch needs a ~350ms hold).
+
+### Options
+
+Types: `choice` (≤1), `mustChoose` (exactly 1), `toggle`, `multi` (`max`, or a
+`repeatable` counter), `perN` (one per N models), `command`, `mount`. `per:"model"`
+multiplies by the model count. Command costs are fixed in the engine (Leader 5,
+Musician 5, Standard 10).
+
+Two UI patterns: a *choice among several* (magic items, mounts, `choice`,
+`mustChoose`, `multi`, powers, virtues, and a run of 3+ plain toggles auto-grouped as
+"Upgrades") opens the shared modal picker `openItemPicker`, which lists every option
+with its rule text; the `i` button then shows only what is chosen. A *single yes/no*
+(a lone toggle, a command role) is an inline checkbox with a one-rule `i`. Counters
+are `+/–` steppers.
+
+Gating — all through `optionActive(e,u,o)`: `requires:{unit}` (another unit in the
+army), `noGod`, `requiresMount`, `requiresChoice`, and `only` on a toggle. A choice's
+own `only` hides it on other profiles; `cond:{mounts}` shows it disabled.
+
+### Keeping entries legal — `reconcileEntry`
+
+Runs to a fixed point (mounts and options gate each other):
+
+- a mount that is no longer allowed is dropped;
+- an option the model itself bars (`optSelfBlocked`: its mount, god, a sibling choice,
+  a profile-only toggle) goes back to its "not taken" value by type (`optDefault`); a
+  pick restricted to another profile is cleared; `perN` counters are clamped. A missing
+  `requires.unit` only hides an option — it is not reset;
+- a magic standard / Banner Runes without a bearer are removed (`canCarryStandard`: the
+  BSB, or a unit whose Standard Bearer is taken);
+- `reconcileMagic`: unknown or illegal items, gifts and powers go; a non-Wizard keeps
+  no Arcane Items; an `extra` item moves to its extra slot;
+- `reconcileSpells`: a lore no longer offered is cleared; spells above the wizard's
+  level or beyond its cap are dropped; a model that stops being a wizard keeps no lore.
+
+### Magic items
+
+- Six categories; army items plus the rulebook's common ones. `common:true` (shown
+  `*`) may be taken more than once in the army; everything else is unique army-wide.
+- One item per category per model, all within the profile's `magicBudget`. Arcane
+  Items (Wizards only) are three sub-slots — Relic, Charm, Staff — derived from the
+  first word of the item's description (`arcaneType`).
+- `multiPickCategories` (Daemonic Gifts, Forest Spites, Lizardmen Spawnings /
+  Disciplines) are take-several lists sharing the budget, stored in `entry.gifts`. A
+  model must never see two such categories at once (`magicCatsOnly` separates them).
+- `extra:true` items (Warrior Familiar) have their own "— extra" slot
+  (`entry.magic["<Category>:extra"]`), outside the budget but still paid for.
+- `requiresAccess`: a magic weapon / armour that *is* a mundane type needs a character
+  whose `access` list has that type (armour is tiered light ⊂ medium ⊂ heavy). The
+  picker shows such items disabled with the reason.
+- Magic standards: the BSB (no limit, outside the budget, `entry.magicStd`) or a unit's
+  Standard Bearer (within `magicStandard`).
+- Army-specific systems, all data-driven: Vampiric Powers and Bloodlines, Virtues
+  (duplicates cost × rank), Dwarf Runic Items, Daemon god sections.
+
+### Wizards and spells
+
+`wizardLevel(e,u)` = the profile's (or unit's) level; raised to a selected choice's or
+taken toggle's `wizLevel`; 1 if `wizardIfUpgraded` and `opts.wiz`; +1 for `opts.wlvl`.
+A `noGod` option is ignored for that god (Khornate Daemons cannot become Wizards).
+
+A wizard knows its lore's signature spell(s) and lore attribute for free and chooses
+`wizardLevel + bonusSpells(e)` more (`extraSpells:N` items), none above its own level.
+`fixedSpells` are personal and always known. `mixLores` add other lores' spells to the
+pick pool; using one brings that lore's attribute and signature. `extraSignatures:N`
+items add a separate pick from the eight Winds' signatures (`entry.sigSpells`).
+`loreData()` resolves a book's own `spellLores` first, then `COMMON_LORES`.
+
+### Mounts and troop types
+
+Mounts use the same picker; each row is a compact unit entity (profile, clickable
+equipment and rules). `mountProfile(label)` matches the label, or its parenthesis,
+against a `unitInfo` profile row name; mounts that are not units get `mount_…` entries.
+`unitInfo.<id>.troop` is the book's TROOP TYPE line; `entryTroop` gives a mounted
+character's effective type. **Only the six PDF-backed books have troop lines.**
+
+### Rule text and clickable words
+
+`ruleDef(label)` (option `i` buttons): book `glossary`, then `COMMON_SPECIAL_RULES`,
+then `COMMON_RULES`, exact first, then the `EQUIP_REGEX` keywords and a glossary
+substring. The detail popup's Special-rules line uses `ruleExact` (exact names only)
+and its Equipment line uses `equipDef` (exact, case-insensitive glossary, then the
+`EQUIP_ALIASES` phrases) — deliberately no substring matching, so a named magic item
+in an equipment line is not linked to a generic weapon. A definition opens in the
+second, stacked window (`openModal2`), leaving the stats window open underneath.
+
+### Rules the engine enforces (`collectIssues`)
+
+Points limit · Characters ≤ 35%, Special ≤ 50%, Rare ≤ 25%, Core ≥ 25% (warning) ·
+no entry above 25% of the limit · unit size (also clamped in the stepper) ·
+duplicate Special / Rare choices by game size (+1/+1 per 1000 pts past the table),
+counting a character's Monstrous Creature / Monster / Chariot / Shrine / War Machine
+mount that is also a Special or Rare unit — only in books with troop lines ·
+special characters unique · magic-item uniqueness · per-model item budgets ·
+`exclusive` items · Rules of the Runes · Expendable Core one-for-one · Chaos Dwarf
+slave limits · `oncePerArmy` / `limitByUnit` upgrades · the required character Wizard
+of a lore (`requireWizardLore`) · `mustBeGeneral` · exactly one Army General · at
+most one BSB (warning if the BSB is the General) · conditional picks (`cond`).
+
+An issue with a `uid` is a clickable row that scrolls to that entry.
+
+### Save, load, share
+
+- Library: IndexedDB (`cd-army-builder` / `armies`) with a localStorage fallback and
+  legacy read. Keys are `fileSafe(name)+".json"`; the default name for a new army is
+  made unique (`freeSaveName`), another book's army of the same name gets its own key
+  (`libFileFor`), an army loaded from the library saves back to its entry, and saving
+  over a *different* saved army asks first.
+- Army JSON: `{app, version, army, name, savedAt, limit, points, uidc, generalUid,
+  state}`. Each saved entry also carries `pick` — its profile / choice / mount / multi
+  picks **by name** (`entryPicks`). On load `applyPicks` lets the name win over the
+  index; name-less older saves go through `applyLegacyOrder` (`orderBefore`). Then
+  `migrateEntry` and `normalizeEntry` repair the entry against the current data;
+  unknown units are dropped with a notice.
+- Draft: the roster is mirrored to localStorage (debounced, and on hide / unload) and
+  restored silently at start-up; a draft that cannot be restored is discarded.
+- Share link: `#army=<code>` — entries packed as differences from `blankEntry`, picks
+  by name (`p`), deflate-raw + base64url (`z`; `j` = plain JSON). Nothing is uploaded.
+  Start-up order: draft, then a shared link over it (an undo step), else the default
+  army.
+- Loading a file for another bundled book switches to that book.
+
+### Game mode and phone layout
+
+Game mode (`⚔ Game`, `#gameView`, under the modals) is a read-only card per entry:
+chosen profile plus mount rows, troop type, equipment, rules, magic, spells with
+casting values — every known word clickable. It keeps its click targets in its own
+globals so a popup cannot break them.
+
+`mobile-init.js` **moves** (does not clone) `#catalog`, `.col.validation` and the
+`.actions` toolbar into drawers and a ☰ menu, so `render()` keeps filling them by id.
+Anything added to the header, the action bar or the validation panel must still work
+after being moved. Crossing back to a wide window reloads the page.
+
+### Look
+
+Modelled on Old World Builder's light theme: parchment page, slate-blue header, tan
+category bars, green primary buttons, square white inputs, system sans-serif with
+Gideon Roman for the title. Use the existing tokens; do not introduce new colours
+casually.
+
+## Testing notes
+
+`scripts/test-engine.js` runs the engine in Node under a small DOM stub: it evals the
+common data files and every book, concatenates `js/*.js` in page order and evals them
+as one script, exposing internals as `__name` globals (add to that list when a test
+needs another). `setTimeout` is a no-op there; use `setImmediate` to let async flows
+settle. IndexedDB does not exist in Node — stub `localStorage` to test the library.
+The tail of the file is `async function finish()`; new sections go before its final
+summary line.
+
+`scripts/audit-pdf.js` needs `pdftotext` (poppler-utils).
+
+## Known gaps — do not paper over these
+
+- Ten books have no PDF in the repo and no `troop` lines: Beastmen, Bretonnia, Dwarfs,
+  Estalia, High Elves, Lizardmen, Ogre Kingdoms, Orcs & Goblins, Skaven, Tomb Kings.
+- Open data questions that need those PDFs: Tomb Guard Chariot weapon costs (+2 flat
+  vs per model); Bretonnia "Bohemund" vs "Bohemond", and Pegasus WS 4 vs 3; untyped
+  Arcane Items in Estalia (5) and Ogre Kingdoms (2); mounts with no profile (High
+  Elves White Lion Chariot and Star Dragon, Tomb Kings Chariot of the Liche King,
+  Dwarfs Oathstone and Beer Cart); short lores in Skaven, Orcs & Goblins, Bretonnia.
+- An item's `only` that names anything other than a character profile (a sub-species,
+  a clan, a vow), and the `restrict` note on three common items, are shown but not
+  enforced.
+- Saves made before picks were stored by name are repaired only for lists that have an
+  `orderBefore`; old share links cannot be repaired.

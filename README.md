@@ -13,7 +13,7 @@ Sixteen army books are bundled and chosen from the **Army** dropdown in the head
 Chaos Dwarfs, Grand Cathay, Daemons of Chaos, Beastmen, Ogre Kingdoms, Orcs &
 Goblins, Skaven, High Elves, Dark Elves, Tomb Kings, Vampire Counts, Bretonnia,
 Wood Elves, Dwarfs, Lizardmen and Estalia. Only the chosen book is downloaded.
-Switching armies clears the current roster (you are asked first). Each army needs
+Switching armies clears the current roster (undo brings it back). Each army needs
 exactly one character nominated as the **Army General** (the radio on each
 character entry); it is shown with ★ in the summary and `[General]` in the export.
 
@@ -40,7 +40,7 @@ data/                all data (the engine reads these)
   common-items.js      descriptions of the common rulebook magic items
   <book>.js            one file per army book
 docs/                SCHEMA.md (field reference), DATA-MAPPING.md (extraction playbook), RELEASING.md
-scripts/             test-engine.js (test harness), sweep.js, release helpers
+scripts/             test-engine.js (test harness), audit-pdf.js (data vs source PDF), sweep.js, release helpers
 build/               release.command (tests + version bump + source snapshot) — see docs/RELEASING.md
 reference/           Rulebook/ (9th Ed 3.11 PDF), Army books/ (source PDFs), audits, stats/logic .docx (not shipped)
 ```
@@ -56,7 +56,7 @@ Adding another book means writing one `data/<book>.js` file and adding one line 
   cap (e.g. `2/3`), and a special character already in the army is greyed out.
 - **Roster** (centre): each unit's options, mounts, magic items and spells. Every
   change can be undone: **↶ / ↷** in the header, **Ctrl/⌘+Z** and
-  **Ctrl/⌘+Shift+Z**, or **Undo** on the message after removing a unit.
+  **Ctrl/⌘+Shift+Z**.
 - **Summary & validation** (right): click a validation message about a unit to
   jump to it.
 - **Points limit**: type a value or pick a preset (1000–4000).
@@ -87,8 +87,9 @@ Category caps (Characters ≤35%, Core ≥25% warning, Special ≤50%, Rare ≤2
 allowed range); duplicate Special/Rare caps by game size; special characters
 unique; army-wide magic-item uniqueness (common `*` items exempt); per-character
 magic-item budgets (the picker disables items you can't afford); one item per
-category per model; Expendable Core needs a non-Expendable Core unit; slave units ≤
-Hobgoblin Cutthroat/Archer units; exactly one Army General.
+category per model; Expendable Core one-for-one with non-Expendable Core units; Chaos
+Dwarf slave-unit limits; exactly one Army General; at most one Battle Standard
+Bearer. `CLAUDE.md` has the full list.
 
 **Magic & spells.** Wizards know their lore's **signature spell and lore
 attribute automatically** (neither counts against the pick limit). A level-N
