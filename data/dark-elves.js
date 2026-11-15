@@ -230,7 +230,7 @@
       { name: "Potion of Toughness", cost: 10, common: true },
       { name: "Potion of Speed", cost: 10, common: true },
       { name: "Potion of Foolhardiness", cost: 5, common: true },
-      { name: "Warrior Familiar", cost: 5, common: true }
+      { name: "Warrior Familiar", cost: 5, common: true, extra: true }
     ],
     "Magic Standards": [
       { name: "Banner of Defiance", cost: 25 },
@@ -357,13 +357,13 @@
     coldoneknights:{troop:"Cavalry (Dark Elf)",profile:[["Cold One Knight",5,5,4,4,3,1,6,1,9],["Cold One",7,3,0,4,4,1,2,2,3]],eq:"Heavy lance, heavy armour, shield",rules:"Elven Grace, Fear, Hatred (High Elves), Murderous Prowess, Natural Armour (6+), Stupidity"},
     coldonechariot:{troop:"Chariot (Armour Save 6+)",profile:[["Cold One Chariot",6,"–","–",5,5,4,"–","–","–"],["Charioteer","–",5,4,4,"–","–",6,1,9],["Cold One","–",3,0,4,"–","–",2,2,"–"]],eq:"Light lance, Deathrain crossbow, heavy armour, scythes",rules:"Elven Grace, Fear, Hatred (High Elves), Murderous Prowess, Natural Armour (6+), Stupidity"},
     scourgerunner:{troop:"Chariot (Armour Save 6+)",profile:[["Scourgerunner Chariot",8,"–","–",4,4,4,"–","–","–"],["Beastmaster Crew","–",4,4,3,"–","–",5,1,8],["Dark Steed","–",3,0,3,"–","–",4,1,"–"]],eq:"Light lance, Deathrain crossbow, Ravager Harpoon, Sea Dragon Cloak",rules:"Elven Grace, Hatred (High Elves), Murderous Prowess"},
-    reaper:{troop:"War Machine",profile:[["Reaper Bolt Thrower","–","–","–","–",7,1,"–","–","–"],["Crew",5,4,4,3,3,1,5,1,8]],eq:"Hand weapon, repeater bolt thrower, medium armour",rules:"Elven Grace, Hatred (High Elves), Murderous Prowess"},
+    reaper:{troop:"War Machine",profile:[["Reaper Bolt Thrower","–","–","–","–",7,"–","–","–","–"],["Crew",5,4,4,3,3,1,5,1,8]],eq:"Hand weapon, repeater bolt thrower, medium armour",rules:"Elven Grace, Hatred (High Elves), Murderous Prowess"},
     melusai:{troop:"Infantry (Dark Elf)",profile:[["Melusai",6,5,5,3,4,2,5,2,8]],eq:"Heartshard Glaive, light armour",rules:"Elven Grace, Hatred (High Elves), Khainite, Murderous Prowess, Natural Armour (6+), Swiftstride, Vanguard"},
     khinerai:{troop:"Infantry (Dark Elf)",profile:[["Khinerai",5,4,4,3,3,1,6,2,8]],eq:"Hand weapon, light armour, shield",rules:"Ambushers, Elven Grace, Fly (10), Hatred (High Elves), Khainite, Murderous Prowess; Fight and Flight"},
     medusa:{troop:"Monstrous Beast (Dark Elf)",profile:[["Bloodwrack Medusa",6,5,5,4,4,3,5,3,7]],eq:"Polearm",rules:"Elven Grace, Frenzy, Hatred (High Elves), Independent, Murderous Prowess, Natural Armour (6+); Avert Your Gaze; Bloodwrack Stare"},
     blackguard:{troop:"Infantry (Dark Elf)",profile:[["Black Guard",5,5,4,4,3,1,6,2,9]],eq:"Polearm, heavy armour",rules:"Elven Grace, Eternal Hatred, Immunity (Psychology), Murderous Prowess, Stubborn"},
     shadowstalkers:{troop:"Infantry (Dark Elf)",profile:[["Shadowstalker",5,5,5,3,3,1,6,2,8]],eq:"Two hand weapons, throwing weapons",rules:"Elven Grace, Hatred (High Elves), Khainite, Murderous Prowess, Poisoned Attacks, Scouts, Skirmishers; Harness Shadow; Shadowleap"},
-    warlocks:{troop:"Cavalry (Dark Elf)",profile:[["Doomfire Warlock",5,4,4,3,3,1,5,2,8],["Dark Steed",9,3,0,3,3,1,4,1,5]],eq:"Hand weapon",rules:"Elven Grace, Fast Cavalry, Hatred (High Elves), Hekarti's Blessing, Magical Ward (4+), Murderous Prowess, Poisoned Attacks; Cursed Coven. The unit is a Level 1 Wizard — Dark, Death, Shadow."},
+    warlocks:{troop:"Cavalry (Dark Elf)",profile:[["Doomfire Warlock",5,4,4,3,3,1,5,1,8],["Dark Steed",9,3,0,3,3,1,4,1,5]],eq:"Hand weapon",rules:"Elven Grace, Fast Cavalry, Hatred (High Elves), Hekarti's Blessing, Magical Ward (4+), Murderous Prowess, Poisoned Attacks; Cursed Coven. The unit is a Level 1 Wizard — Dark, Death, Shadow."},
     cauldron:{troop:"Shrine (Armour Save 6+)",profile:[["Cauldron of Blood",5,"–","–",5,6,5,"–","–","–"],["Keeper of the Cauldron","–",4,4,3,"–","–",6,2,8],["Guardian","–",4,4,3,"–","–",6,1,8]],eq:"Two hand weapons",rules:"Elven Grace, Hatred (High Elves), Frenzy, Impact Hits (D3), Khainite, Murderous Prowess, Poisoned Attacks, Terror; Altar of Khaine; Blessings of Khaine. LoS value 5."},
     bloodwrackshrine:{troop:"Shrine (Armour Save 6+)",profile:[["Bloodwrack Shrine",5,"–","–",5,6,5,"–","–","–"],["Shrinekeeper","–",4,4,3,"–","–",5,1,8],["Bloodwrack Medusa","–",5,5,4,"–","–",5,3,"–"]],eq:"Polearm",rules:"Elven Grace, Hatred (High Elves), Impact Hits (D3), Murderous Prowess, Natural Armour (6+), Terror; Aura of Agony; Avert Your Gaze; Bloodwrack Stare. LoS value 5."},
     warhydra:{troop:"Monster (Hydra)",profile:[["War Hydra",6,4,4,5,5,5,2,8,6],["Beastmaster Apprentice",5,4,4,3,3,1,5,1,8]],eq:"Two hand weapons (Apprentices only)",rules:"Mixed Unit, Natural Armour (4+), Regeneration (4+); Loss of Heads. (Apprentice: Elven Grace, Hatred, Murderous Prowess.)"},
@@ -555,7 +555,7 @@
     "Potion of Toughness":`One use. +D3 Toughness until the end of the turn. Common.`,
     "Potion of Speed":`One use. +D3 Attacks until the end of the turn. Common.`,
     "Potion of Foolhardiness":`One use. Frenzy until the end of the turn. Common.`,
-    "Warrior Familiar":`+1 Strength 3 Attack (no special rules); does not count against the magic-item points limit. Common.`,
+    "Warrior Familiar":`+1 Strength 3 Attack (no special rules). May be taken in addition to another Enchanted Item and does not count against the magic-item points limit. Common.`,
     "Banner of Defiance":`The unit gains Stubborn.`,
     "Banner of Iron Resolve":`The unit gains Immunity (Psychology).`,
     "Rampager's Standard":`The unit can re-roll its charge distance.`,
@@ -675,7 +675,9 @@
         access: ["additional hand weapon","spear","light armour","light lance","sea dragon cloak"],
         variants: [ { name: "Beastmaster", points: 45, magicBudget: 50 } ],
         options: [
-          { id: "wep", type: "choice", label: "Weapon", choices: [
+          { id: "wep", type: "choice", label: "Weapon",
+            orderBefore: [ { until: "2026-09-28T10:43:36Z", order: ["Additional hand weapon","Spear","Light lance"] } ],   // v3.1 put Spear first
+            choices: [
             { label: "Spear", cost: 0 }, { label: "Additional hand weapon", cost: 5 }, { label: "Light lance", cost: 5 } ] },
           { id: "armour", type: "toggle", label: "Light armour", cost: 3, per: "flat" },
           { id: "cloak", type: "toggle", label: "Sea Dragon Cloak", cost: 3, per: "flat" },
@@ -757,7 +759,9 @@
       access: ["light armour"],
         variants: [ { name: "Crone Hellebron", points: 280, magicBudget: 0 } ],
         options: [
-          { id: "mount", type: "mount", label: "Mount", choices: [
+          { id: "mount", type: "mount", label: "Mount",
+            orderBefore: [ { until: "2026-09-28T10:43:36Z", order: ["Cauldron of Blood","Manticore"] } ],   // v3.1 swapped the two
+            choices: [
             { label: "Manticore", key: "manticore", cost: 150 }, { label: "Cauldron of Blood", cost: 160 } ] },
           { id: "man_fangs", type: "toggle", label: "Rending Fangs", cost: 5, per: "flat", requiresMount: "manticore" },
           { id: "man_rage", type: "toggle", label: "Bloodrage", cost: 15, per: "flat", requiresMount: "manticore" },
@@ -827,7 +831,7 @@
         options: [ { id: "cmd", type: "command", magicStandard: 50 } ],
         },
       { id: "bloodhags", name: "Blood Hags", perModel: true, basePoints: 15, unitSize: [10,30],
-        options: [ { id: "cmd", type: "command", magicStandard: 25 } ],
+        options: [ { id: "cmd", type: "command", magicStandard: 50 } ],
         },
       { id: "sisters", name: "Sisters of Slaughter", perModel: true, basePoints: 15, unitSize: [10,30],
         options: [

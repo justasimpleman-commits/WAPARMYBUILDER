@@ -83,7 +83,12 @@ const engine=srcs.filter(s=>s.startsWith("js/")).map(load).join("\n");
   __runeCopyCost:runeCopyCost, __runeMaxCopies:runeMaxCopies, __isBSB:isBSB,
   __reorderEntry:reorderEntry, __openGame:openGameMode, __closeGame:closeGameMode, __gameProfileRows:gameProfileRows,
   __troopBase:troopBase, __entryTroop:entryTroop, __troopToHTML:troopToHTML, __mountChoiceData:mountChoiceData,
-  __openUnitDetail:openUnitDetail, __syncLimitPreset:syncLimitPreset, __wireLimit:wireLimit
+  __openUnitDetail:openUnitDetail, __syncLimitPreset:syncLimitPreset, __wireLimit:wireLimit,
+  __normalizeEntry:normalizeEntry, __dupCap:dupCap, __freeSaveName:freeSaveName, __libFileFor:libFileFor,
+  __libSave:libSave, __openLibrary:openLibrary, __loreData:loreData, __canCarryStandard:canCarryStandard,
+  __dupCounts:dupCounts, __mountDupUnit:mountDupUnit, __entryPicks:entryPicks, __applyPicks:applyPicks,
+  __saveArmy:saveArmy, __finishPrompt:finishPrompt, __finishConfirm:finishConfirm, __libGet:libGet,
+  __setSaveFile:(f)=>{currentSaveFile=f;}, __saveFile:()=>currentSaveFile, __refreshCatalog:refreshCatalog
 });`);
 
 /* ---------- helpers ---------- */
@@ -1025,7 +1030,7 @@ console.log("Undo: switching armies and loading an army are undo steps (no confi
     finish();
   });
 }
-function finish(){
+async function finish(){
 __addUnit("core","warriors");
 console.log("Dirty tracking: saved vs changed…");
 {
@@ -1220,6 +1225,289 @@ console.log("Points limit: the number input only shows for a Custom limit…");
   inp.value="1500"; p.value="1500"; p.onchange(); ok(inp.hidden===true, "picking a preset hides it again");
   p.value=""; p.onchange(); ok(inp.hidden===false, "picking Custom shows it even at a preset value");
   inp.value="2000"; __syncLimitPreset(true);
+}
+
+
+console.log("Reconcile: an option the model can no longer have is reset, a standard needs a bearer…");
+{
+  const fresh=(book,cat,id)=>{ __setState([]); __setGen(null); __switch(book,false); __addUnit(cat,id); return [__getState()[0], __findUnit(cat,id)]; };
+  { // un-ticking the Battle Standard drops (and stops charging for) the magic standard
+    const [e,u]=fresh("chaos-dwarfs","characters","despots");
+    e.variant=u.variants.findIndex(v=>v.name==="Overseer"); const base=__entryPoints(e);
+    __update(()=>{ e.opts.bsb=true; e.magicStd=__D().magicItems["Magic Standards"][0].name; });
+    ok(__entryPoints(e)===base+25+__D().magicItems["Magic Standards"][0].cost, "BSB + magic standard charged");
+    __update(()=>{ e.opts.bsb=false; });
+    ok(e.magicStd==="" && __entryPoints(e)===base, "un-ticking the Battle Standard removes its magic standard");
+    __update(()=>{ e.opts.bsb=true; e.variant=u.variants.findIndex(v=>v.name==="Overlord"); });
+    ok(e.opts.bsb===false && !__isBSB(e,u), "a profile that may not carry the Battle Standard loses it");
+  }
+  { // a pick restricted to another profile does not survive a profile switch
+    const [e,u]=fresh("vampire-counts","characters","voncarstein");
+    const wiz=u.options.find(o=>o.id==="wiz");
+    __update(()=>{ e.variant=u.variants.findIndex(v=>v.name==="Count"); e.opts.wiz=wiz.choices.findIndex(c=>c.wizLevel===3); });
+    ok(__wlevel(e,u)===3, "Count: Level 3 Wizard");
+    __update(()=>{ e.variant=u.variants.findIndex(v=>v.name==="Scion"); });
+    ok(e.opts.wiz===null && __wlevel(e,u)===0 && __entryPoints(e)===u.variants[e.variant].points, "Scion: the Count-only wizard level is cleared, not kept and charged");
+  }
+  { // Arcane Items are for Wizards only
+    const [e,u]=fresh("chaos-dwarfs","characters","daemonsmith"); const base=__entryPoints(e);
+    __update(()=>{ e.opts.wiz=true; e.magic["Arcane Items:Charm"]="Dispel Scroll"; });
+    ok(__entryPoints(e)>base+35, "Daemonsmith Wizard carries an Arcane Item");
+    __update(()=>{ e.opts.wiz=false; });
+    ok(!e.magic["Arcane Items:Charm"] && __entryPoints(e)===base, "no longer a Wizard ⇒ the Arcane Item goes (it was charged but invisible)");
+  }
+  { // a mount-gated CHOICE is reset to "none" (it used to become `false` and crash on re-mounting)
+    const [e,u]=fresh("estalia","characters","priests");
+    const mo=u.options.find(o=>o.type==="mount"), dr=u.options.find(o=>o.id==="drawn"), altar=mo.choices.findIndex(c=>c.key==="altar");
+    e.variant=u.variants.findIndex(v=>v.name===mo.choices[altar].only);
+    __update(()=>{ e.opts.mount=altar; e.opts.drawn=dr.choices.length-1; });
+    const withAltar=__entryPoints(e);
+    __update(()=>{ e.opts.mount=null; });
+    ok(e.opts.drawn===null, "leaving the War Altar resets what draws it");
+    let threw=false; try{ __update(()=>{ e.opts.mount=altar; }); }catch(err){ threw=true; }
+    ok(!threw && __entryPoints(e)===withAltar-dr.choices[dr.choices.length-1].cost, "taking the War Altar again works");
+  }
+  { // a unit's banner runes need its Standard Bearer
+    const D=(__setState([]), __switch("dwarfs",false), __D());
+    const cat=["core","special"].find(c=>D.units[c].some(u=>(u.options||[]).some(o=>o.type==="command"&&o.magicStandard)));
+    const u=D.units[cat].find(u=>(u.options||[]).some(o=>o.type==="command"&&o.magicStandard));
+    __addUnit(cat,u.id); const e=__getState()[0], base=__entryPoints(e);
+    const rune=D.runes["Banner Runes"].find(r=>!r.master && !r.only);
+    __update(()=>{ e.opts.cmd.standard=true; e.runes["Banner Runes"]=[rune.name]; });
+    ok(__entryPoints(e)>base+10, "standard bearer with a banner rune");
+    __update(()=>{ e.opts.cmd.standard=false; });
+    ok(!e.runes["Banner Runes"] && __entryPoints(e)===base, "no Standard Bearer ⇒ no banner runes");
+  }
+}
+
+console.log("Validation: one BSB, Expendable one-for-one, slave limits per type, duplicate caps past the table…");
+{
+  const issues=()=>{ const r=__collectIssues(); return {e:r.errs.map(x=>x.msg), w:r.warns.map(x=>x.msg)}; };
+  __setState([]); __setGen(null); __switch("chaos-dwarfs",false);
+  __addUnit("characters","despots"); __addUnit("characters","despots");
+  const [a,b]=__getState(), du=__findUnit("characters","despots"), ov=du.variants.findIndex(v=>v.name==="Overseer");
+  __update(()=>{ a.variant=ov; b.variant=ov; a.opts.bsb=true; __setGen(b.uid); });
+  ok(!issues().e.some(m=>/Battle Standard/.test(m)) && !issues().w.some(m=>/Battle Standard/.test(m)), "one BSB who is not the General: fine");
+  __update(()=>{ b.opts.bsb=true; });
+  ok(issues().e.some(m=>/Only one character may carry the Battle Standard/.test(m)), "two BSBs ⇒ error");
+  ok(issues().w.some(m=>/may not be the Army General/.test(m)), "BSB nominated General ⇒ warning");
+  __setState([]); __setGen(null);
+  __addUnit("core","goblinslaves"); __addUnit("core","orcslaves"); __addUnit("core","cutthroats");
+  ok(issues().e.some(m=>/Expendable Core units \(2\)/.test(m)), "2 Expendable Core units need 2 non-Expendable ones (1 present) ⇒ error");
+  ok(!issues().e.some(m=>/exceed Hobgoblin/.test(m)), "one Orc Slaves + one Goblin Slaves unit per Hobgoblin unit is legal (each type is limited separately)");
+  __addUnit("core","warriors");
+  ok(!issues().e.some(m=>/Expendable/.test(m)), "two non-Expendable Core units cover two Expendable ones");
+  __addUnit("core","orcslaves");
+  ok(issues().e.some(m=>/Orc Slaves units \(2\) exceed/.test(m)), "a second Orc Slaves unit with one Hobgoblin unit ⇒ error");
+  const cap=l=>{ const c=__dupCap(l); return c.special+"/"+c.rare; };
+  ok(cap(999)==="1/1" && cap(2000)==="3/1" && cap(3000)==="4/2" && cap(4999)==="5/3", "duplicate caps follow the rulebook table");
+  ok(cap(5000)==="6/4" && cap(5999)==="6/4" && cap(6000)==="7/5", "past 4999: +1 Special and +1 Rare per further 1000 points");
+  __setState([]); __setGen(null);
+}
+
+console.log("Loading: a stale or damaged save is repaired, never a crash…");
+{
+  __setState([]); __setGen(null); __switch("chaos-dwarfs",true); __resetHistory();
+  const good=Object.assign({uid:1},__blankEntry("core","warriors"));
+  const noOpts=Object.assign({uid:2},__blankEntry("core","warriors")); delete noOpts.opts; delete noOpts.magic; noOpts.count="x";
+  const stale=Object.assign({uid:2},__blankEntry("characters","despots")); stale.variant=9; stale.opts.mount=42;
+  stale.opts[__findUnit("characters","despots").options.find(o=>o.type==="choice").id]=77; stale.magic["Magic Weapons"]="No Such Sword";
+  const gone={uid:5,cat:"core",id:"nosuchunit",variant:0,count:10,opts:{}};
+  let r=false, threw=null;
+  try{ r=await __applyArmy({app:"chaos-dwarfs-army-builder",army:"chaos-dwarfs",name:"old",limit:2000,generalUid:5,state:[good,noOpts,stale,gone]}); }catch(err){ threw=err; }
+  ok(!threw && r===true, "an old save with a missing unit, missing fields and out-of-range picks loads"+(threw?" ("+threw.message+")":""));
+  const st=__getState();
+  ok(st.length===3 && !st.some(e=>e.id==="nosuchunit"), "the unknown unit is dropped, the rest kept");
+  ok(new Set(st.map(e=>e.uid)).size===3, "duplicate uids are made unique");
+  ok(__getGen()===null, "a General that no longer exists is not kept");
+  ok(st.every(e=>isFinite(__entryPoints(e))) && st[1].count===__blankEntry("core","warriors").count, "every entry has finite points; a bad model count falls back to the default");
+  const ch=st.find(e=>e.cat==="characters");
+  ok(ch.variant===0 && ch.opts.mount===null && !ch.magic["Magic Weapons"], "out-of-range profile/mount and an item the book doesn't list are cleared");
+  let dthrew=false; try{ st.forEach(e=>__describe(e,__findUnit(e.cat,e.id))); __openGame(); __closeGame(); }catch(err){ dthrew=true; }
+  ok(!dthrew, "export and game mode work on the repaired army");
+  // a `multi` that became a repeatable counter since the save (Ogre Gnoblars): array → count
+  __switch("ogre-kingdoms",true);
+  const og=Object.assign({uid:1},__blankEntry("characters","chieftains")); og.opts.namegnoblar=[0];
+  ok(__normalizeEntry(og) && og.opts.namegnoblar===1, "an old multi-pick array becomes the new counter's value");
+  __setState([]); __setGen(null); __resetHistory();
+}
+
+console.log("Library: a new army never silently replaces another saved army…");
+{
+  const realLS=global.localStorage;
+  global.localStorage={ _d:{}, getItem(k){ return (k in this._d)?this._d[k]:null; }, setItem(k,v){ this._d[k]=String(v); }, removeItem(k){ delete this._d[k]; } };
+  __switch("chaos-dwarfs",true);
+  ok(await __freeSaveName("My Chaos Dwarfs")==="My Chaos Dwarfs", "default name offered as-is while it is free");
+  await __libSave("My Chaos Dwarfs.json",{army:"chaos-dwarfs",name:"My Chaos Dwarfs",state:[]});
+  ok(await __freeSaveName("My Chaos Dwarfs")==="My Chaos Dwarfs 2", "a taken default name gets a number instead of overwriting");
+  await __libSave("Horde.json",{army:"skaven",name:"Horde",state:[]});
+  ok(await __libFileFor("Horde")==="Horde--chaos-dwarfs.json", "a name used by another book's army gets its own library key");
+  ok(await __libFileFor("My Chaos Dwarfs")==="My Chaos Dwarfs.json", "same book, same name ⇒ the same entry is updated");
+  await __libSave("x.json",{army:"chaos-dwarfs",name:"<img src=x onerror=alert(1)>",state:[]});
+  await __openLibrary();
+  const lh=document.getElementById("modalBody").innerHTML;
+  ok(/&lt;img src=x/.test(lh) && !/<img src=x/.test(lh), "army names are escaped in the library list");
+  if(realLS===undefined) delete global.localStorage; else global.localStorage=realLS;
+}
+
+console.log("Data: values corrected against the source books…");
+{
+  __setState([]); __setGen(null); __switch("dark-elves",false);
+  ok(__findUnit("special","bloodhags").options.find(o=>o.type==="command").magicStandard===50, "Dark Elves: Blood Hags may take a Magic Standard up to 50 points");
+  ok(__D().unitInfo.warlocks.profile[0][8]===1, "Dark Elves: Doomfire Warlock has 1 Attack");
+  ok(__D().unitInfo.reaper.profile[0][6]==="–", "Dark Elves: the Reaper Bolt Thrower itself has no Wounds value");
+  __switch("daemons-of-chaos",false); __addUnit("rare","hellflayer");
+  { const e=__getState()[0]; e.count=2; __render();
+    ok(__entryPoints(e)===240 && !__collectIssues().errs.some(x=>/Too many|maximum size/.test(x.msg)), "Daemons: two Hellflayers are one Rare choice (240 pts)"); }
+  __setState([]); __switch("beastmen",false); __addUnit("characters","chieftains");
+  { const e=__getState()[0], u=__findUnit("characters","chieftains"), bsb=u.options.find(o=>o.bsb);
+    e.variant=u.variants.findIndex(v=>v.name==="Beastlord"); ok(!__optionActive(e,u,bsb), "Beastmen: a Beastlord cannot carry the Battle Standard");
+    e.variant=u.variants.findIndex(v=>v.name==="Wargor");    ok(__optionActive(e,u,bsb), "Beastmen: a Wargor can"); }
+  __setState([]); __switch("ogre-kingdoms",false); __addUnit("characters","chieftains");
+  { const e=__getState()[0], base=__entryPoints(e); __update(()=>{ e.opts.namegnoblar=2; });
+    ok(__entryPoints(e)===base+6 && /2× Name-Gnoblar/.test(__describe(e,__findUnit("characters","chieftains")).join("|")), "Ogre Kingdoms: up to two Name-Gnoblars can actually be taken"); }
+  __setState([]); __switch("chaos-dwarfs",false);
+  ok(!__D().spellLores.Fire && __loreData("Fire")===COMMON_LORES.Fire && __loreData("Hashut")===__D().spellLores.Hashut, "Chaos Dwarfs use the shared rulebook lores (no stale private copy)");
+  __setState([]); __setGen(null);
+}
+
+
+console.log("Duplicates: a character's mount that is also a Special/Rare unit counts towards its limit…");
+{
+  const dupErr=()=>__collectIssues().errs.map(x=>x.msg).filter(m=>/^Too many/.test(m));
+  const lim=document.getElementById("limit");
+  __setState([]); __setGen(null); __switch("chaos-dwarfs",false); lim.value="2000";
+  __addUnit("characters","sorcerers"); __addUnit("rare","lammasu");
+  const e=__getState()[0], u=__findUnit("characters","sorcerers"), mo=u.options.find(o=>o.type==="mount");
+  e.variant=u.variants.findIndex(v=>v.name==="Sorcerer-Prophet");
+  ok(dupErr().length===0, "one Lammasu unit at 2000 pts: fine");
+  __update(()=>{ e.opts.mount=mo.choices.findIndex(c=>c.label==="Lammasu"); });
+  ok(__mountDupUnit(e,u) && __mountDupUnit(e,u).id==="lammasu", "a Lammasu mount is the Rare Lammasu (Monstrous Creature)");
+  ok(dupErr().some(m=>/Too many Lammasu \(2\).*character's mount/.test(m)), "Prophet on a Lammasu + a Lammasu unit = 2 Rare duplicates at 2000 pts ⇒ error");
+  __refreshCatalog();
+  ok(__catalogRows().find(r=>r.u.id==="lammasu").badge.textContent==="2/1", "the catalogue badge counts the mount too");
+  lim.value="3000"; ok(dupErr().length===0, "at 3000 pts two of the same Rare choice are allowed"); lim.value="2000";
+  __update(()=>{ e.opts.mount=mo.choices.findIndex(c=>c.label==="Great Taurus"); });
+  ok(!__mountDupUnit(e,u) && dupErr().length===0, "a mount that is not a Special/Rare unit does not count");
+  // a Monstrous Beast mount is not one of the five types the rule names
+  __setState([]); __switch("wood-elves",false); __addUnit("characters","highborns"); __addUnit("rare","greateagle");
+  { const h=__getState()[0], hu=__findUnit("characters","highborns"), hm=hu.options.find(o=>o.type==="mount");
+    const gi=hm.choices.findIndex(c=>c.label==="Great Eagle");
+    if(hm.choices[gi].only) h.variant=hu.variants.findIndex(v=>String(hm.choices[gi].only).split(/\s+or\s+/).includes(v.name));
+    __update(()=>{ h.opts.mount=gi; });
+    ok(h.opts.mount===gi && !__mountDupUnit(h,hu) && dupErr().length===0, "Wood Elves: a Great Eagle mount (Monstrous Beast) does not count"); }
+  __setState([]); __setGen(null);
+}
+
+console.log("Extra items: the Warrior Familiar is taken in addition, outside the points limit…");
+{
+  __setState([]); __setGen(null); __switch("chaos-dwarfs",false); __addUnit("characters","despots");
+  const e=__getState()[0], u=__findUnit("characters","despots");
+  e.variant=u.variants.findIndex(v=>v.name==="Overlord"); const base=__entryPoints(e);
+  const ench=__D().magicItems["Enchanted Items"][0];
+  __update(()=>{ e.magic["Enchanted Items"]=ench.name; e.magic["Enchanted Items:extra"]="Warrior Familiar"; });
+  ok(__spent(e)===ench.cost, "the Warrior Familiar does not count against the magic-item budget");
+  ok(__entryPoints(e)===base+ench.cost+5, "…but its 5 points are paid");
+  ok(e.magic["Enchanted Items"]===ench.name && e.magic["Enchanted Items:extra"]==="Warrior Familiar", "it is carried alongside another Enchanted Item");
+  __update(()=>{ e.magic={ "Enchanted Items":"Warrior Familiar" }; });
+  ok(e.magic["Enchanted Items:extra"]==="Warrior Familiar" && !e.magic["Enchanted Items"], "an older save's Warrior Familiar moves to the extra slot");
+  __update(()=>{ e.magic["Enchanted Items:extra"]=ench.name; });
+  ok(!e.magic["Enchanted Items:extra"], "only an extra item may sit in the extra slot");
+  const main=__pickerGroups("Enchanted Items",e,u,(it)=>!it.extra).flatMap(g=>g.items).map(i=>i.name);
+  ok(!main.includes("Warrior Familiar"), "the ordinary Enchanted slot no longer lists it");
+  __setState([]);
+}
+
+console.log("Vampire Counts: Dark Soul makes the Necrofex Colossus a Level 1 Wizard…");
+{
+  __setState([]); __setGen(null); __switch("vampire-counts",false); __addUnit("rare","necrofexcolossus");
+  const e=__getState()[0], u=__findUnit("rare","necrofexcolossus");
+  ok(__wlevel(e,u)===0, "no Dark Soul ⇒ not a Wizard");
+  __update(()=>{ e.opts.darksoul=true; });
+  ok(__wlevel(e,u)===1 && __availableLores(e,u).join(",")==="Death,Necromancy" && __entryPoints(e)===240+45, "Dark Soul ⇒ Level 1, Lore of Death or Necromancy, +45 pts");
+  __update(()=>{ e.lore="Necromancy"; });
+  ok(__knownSpells(e).length>0, "it knows its lore's signature spell");
+  ok(__collectIssues().errs.some(x=>/Necromancy/.test(x.msg)), "a Necrofex is not the *character* Wizard the army must include");
+  __update(()=>{ e.opts.darksoul=false; });
+  ok(!e.lore && __wlevel(e,u)===0, "dropping Dark Soul clears the lore");
+  __setState([]);
+}
+
+console.log("Saves: picks travel by name, so a re-ordered list cannot change an army…");
+{
+  __setState([]); __setGen(null); __switch("dark-elves",true); __resetHistory();
+  __addUnit("characters","beastmaster");
+  const e=__getState()[0], u=__findUnit("characters","beastmaster"), wep=u.options.find(o=>o.id==="wep");
+  const idx=l=>wep.choices.findIndex(c=>c.label===l);
+  e.opts.wep=idx("Light lance");
+  const save=__serialize("t");
+  ok(save.state[0].pick && save.state[0].pick.opts.wep==="Light lance", "a saved entry records its picks by name");
+  ok(!("pick" in __getState()[0]), "…without touching the live roster");
+  // as if the book had since been re-ordered: the stored index is now wrong, the name still right
+  const moved=JSON.parse(JSON.stringify(save)); moved.state[0].opts.wep=idx("Spear");
+  await __applyArmy(moved);
+  ok(__getState()[0].opts.wep===idx("Light lance") && !("pick" in __getState()[0]), "on load the name decides, not the stale index");
+  // older saves (no names): the book says what its indexes used to mean
+  const old=(wepIdx,savedAt)=>({app:"chaos-dwarfs-army-builder",army:"dark-elves",name:"old",limit:2000,savedAt,
+    state:[Object.assign({uid:1},__blankEntry("characters","beastmaster"),{opts:Object.assign({},__blankEntry("characters","beastmaster").opts,{wep:wepIdx})})]});
+  await __applyArmy(old(1,"2026-09-01T10:00:00.000Z"));
+  ok(wep.choices[__getState()[0].opts.wep].label==="Spear", "Dark Elves: a pre-v3.1 save's Spear (then 2nd in the list) is still a Spear");
+  await __applyArmy(old(0,"2026-09-01T10:00:00.000Z"));
+  ok(wep.choices[__getState()[0].opts.wep].label==="Additional hand weapon", "…and its Additional hand weapon too");
+  await __applyArmy(old(1,"2026-10-15T10:00:00.000Z"));
+  ok(wep.choices[__getState()[0].opts.wep].label==="Additional hand weapon", "a save made after the re-order is left alone");
+  { const hb=Object.assign({uid:1},__blankEntry("characters","hellebron")); hb.opts.mount=0;
+    await __applyArmy({app:"chaos-dwarfs-army-builder",army:"dark-elves",name:"old",limit:2000,savedAt:"2026-08-01T00:00:00Z",state:[hb]});
+    const mo=__findUnit("characters","hellebron").options.find(o=>o.type==="mount");
+    ok(mo.choices[__getState()[0].opts.mount].label==="Cauldron of Blood", "Dark Elves: Hellebron's old Cauldron of Blood is not turned into a Manticore"); }
+  __switch("grand-cathay",true);
+  { const dd=Object.assign({uid:1},__blankEntry("characters","dragondescendant")); const w=__findUnit("characters","dragondescendant").options.find(o=>o.id==="wep"); dd.opts.wep=3;
+    await __applyArmy({app:"chaos-dwarfs-army-builder",army:"grand-cathay",name:"old",limit:2000,savedAt:"2026-10-01T00:00:00Z",state:[dd]});
+    ok(w.choices[__getState()[0].opts.wep].label==="Great weapon", "Grand Cathay: a pre-v3.1 Dragon Descendant keeps its Great weapon"); }
+  // every recorded old order must name real choices
+  let bad=[];
+  books.forEach(id=>{ const B=ARMY_BOOKS[id]; ["characters","core","special","rare"].forEach(cat=>B.units[cat].forEach(u=>(u.options||[]).forEach(o=>(o.orderBefore||[]).forEach(x=>{
+    if(!isFinite(Date.parse(x.until)) || !x.order.every(l=>o.choices.some(c=>c.label===l))) bad.push(id+"/"+u.id+"/"+(o.id||o.type)); })))); });
+  ok(bad.length===0, "every orderBefore has a valid date and names existing choices"+(bad.length?" ("+bad.join(", ")+")":""));
+  // share links
+  __setState([]); __switch("dark-elves",true); __addUnit("characters","commanders");
+  { const c=__getState()[0], cu=__findUnit("characters","commanders"), mo=cu.options.find(o=>o.type==="mount");
+    c.variant=cu.variants.length-1; c.opts.mount=mo.choices.findIndex(x=>x.label==="Dark Steed");
+    const pk=__packEntry(c);
+    ok(pk.p && pk.p.opts.mount==="Dark Steed" && pk.p.variant===cu.variants[c.variant].name && !(pk.opts&&("mount" in pk.opts)) && !("variant" in pk), "a share link names the mount and profile instead of indexing them");
+    const back=__unpackEntry(JSON.parse(JSON.stringify(pk)),c.uid);
+    ok(back.opts.mount===c.opts.mount && back.variant===c.variant, "…and unpacks to the same picks");
+    const v1=__unpackEntry({c:"characters",i:"commanders",variant:c.variant,opts:{mount:c.opts.mount}},c.uid);
+    ok(v1.opts.mount===c.opts.mount && v1.variant===c.variant, "an older, index-based link still opens"); }
+  __setState([]); __setGen(null); __resetHistory();
+}
+
+console.log("Save: replacing a different saved army asks first…");
+{
+  const tick=()=>new Promise(r=>setImmediate(r));
+  const realLS=global.localStorage;
+  global.localStorage={ _d:{}, getItem(k){ return (k in this._d)?this._d[k]:null; }, setItem(k,v){ this._d[k]=String(v); }, removeItem(k){ delete this._d[k]; } };
+  __switch("chaos-dwarfs",true); __setState([]); __addUnit("core","warriors"); __setSaveName(null); __setSaveFile(null);
+  await __libSave("Horde.json",{army:"chaos-dwarfs",name:"Horde",marker:"original",state:[]});
+  const title=()=>document.getElementById("modalTitle").textContent;
+  let p=__saveArmy(); await tick();
+  ok(title()==="Save army as", "a new army is asked for a name");
+  document.getElementById("promptInput").value="Horde"; __finishPrompt(true); await tick();
+  ok(title()==="Replace saved army?", "a name that is already in the library ⇒ asked before replacing");
+  __finishConfirm(false); await tick();
+  ok(title()==="Save army as" && /value="Horde 2"/.test(document.getElementById("modalBody").innerHTML), "declining offers a free name instead");
+  document.getElementById("promptInput").value="Horde 2"; __finishPrompt(true); await p;
+  ok((await __libGet("Horde.json")).marker==="original" && !!(await __libGet("Horde 2.json")) && __saveName()==="Horde 2", "the existing army is untouched; this one is saved beside it");
+  // saving again goes straight to its own entry — no question
+  p=__saveArmy(); await tick(); await p;
+  ok(title()!=="Replace saved army?" && __saveFile()==="Horde 2.json", "re-saving the same army never asks");
+  // confirming replaces
+  __setSaveName(null); __setSaveFile(null);
+  p=__saveArmy(); await tick(); document.getElementById("promptInput").value="Horde"; __finishPrompt(true); await tick();
+  __finishConfirm(true); await p;
+  ok(!(await __libGet("Horde.json")).marker && __saveFile()==="Horde.json", "choosing Replace overwrites it");
+  if(realLS===undefined) delete global.localStorage; else global.localStorage=realLS;
+  __setState([]); __setGen(null); __setSaveName(null); __setSaveFile(null); __resetHistory();
 }
 
 console.log(`\n${fails? "FAIL":"PASS"}: ${checks-fails}/${checks} checks passed.`);

@@ -213,10 +213,17 @@ script in **`build/`**.
 ## Rules the engine enforces
 
 Category caps; 25% single-unit cost limit; duplicate Special/Rare caps by game
-size; special characters unique; army-wide magic-item uniqueness (common `*` items
+size (past the table's last row `dupCap` adds +1/+1 per further 1000 pts, as the
+rulebook does) — a character's Monstrous Creature / Monster / Chariot / Shrine / War
+Machine mount that is also a Special or Rare unit counts towards that unit's limit
+(`mountDupUnit`/`dupCounts`, matched by name; the mount's type comes from its `troop`
+line, so books without troop lines are not checked yet); special characters unique; army-wide magic-item uniqueness (common `*` items
 exempt); one item per category per model; per-character magic-item budgets;
-Expendable Core needs a non-Expendable Core unit; slave units ≤ Hobgoblin
-Cutthroat/Archer units; exactly one Army General; **equipment access** — a magic
+Expendable Core one-for-one (each Expendable Core unit needs its own non-Expendable
+Core unit); Orc Slave units ≤ Hobgoblin Cutthroat/Archer units, and Goblin Slave
+units likewise (each slave type separately); exactly one Army General; at most one
+Battle Standard Bearer (and a warning if the BSB is the General — the rulebook
+forbids it "unless specified"); **equipment access** — a magic
 weapon/armour that *is* a mundane type (`requiresAccess`: heavy armour, shield, heavy
 lance, longbow, gut-plate…) only for a character whose `access` list (base equipment +
 buyable options) includes that type (armour tiered light⊂medium⊂heavy; items with no
@@ -236,10 +243,18 @@ and scrolls to it (and closes the mobile drawer).
 `toggle`'s `only`). `entryPoints`, the entry card, `describe()` (export) and the
 loadout popup all use it, so a hidden option is never charged or exported.
 `reconcileEntry(e)` runs at the start of every `render()` and keeps each entry
-legal: drops illegal mounts, mount/choice-gated upgrades, illegal magic items/gifts/
-powers (`reconcileMagic`), a lore that is no longer offered and over-cap or
-too-high spells (`reconcileSpells` — a model that stops being a wizard loses its
-lore). Render functions do **not** mutate entries; put any such normalisation here.
+legal: drops illegal mounts; resets any option the model itself bars (`optSelfBlocked`:
+its mount, god, a sibling choice, or a profile-only toggle — so the Battle Standard,
+a wizard upgrade or a mount upgrade never lingers on a model that can't have it) to
+its "not taken" value by type (`optDefault`); clears a pick restricted to another
+profile (`only` on a choice); removes a magic standard / Banner Runes that has no
+bearer (`canCarryStandard`: the BSB, or a unit with its Standard Bearer); drops
+illegal or unknown magic items/gifts/powers and a non-Wizard's Arcane Items
+(`reconcileMagic`), a lore that is no longer offered and over-cap or too-high spells
+(`reconcileSpells` — a model that stops being a wizard loses its lore). Mounts and
+options gate each other, so it loops to a fixed point. A missing `requires.unit`
+only hides an option (it is not reset). Render functions do **not** mutate entries;
+put any such normalisation here.
 
 **Unit size is clamped, not just validated.** The model stepper/input in
 `renderEntry` cannot go below `unitSize[0]` or above `unitSize[1]` (open-ended max
@@ -271,6 +286,12 @@ Magic standards: only the BSB (no points limit, charged outside the magic-item
 budget, stored in `entry.magicStd`) or a unit's Standard Bearer (within the
 unit's banner budget).
 
+**Extra items.** An item flagged `extra:true` (the rulebook's Warrior Familiar) is
+taken *in addition* to the model's item of that category and does not count against
+the magic-item points limit: it gets its own "<Category> — extra" slot
+(`entry.magic["<Category>:extra"]`), `spentMagic` skips it, `entryPoints` still
+charges it, and `reconcileMagic` moves one found in the ordinary slot (older saves).
+
 **Spells.** A wizard knows its lore's **signature spell(s)** and its **lore
 attribute** automatically (free, locked in the UI, excluded from the pick limit),
 then chooses **`wizardLevel`** more (i.e. as many spells as its level), **plus one
@@ -293,7 +314,9 @@ spells), stored in `entry.sigSpells`, not counted against the wizard-level cap;
 the bonus so removing the item drops them).
 `wizardLevel(e,u)` = base profile/unit level, raised to a choice option's
 `wizLevel` if one is selected (e.g. the Daemon Prince and greater daemons buy
-their level via a `choice`, not a flat profile level), +1 if the Daemonsmith
+their level via a `choice`, not a flat profile level) or to a taken toggle's
+`wizLevel` (the Necrofex Colossus' Dark Soul — a non-character unit with `lores`
+then gets the lore/spell picker), +1 if the Daemonsmith
 "Wizard" upgrade is taken, +1 for the "Additional Wizard Level" option — but an
 option flagged `noGod:[…]` is ignored when the model's god matches, so **Khornate
 Daemons cannot become Wizards** (the Daemon Prince / Exalted Daemon `wizlvl`
@@ -434,11 +457,35 @@ stats card, which would make rule-heavy units unreadable.
   Blob download / file input.
 - Army JSON: `{ app, version, army, name, savedAt, limit, points, uidc,
   generalUid, state }`. `applyArmy()` (async — it may need to load the book first)
-  runs `migrateEntry()` on load. The storage keys keep their old `cd-`/
-  `chaos-dwarfs-` names so existing saves keep loading — don't rename them.
+  runs `migrateEntry()` then `normalizeEntry()` on every entry: a save can be older
+  than the data (options added/removed/re-ordered) or hand-edited, so missing fields
+  get defaults, out-of-range picks are cleared and a unit the book no longer has is
+  dropped (with a toast) — a stale save must never throw. The storage keys keep
+  their old `cd-`/`chaos-dwarfs-` names so existing saves keep loading — don't
+  rename them.
+- **Picks travel by name.** In memory an entry holds its profile / choice / mount /
+  multi picks as list indexes; `serializeArmy` adds `pick` to each saved entry
+  (`entryPicks`: `{variant:"Overlord", opts:{wep:"Great weapon", mount:"Bale Taurus"}}`)
+  and `applyArmy` resolves it (`applyPicks` — the name wins, the index is only the
+  fallback) and strips it again, so re-ordering or extending a list in a book cannot
+  change a saved army. Share links do the same (`p` in a packed entry). Saves made
+  before this have indexes only: **when you re-order a list, record the old order on
+  the option** — `orderBefore:[{until:"<ISO time the change went live>", order:[labels
+  in the old order]}]` — and `applyLegacyOrder` translates name-less saves older than
+  `until` (Dark Elves Beastmaster weapon / Hellebron mount, Grand Cathay character
+  weapons from the v3.1 updates). The harness checks every `orderBefore`.
+- Library keys are `fileSafe(name)+".json"`. The default name offered for a new army
+  is made unique (`freeSaveName`: "My Chaos Dwarfs 2"), a name already used by
+  another book's army gets its own key (`libFileFor`), and an army loaded from the
+  library is saved back to the entry it came from (the draft remembers that entry
+  across a reload). Saving an army that is not tied to an entry yet under a name
+  already in the library asks first (`modalConfirm` "Replace saved army?"; declining
+  offers a free name) — the one confirm in the app, because undo cannot bring a
+  replaced save back.
 - Autosave draft: the roster is mirrored to localStorage (debounced) and restored
   silently on the next visit (no notice); the draft records whether it was
-  dirty.
+  dirty. A draft that cannot be restored is discarded at start-up rather than left
+  to break the page.
 - **Share link** (`shareArmy`): the army is packed into the URL fragment
   `#army=<code>` — nothing is uploaded. Each entry is stored as its difference from
   `blankEntry(cat,id)` (`packEntry`/`unpackEntry`; a default entry is just

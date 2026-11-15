@@ -195,16 +195,18 @@ function buildCatalog(){
   if(q && !shown){ const n=document.createElement("div"); n.className="empty note"; n.textContent=`No units match “${q}”.`; el.appendChild(n); }
 }
 function refreshCatalog(){
-  const limit=currentLimit(), cap=dupCap(limit), counts={};
+  const limit=currentLimit(), cap=dupCap(limit), counts={}, dc=dupCounts();
   state.forEach(e=>{ const k=e.cat+":"+e.id; counts[k]=(counts[k]||0)+1; });
   _catalogRows.forEach(({cat,u,row,badge,add})=>{
     const n=counts[cat+":"+u.id]||0;
     const taken=!!(u.isSpecialChar && n>0);
+    // Special/Rare: the duplicate count includes characters mounted on this unit
+    const d=(cat==="special"||cat==="rare") ? dc[cat][u.id] : null;
     let txt="", cls="cbadge", tip="";
     if(taken){ txt="taken"; tip="Special characters are unique — already in your army"; }
-    else if(n && (cat==="special"||cat==="rare")){ const mx=cap[cat];
-      txt=`${n}/${mx}`; tip=`${n} in your army — up to ${mx} of the same ${cat} choice at ${limit} pts`;
-      if(n>mx) cls+=" over"; else if(n===mx) cls+=" full"; }
+    else if(d){ const mx=cap[cat];
+      txt=`${d.n}/${mx}`; tip=`${d.n} in your army${d.mounts?` (${d.mounts} as a character's mount)`:""} — up to ${mx} of the same ${cat} choice at ${limit} pts`;
+      if(d.n>mx) cls+=" over"; else if(d.n===mx) cls+=" full"; }
     else if(n){ txt="×"+n; tip=`${n} in your army`; }
     badge.textContent=txt; badge.className=cls; badge.title=tip;
     if(taken) row.classList.add("taken"); else row.classList.remove("taken");
@@ -628,6 +630,7 @@ function renderOption(e,o,u){
       inp.onchange=()=>update(()=>{ e.opts[o.id]=Math.max(0,Math.min(o.max,Math.floor(+inp.value||0))); });
       st.append(m,inp,p); r.appendChild(st);
       const n=document.createElement("span"); n.className="note"; n.textContent=`× ${o.choices[0].cost} pts each (max ${o.max})`; r.appendChild(n);
+      if(hasRuleDef(o.choices[0].label)) r.appendChild(mkRuleInfoBtn(o.choices[0].label));
     } else {
       // multi-select upgrades use the same modal picker as magic items/mounts, so
       // each upgrade shows its rule text inline and the cap is enforced (max picks).
@@ -756,9 +759,10 @@ function magicSlotRemaining(e,budget,slotKey){
 /* one magic-item slot. Opens the picker for `sourceCat` (single-pick). Items over
    the remaining budget are disabled in the list; the chosen item is shown on the
    button and re-opens the picker when tapped. */
-function addMagicSlot(box,e,u,label,slotKey,sourceCat,budget,extra){
+function addMagicSlot(box,e,u,label,slotKey,sourceCat,budget,extra,free){
   const cur=e.magic[slotKey]||"";
-  const base = budget>0 ? budget - spentMagic(e) + (cur?itemCost(cur):0) : Infinity;
+  // `free` = a slot outside the points limit (an `extra` item such as the Warrior Familiar)
+  const base = (budget>0 && !free) ? budget - spentMagic(e) + (cur?itemCost(cur):0) : Infinity;
   const r=mkRow(label);
   const open=()=>openItemPicker({
     title:label, multi:false, groups:pickerGroups(sourceCat,e,u,extra),
@@ -769,6 +773,7 @@ function addMagicSlot(box,e,u,label,slotKey,sourceCat,budget,extra){
   const et=cur?itemEquipType(findItem(cur)):null;
   r.appendChild(pickBtn(cur?`${cur}${et?` · ${et}`:""} (${itemCost(cur)})`:"Choose…", !cur, open));
   r.appendChild(pickInfoBtn("Selected item", ()=>openChosenInfoRows(label, cur?[{name:cur,cost:itemCost(cur),desc:itemDescOf(cur)}]:[])));
+  if(free){ const n=document.createElement("span"); n.className="note"; n.textContent="in addition — outside the points limit"; r.appendChild(n); }
   box.appendChild(r);
 }
 function renderMagic(e,u,budget){
@@ -789,7 +794,11 @@ function renderMagic(e,u,budget){
       continue;
     }
     if(multiCats.includes(cat)){ box.appendChild(renderMultiItemCat(e,u,cat,budget)); continue; }
-    addMagicSlot(box,e,u,cat,cat,cat,budget,null);
+    addMagicSlot(box,e,u,cat,cat,cat,budget,(it)=>!it.extra);
+    // items taken IN ADDITION to that category's item, outside the points limit
+    // (`extra:true` — the Warrior Familiar) get a slot of their own
+    if(itemsIn(cat).some(it=>it.extra && itemAllowed(it,e,u)))
+      addMagicSlot(box,e,u,cat.replace(/ Items$/,"")+" — extra",extraSlotKey(cat),cat,budget,(it)=>!!it.extra,true);
   }
   // Runic Items (Dwarfs) — weapon/armour/talismanic/tattoo runes share the
   // character's magic-item budget (banner runes for a BSB are added below).

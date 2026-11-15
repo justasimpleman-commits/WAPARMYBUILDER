@@ -88,5 +88,5 @@ window.COMMON_ITEM_DESC = {
   "Wand of Onyx": "Staff. +1 casting bonus.",
   "Wand of the Winds": "Staff. Re-roll one D3 when determining the Winds of Magic each Magic phase.",
   "War Banner": "+1 to combat resolution. Common.",
-  "Warrior Familiar": "+1 Strength 3 Attack (no special rules); does not count against the magic-item points limit. Common."
+  "Warrior Familiar": "+1 Strength 3 Attack (no special rules). May be taken in addition to another Enchanted Item and does not count against the magic-item points limit. Common."
 };

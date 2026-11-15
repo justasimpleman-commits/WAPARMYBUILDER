@@ -285,7 +285,7 @@
       { name: "Potion of Toughness", cost: 10, common: true },
       { name: "Potion of Speed", cost: 10, common: true },
       { name: "Potion of Foolhardiness", cost: 5, common: true },
-      { name: "Warrior Familiar", cost: 5, common: true }
+      { name: "Warrior Familiar", cost: 5, common: true, extra: true }
     ],
     "Magic Standards": [
       { name: "Banner of Defiance", cost: 25 },
@@ -1079,7 +1079,7 @@ Once the final position is established, place the unit so it can touch the marke
           { id: "deathheads", type: "toggle", label: "Death Heads", cost: 5, per: "model" },
           { id: "cmd", type: "command", magicStandard: 50 } ] },
       { id: "exaltedseeker", god: "Slaanesh", name: "Exalted Seeker Chariot", perModel: false, basePoints: 210, unitSize: [1,1], options: [] },
-      { id: "hellflayer", god: "Slaanesh", name: "Hellflayer", perModel: false, basePoints: 120, unitSize: [1,2], options: [],
+      { id: "hellflayer", god: "Slaanesh", name: "Hellflayer", perModel: true, basePoints: 120, unitSize: [1,2], options: [],
         notes: "1-2 Hellflayers may be taken as a single Rare choice." },
       { id: "contorted", god: "Slaanesh", name: "Contorted Epitome", perModel: false, basePoints: 165, unitSize: [1,1], options: [] },
       { id: "changebringers", god: "Tzeentch", name: "Changebringers", perModel: true, basePoints: 45, unitSize: [3,6],

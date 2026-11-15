@@ -3,7 +3,7 @@
 function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 function openModal(title, html){ document.getElementById("modalTitle").textContent=title;
   document.getElementById("modalBody").innerHTML=html; document.getElementById("modalBg").classList.add("open"); }
-function closeModal(){ document.getElementById("modalBg").classList.remove("open"); if(_promptCb) finishPrompt(false); }
+function closeModal(){ document.getElementById("modalBg").classList.remove("open"); if(_promptCb) finishPrompt(false); if(_confirmCb) finishConfirm(false); }
 /* second, stacked window — used for a single rule's definition so it opens on
    top of the unit-detail window rather than replacing it */
 function openModal2(title, html){ document.getElementById("modal2Title").textContent=title;
@@ -37,6 +37,30 @@ function modalPrompt(title, def, okLabel){
     document.getElementById("modalBg").classList.add("open");
     const inp=document.getElementById("promptInput");
     if(inp){ inp.focus(); inp.select(); inp.onkeydown=e=>{ if(e.key==="Enter"){ e.preventDefault(); finishPrompt(true); } }; }
+  });
+}
+
+/* In-app yes/no question (same shared modal). Resolves true only on the OK button;
+   Cancel, ✕, Esc and a click outside all mean no. `html` is trusted markup — escape
+   any user text before passing it in. */
+let _confirmCb=null;
+function finishConfirm(ok){
+  if(!_confirmCb) return;
+  const cb=_confirmCb; _confirmCb=null;
+  document.getElementById("modalBg").classList.remove("open");
+  cb(!!ok);
+}
+function modalConfirm(title, html, okLabel){
+  return new Promise(res=>{
+    _confirmCb=res;
+    document.getElementById("modalTitle").textContent=title;
+    document.getElementById("modalBody").innerHTML=
+      '<div class="rule">'+html+'</div>'+
+      '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">'+
+      '<button class="btn" onclick="finishConfirm(false)">Cancel</button>'+
+      '<button class="btn primary" onclick="finishConfirm(true)">'+esc(okLabel||"OK")+'</button>'+
+      '</div>';
+    document.getElementById("modalBg").classList.add("open");
   });
 }
 
@@ -324,7 +348,9 @@ function openUnitDetail(cat,id,variant,e){
     if(!hasEq && !lo.magic.length)
       html+=`<div class="lbl loadout">Loadout</div><div class="rule" style="color:var(--muted)">No upgrades or items purchased yet.</div>`;
   }
-  const title = u.isCharacter && u.variants.length>1 ? u.name : (inf&&inf.profile?inf.profile[0][0]:u.name);
+  // a character is titled by its own name: its first profile row can be something else
+  // ("Human Form" for a Cathayan dragon, one twin of "Naestra & Arahan")
+  const title = u.isCharacter ? u.name : (inf&&inf.profile?inf.profile[0][0]:u.name);
   openModal(title, html);
 }
 

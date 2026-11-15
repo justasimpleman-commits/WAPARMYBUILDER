@@ -189,7 +189,7 @@
       { name: "Potion of Toughness", cost: 10, common: true },
       { name: "Potion of Speed", cost: 10, common: true },
       { name: "Potion of Foolhardiness", cost: 5, common: true },
-      { name: "Warrior Familiar", cost: 5, common: true }
+      { name: "Warrior Familiar", cost: 5, common: true, extra: true }
     ],
     "Magic Standards": [
       { name: "Banner of Defiance", cost: 25 },
@@ -467,7 +467,7 @@
     "Potion of Toughness":`One use. +D3 Toughness until the end of the turn. Common.`,
     "Potion of Speed":`One use. +D3 Attacks until the end of the turn. Common.`,
     "Potion of Foolhardiness":`One use. Frenzy until the end of the turn. Common.`,
-    "Warrior Familiar":`+1 Strength 3 Attack (no special rules); does not count against the magic-item points limit. Common.`,
+    "Warrior Familiar":`+1 Strength 3 Attack (no special rules). May be taken in addition to another Enchanted Item and does not count against the magic-item points limit. Common.`,
     "Banner of Defiance":`The unit gains Stubborn.`,
     "Banner of Iron Resolve":`The unit gains Immunity (Psychology).`,
     "Rampager's Standard":`The unit can re-roll its charge distance.`,
@@ -500,67 +500,8 @@
       { name:"Hell Hammer", lvl:4, cast:13, type:"Direct damage (line)", range:`18"`, effect:`Line template: Strength 6 Flaming hits with Multiple Wounds (D3); casualties cause Panic.` },
       { name:"Lava Storm", lvl:4, cast:14, type:"Direct damage (area)", range:`12"`, effect:`Place D3 small templates; Strength 5 Flaming hits with Multiple Wounds (D3).` },
       { name:"Flames of Azgorh", lvl:4, cast:15, type:"Direct damage (area)", range:`12"`, effect:`Large round template: Strength 5 Flaming hits with Multiple Wounds (D3).` }
-    ]},
-    "Fire": { attribute: { name:"Kindleflame", text:`All Lore of Fire spells have Flaming Attacks. A spell hitting a unit already hit by a Fire spell this phase inflicts an extra D3 Strength 4 hits.` }, spells: [
-      { name:"Fireball", lvl:0, cast:6, type:"Magic Missile", range:`30"`, effect:`D6 Strength 4 hits.` },
-      { name:"Cascading Fire-Cloak", lvl:1, cast:5, type:"Augment (RIP)", range:`18"`, effect:`Enemy units in base contact with the target take 2D6 Strength 4 hits at the end of each Magic phase.` },
-      { name:"Breathe Fire", lvl:1, cast:6, type:"Direct damage", range:`Breath`, effect:`Breath Weapon attack (usable in close combat): all models hit suffer a Strength 4 hit.` },
-      { name:"Flaming Sword of Rhuin", lvl:1, cast:6, type:"Augment", range:`18"`, effect:`Target (except mounts) gains +1 To Wound and Magical & Flaming Attacks until the caster's next Magic phase.` },
-      { name:"Fires of U'Zhul", lvl:2, cast:6, type:"Magic Missile", range:`18"`, effect:`D6 Strength 5 hits.` },
-      { name:"Sweltering Heat", lvl:2, cast:7, type:"Hex (RIP)", range:`24"`, effect:`Target rolls an extra D6 (discard highest) when charging/pursuing/fleeing; D6 Strength 3 hits each Magic phase.` },
-      { name:"The Burning Head", lvl:2, cast:9, type:"Direct damage (line)", range:`18"`, effect:`12" line template: Strength 4 hits; casualties cause Panic.` },
-      { name:"Fiery Blast", lvl:3, cast:9, type:"Direct damage (area)", range:`24"`, effect:`Small round template: Strength 4 hits.` },
-      { name:"Piercing Bolts of Burning", lvl:3, cast:10, type:"Magic Missile", range:`30"`, effect:`D3 Strength 5 hits; each hit pierces ranks like a Bolt Thrower.` },
-      { name:"Fulminating Flame Cage", lvl:3, cast:11, type:"Hex", range:`24"`, effect:`D6 Strength 4 hits; if the target moves, every model suffers a Strength 4 hit and the spell ends.` },
-      { name:"Conflagration of Doom", lvl:4, cast:12, type:"Direct damage", range:`30"`, effect:`D6 Strength 4 hits, then escalating extra D6 hits (2+, then 3+, etc.).` },
-      { name:"Flame Storm", lvl:4, cast:13, type:"Direct damage (area)", range:`18"`, effect:`Small template moves D6" randomly; Strength 4 hits along its path.` },
-      { name:"Magma Storm", lvl:4, cast:15, type:"Magical vortex (RIP)", range:`—`, effect:`Small-template vortex: Strength 5 hits with Multiple Wounds (D3).` }
-    ]},
-    "Metal": { attribute: { name:"Metallic Attraction", text:`+1 to cast if most models in the target unit have a close combat armour save of 4+ or better (excluding Natural Armour).` }, spells: [
-      { name:"Glittering Robe", lvl:0, cast:5, type:"Augment", range:`18"`, effect:`Target gains a 6+ armour save until the caster's next Magic phase.` },
-      { name:"Searing Doom", lvl:1, cast:5, type:"Magic Missile", range:`24"`, effect:`D3 hits, Ignores Armour Saves & Flaming; wounds on the target's unmodified CC armour save.` },
-      { name:"Law of Gold", lvl:1, cast:6, type:"Hex", range:`24"`, effect:`Reveal magic items; nominate one — D6: 1-4 unusable until next Magic phase, 5+ for the game.` },
-      { name:"Plague of Rust", lvl:1, cast:6, type:"Hex", range:`24"`, effect:`Target armour save -1 for the rest of the game (stacks on repeated casts).` },
-      { name:"Commandment of Brass", lvl:2, cast:7, type:"Hex", range:`24"`, effect:`Target War Machine/Chariot can't move; artillery/War Machine can't shoot until next Magic phase.` },
-      { name:"Silver Arrows of Arha", lvl:2, cast:7, type:"Magic Missile", range:`24"`, effect:`2D6 Strength 3 hits with Armour Piercing (1).` },
-      { name:"Enchanted Blades of Aiban", lvl:2, cast:8, type:"Augment", range:`18"`, effect:`Target (except mounts) gains +1 To Hit, Armour Piercing (1) and Magical Attacks.` },
-      { name:"Gehenna's Golden Hounds", lvl:3, cast:8, type:"Direct damage", range:`12"`, effect:`Single enemy model suffers D6 Strength 4 hits (no Look Out Sir).` },
-      { name:"Transmutation of Lead", lvl:3, cast:9, type:"Hex", range:`24"`, effect:`Target suffers -1 To Hit, -1 Movement and -1 Initiative until the caster's next Magic phase.` },
-      { name:"The Gilded Cage", lvl:3, cast:11, type:"Hex", range:`24"`, effect:`Unengaged target becomes Unbreakable, cannot move and counts as impassable terrain.` },
-      { name:"Meteoric Ironclad", lvl:4, cast:13, type:"Augment", range:`18"`, effect:`Target gains Magical Ward (4+) until the caster's next Magic phase.` },
-      { name:"Quicksilver Swords", lvl:4, cast:13, type:"Augment", range:`18"`, effect:`Target gains Ignores Armour Saves and Magical Attacks until the caster's next Magic phase.` },
-      { name:"Final Transmutation", lvl:4, cast:15, type:"Direct damage", range:`18"`, effect:`Each model rolls a D6 per Wound; on 5+ suffers a Wound that Ignores Armour Saves & Regeneration.` }
-    ]},
-    "Shadow": { attribute: { name:"Steed of Shadows", text:`After successfully casting a Shadow spell, the caster may immediately make a Fly move equal to 10 minus its Line of Sight value.` }, spells: [
-      { name:"Melkoth's Mystifying Miasma", lvl:0, cast:5, type:"Hex", range:`24"`, effect:`Reduce the target's WS, BS, Initiative or Movement (your choice) by D3 (min 1).` },
-      { name:"Creeping Darkness", lvl:1, cast:5, type:"Magic Missile", range:`24"`, effect:`2D6 Strength 1 hits with Ignores Armour Saves.` },
-      { name:"The Enfeebling Foe", lvl:1, cast:6, type:"Hex (RIP)", range:`24"`, effect:`All models in the target unit have -1 Strength (min 1).` },
-      { name:"Cloak of Midnight", lvl:1, cast:6, type:"Augment", range:`18"`, effect:`Missile attacks vs target hit only on a natural 6; scatter-dice templates always scatter.` },
-      { name:"Horn of Andar", lvl:2, cast:7, type:"Hex (aura)", range:`12"`, effect:`Affected units suffer -1 Leadership until the caster's next Magic phase.` },
-      { name:"The Withering", lvl:2, cast:7, type:"Hex (RIP)", range:`24"`, effect:`All models in the target unit have -1 Toughness (min 1).` },
-      { name:"The Dance of Despair", lvl:2, cast:8, type:"Hex (RIP)", range:`24"`, effect:`Target must move straight forward using Random Movement (2D6).` },
-      { name:"Crown of Taidron", lvl:3, cast:9, type:"Direct damage (aura)", range:`12"`, effect:`Each affected unit suffers D6 Strength 4 hits.` },
-      { name:"Unseen Lurker", lvl:3, cast:10, type:"Augment", range:`18"`, effect:`Units can only draw Line of Sight to the target if within 8".` },
-      { name:"Bridge of Shadows", lvl:3, cast:12, type:"Conveyance", range:`12"`, effect:`Move the target to any position within 18" of its original position.` },
-      { name:"Okkam's Mindrazor", lvl:4, cast:12, type:"Augment", range:`18"`, effect:`Target (except mounts) gains Magical Attacks and uses Leadership instead of Strength To Wound in close combat.` },
-      { name:"The Penumbral Pendulum", lvl:4, cast:13, type:"Direct damage (line)", range:`18"`, effect:`18" line template: Strength 10 hits with Multiple Wounds (D3).` },
-      { name:"Pit of Shades", lvl:4, cast:15, type:"Direct damage (area)", range:`24"`, effect:`Small template: each model rolls a D6 per Wound; on 4+ suffers a Wound that Ignores Armour & Regen.` }
-    ]},
-    "Death": { attribute: { name:"Life Leeching", text:`When a Death spell is cast, roll a D6 per unsaved wound it caused; each 6+ adds a die to your power pool (max +3 per spell).` }, spells: [
-      { name:"Dark Hand of Death", lvl:0, cast:6, type:"Magic Missile", range:`18"`, effect:`D6 Strength 3 hits with Ignores Armour Saves.` },
-      { name:"Death Dealer", lvl:1, cast:5, type:"Augment", range:`18"`, effect:`Target gains Fear; models slain in close combat may make an extra Attack.` },
-      { name:"The Caress of Laniph", lvl:1, cast:6, type:"Direct damage", range:`12"`, effect:`Single enemy model takes D6 Strength tests; each failed test causes a Wound that Ignores Armour Saves.` },
-      { name:"Spirit Leech", lvl:1, cast:7, type:"Hex", range:`18"`, effect:`Leadership duel vs a single Monster/Monstrous Creature/character; per point the caster wins, -1 S and T (min 1) for the battle.` },
-      { name:"The Choking Foe", lvl:2, cast:8, type:"Hex (RIP)", range:`24"`, effect:`Each Magic phase the target takes a Leadership test, suffering a Wound (Ignores Armour) per point failed, with a cumulative -1.` },
-      { name:"Wind of Death", lvl:2, cast:8, type:"Magic Missile", range:`18"`, effect:`2D6 Strength 4 hits.` },
-      { name:"Drain Life", lvl:2, cast:9, type:"Direct damage (aura)", range:`12"`, effect:`Each affected unit suffers D6 Strength 2 hits (Ignores Armour); per unsaved 6, the caster restores 1 lost Wound.` },
-      { name:"Scythe of Shyish", lvl:3, cast:9, type:"Direct damage", range:`18"`, effect:`Each model in the unit's front rank suffers a Strength 5 hit (Look Out Sir applies).` },
-      { name:"Doom and Darkness", lvl:3, cast:10, type:"Hex (RIP)", range:`24"`, effect:`Target suffers -3 Leadership.` },
-      { name:"Ashes and Dust", lvl:3, cast:11, type:"Direct damage (area)", range:`18"`, effect:`Small template: each model rolls a D6 per Wound; on 4+ suffers a Wound that Ignores Armour & Regen.` },
-      { name:"The Fate of Bjuna", lvl:4, cast:12, type:"Direct damage (RIP)", range:`12"`, effect:`Single model takes hits equal to its current Wounds each Magic phase; wounds on 4+ with Ignores Armour Saves.` },
-      { name:"Soulblight", lvl:4, cast:12, type:"Hex", range:`24"`, effect:`Target has -1 Strength and -1 Toughness (min 1) until the caster's next Magic phase.` },
-      { name:"The Purple Sun of Xereus", lvl:4, cast:15, type:"Magical vortex (RIP)", range:`—`, effect:`Small-template vortex: each model rolls a D6 per Wound; on 4+ suffers a Wound that Ignores Armour & Regen.` }
     ]}
+    // Fire, Metal, Shadow and Death are the rulebook lores — shared by every book in data/lores-common.js
   },
 
   units: {

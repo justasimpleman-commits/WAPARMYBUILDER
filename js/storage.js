@@ -54,6 +54,7 @@ function saveDraft(){
     if(!state.length){ localStorage.removeItem(LS_DRAFT); return; }
     const snap=serializeArmy(currentSaveName);
     snap.draft=true; snap.savedName=currentSaveName||null;   // keep "unsaved" state across reload
+    snap.savedFile=currentSaveFile||null;                    // …and which library entry it is
     snap.dirty=isDirty();
     localStorage.setItem(LS_DRAFT, JSON.stringify(snap));
   }catch(_){ /* private mode / quota — best effort */ }
@@ -69,7 +70,7 @@ async function restoreDraft(){
   const snap=readDraft(); if(!snap) return false;
   if(!(await applyArmy(snap))) return false;         // applyArmy loads the book, the roster, renders
   currentSaveName = snap.savedName || null;          // restore "unsaved" status, not the draft's placeholder name
-  currentSaveFile = null;
+  currentSaveFile = (currentSaveName && snap.savedFile) || null;   // still the same library entry
   if(snap.dirty!==false) _savedSig=null;             // it was unsaved when the page closed
   updateSaveStatus();
   return true;
@@ -83,7 +84,9 @@ function serializeArmy(name){
     limit: currentLimit(),
     points: Math.round(grandTotal()),
     uidc, generalUid,
-    state: JSON.parse(JSON.stringify(state))
+    // each entry also carries its picks by NAME (`pick`), so the save survives a
+    // book re-ordering its lists — see entryPicks / applyPicks
+    state: state.map(e=>{ const c=JSON.parse(JSON.stringify(e)), p=entryPicks(e); if(Object.keys(p).length) c.pick=p; return c; })
   };
 }
 /* load a saved army (library, file, draft or shared link): fetches its book if
@@ -101,17 +104,28 @@ async function applyArmy(data, hist){
     else if(!D || !confirm(`This army ("${data.army}") isn't one of the bundled books. Load it under ${D.name} anyway?`)) return false;
   }
   if(!D && !(await switchArmy(DEFAULT_ARMY, true))) return false;
-  state = JSON.parse(JSON.stringify(data.state));
-  state.forEach(migrateEntry);                       // upgrade older save formats
-  uidc = data.uidc || (state.reduce((m,e)=>Math.max(m,e.uid||0),0)+1);
-  generalUid = data.generalUid || null;
-  if(data.limit){ document.getElementById("limit").value=data.limit; syncLimitPreset(true); }
+  // upgrade older save formats, repair entries against the current book data, and
+  // drop units this book doesn't have — a stale save must never break the page
+  let dropped=0;
+  state = JSON.parse(JSON.stringify(data.state)).filter(e=>{
+    if(e && typeof e==="object"){
+      if(e.pick) applyPicks(e,e.pick);              // picks by name win over the stored indexes
+      else applyLegacyOrder(e,data.savedAt);        // an older, index-only save: undo later re-orderings
+      delete e.pick;
+    }
+    migrateEntry(e); if(normalizeEntry(e)) return true; dropped++; return false; });
+  const seen=new Set(); let top=state.reduce((m,e)=>Math.max(m,Number.isInteger(e.uid)?e.uid:0),0);
+  state.forEach(e=>{ if(!Number.isInteger(e.uid) || e.uid<1 || seen.has(e.uid)) e.uid=++top; seen.add(e.uid); });
+  uidc = Math.max(Number.isInteger(data.uidc)?data.uidc:0, top+1);
+  generalUid = state.some(e=>e.uid===data.generalUid && e.cat==="characters") ? data.generalUid : null;
+  if(isFinite(+data.limit) && +data.limit>0){ document.getElementById("limit").value=+data.limit; syncLimitPreset(true); }
   currentSaveName = data.name||null;
   currentSaveFile = null;            // set by library load when applicable
   saveNameHint = null;
   render();
   if(hist && hist.s!==snapshot()) pushHistory(hist.s, hist.m);
   markSaved(); updateSaveStatus();
+  if(dropped) toast(`${dropped} unit${dropped>1?"s":""} skipped — not in this version of ${D.name}`);
   return true;
 }
 
@@ -165,16 +179,44 @@ async function libDelete(file){
   try{ const lib=lsLibRead(); delete lib[file]; lsLibWrite(lib); }catch(_){}
 }
 
-/* ---- LIBRARY: quick save ---- */
+/* ---- LIBRARY: quick save ----
+   The library is keyed by a filename made from the army's name. Two things must not
+   silently replace another saved army: the default name offered for a NEW army (it
+   is the same for every army of a book, so it gets a number once taken), and a name
+   already used by an army of ANOTHER book (the library only lists the current book's
+   armies, so the clash would be invisible — that save gets its own key). */
+async function freeSaveName(base){
+  let taken=new Set(); try{ taken=new Set((await libAll()).map(r=>r.file)); }catch(_){}
+  let name=base; for(let i=2; taken.has(fileSafe(name)+".json"); i++) name=base+" "+i;
+  return name;
+}
+async function libFileFor(name){
+  const file=fileSafe(name)+".json";
+  let ex=null; try{ ex=await libGet(file); }catch(_){}
+  return (ex && ex.army && ex.army!==D.id) ? fileSafe(name)+"--"+D.id+".json" : file;
+}
 async function saveArmy(){
   if(!state.length){ toast("Nothing to save"); return; }
   let name=currentSaveName;
-  if(!name){
-    name=await modalPrompt("Save army as", saveNameHint||("My "+D.name), "Save");
-    if(!name) return;
+  // an army loaded from (or already saved to) the library goes back to its own entry
+  let file=(currentSaveFile && currentSaveName) ? currentSaveFile : null;
+  if(!file){
+    // Not tied to a library entry yet (new, opened from a file, or from a link): it
+    // needs a name, and it must not replace a DIFFERENT saved army without asking —
+    // that is the one thing here undo cannot bring back.
+    let suggest=await freeSaveName(saveNameHint||("My "+D.name));
+    for(;;){
+      if(!name){ name=await modalPrompt("Save army as", suggest, "Save"); if(!name) return; }
+      file=await libFileFor(name);
+      let ex=null; try{ ex=await libGet(file); }catch(_){}
+      if(!ex) break;
+      const when=ex.savedAt ? " (saved "+new Date(ex.savedAt).toLocaleString()+")" : "";
+      if(await modalConfirm("Replace saved army?",
+        `An army called “${esc(name)}” is already in your library${esc(when)}. Replace it with this one?`, "Replace")) break;
+      suggest=await freeSaveName(name); name=null; file=null;      // no: offer a free name instead
+    }
   }
   const data=serializeArmy(name);
-  const file=fileSafe(name)+".json";
   const ok=await libSave(file,data);
   if(!ok){ toast("Could not save — browser storage unavailable"); return; }
   currentSaveFile=file;
@@ -228,7 +270,7 @@ async function openLibrary(){
     body.innerHTML='<div class="liblist">'+items.map(it=>{
       const when=it.savedAt? new Date(it.savedAt).toLocaleString():"";
       const pts=(it.points!=null)?(it.points+(it.limit?(" / "+it.limit):"")+" pts"):"";
-      const fa=encodeURIComponent(it.file), na=(it.name||"").replace(/"/g,"&quot;");
+      const fa=encodeURIComponent(it.file), na=esc(it.name||"");   // a name can come from someone else's file or link
       return '<div class="librow"><div class="libmeta"><div class="libname">'+na+'</div>'+
              '<div class="libsub">'+[pts,when].filter(Boolean).join(" · ")+'</div></div>'+
              '<div class="libacts"><button class="btn primary" onclick="libraryLoad(decodeURIComponent(\''+fa+'\'))">Load</button>'+
@@ -246,20 +288,27 @@ async function openLibrary(){
    encoded ("z" prefix); browsers without CompressionStream write plain JSON
    ("j" prefix). */
 const SHARE_KEY="army=";
+/* A profile / choice / mount pick travels by NAME (`p`, see entryPicks) rather than
+   by index, so a link still opens correctly after a book re-orders a list; older
+   links carry plain indexes and still unpack. */
 function packEntry(e){
-  const b=blankEntry(e.cat,e.id), o={c:e.cat, i:e.id};
+  const b=blankEntry(e.cat,e.id), o={c:e.cat, i:e.id}, picks=entryPicks(e), p={};
   for(const k in e){
     if(k==="uid"||k==="cat"||k==="id"||k==="collapsed") continue;
+    if(k==="variant"){ if(e.variant!==b.variant){ if(picks.variant!=null) p.variant=picks.variant; else o.variant=e.variant; } continue; }
     if(k==="opts"){ const d={};
-      for(const ok in e.opts){ if(JSON.stringify(e.opts[ok])!==JSON.stringify(b.opts[ok])) d[ok]=e.opts[ok]; }
+      for(const ok in e.opts){ if(JSON.stringify(e.opts[ok])===JSON.stringify(b.opts[ok])) continue;
+        if(picks.opts && ok in picks.opts) (p.opts=p.opts||{})[ok]=picks.opts[ok]; else d[ok]=e.opts[ok]; }
       if(Object.keys(d).length) o.opts=d; continue; }
     if(JSON.stringify(e[k])!==JSON.stringify(b[k])) o[k]=e[k];
   }
+  if(Object.keys(p).length) o.p=p;
   return o;
 }
 function unpackEntry(o,uid){
   const e=Object.assign({uid}, blankEntry(o.c,o.i));
-  for(const k in o){ if(k==="c"||k==="i") continue; if(k==="opts") Object.assign(e.opts,o.opts); else e[k]=o[k]; }
+  for(const k in o){ if(k==="c"||k==="i"||k==="p") continue; if(k==="opts") Object.assign(e.opts,o.opts); else e[k]=o[k]; }
+  if(o.p) applyPicks(e,o.p);
   return e;
 }
 function b64url(u8){ let s=""; for(let i=0;i<u8.length;i+=0x8000) s+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000));
@@ -268,7 +317,7 @@ function unb64url(s){ s=s.replace(/-/g,"+").replace(/_/g,"/"); while(s.length%4)
   const b=atob(s), u=new Uint8Array(b.length); for(let i=0;i<b.length;i++) u[i]=b.charCodeAt(i); return u; }
 async function pipeBytes(bytes,stream){ return new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer()); }
 async function encodeShare(){
-  const json=JSON.stringify({ v:1, a:D.id, l:currentLimit(), n:currentSaveName||"",
+  const json=JSON.stringify({ v:2, a:D.id, l:currentLimit(), n:currentSaveName||"",
     g:state.findIndex(e=>e.uid===generalUid), s:state.map(packEntry) });
   const bytes=new TextEncoder().encode(json);
   if(window.CompressionStream) return "z"+b64url(await pipeBytes(bytes,new CompressionStream("deflate-raw")));
