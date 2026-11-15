@@ -10,3 +10,8 @@ Thumbs.db
 .idea/
 .trash/
 
+
+# Stray temp/lock files (FUSE leftovers, editor temp, LibreOffice locks)
+.fuse_hidden*
+*.tmp
+.~lock.*
